@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/base}">
+<head>
+  <meta charset="utf-8">
+  <title>Profile - Fruitables</title>
+</head>
+<body>
+  <div layout:fragment="content">
+    <div class="container py-5">
+      <h1 class="mb-4">Profile</h1>
+      <div>
+        <p><strong>Username:</strong> <span th:text="${user.username}">username</span></p>
+        <p><strong>Full Name:</strong> <span th:text="${user.fullName}">full name</span></p>
+        <p><strong>Email:</strong> <span th:text="${user.email}">email</span></p>
+        <p><strong>Phone:</strong> <span th:text="${user.phone}">phone</span></p>
+        <p><strong>Address:</strong> <span th:text="${user.address}">address</span></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: shoppingwebsiteMVC
+
+  # 資料庫連線資訊
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost:1433;databaseName=shopping_website;encrypt=true;trustServerCertificate=true
+    username: sa
+    password: P@ssw0rd
+
+  # Hibernate 或 JPA 設定
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServerDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+      
+  # Thymeleaf 設定
+  thymeleaf:
+    prefix: classpath:/templates
+    suffix: .html
+
+  # FileUpload 設定
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 100MB
+
+# 綠界 URL 和 API 密鑰
+payment:
+  gateway:
+    url:  https://api.mock-payment.com
+    apiKey: mock-api-key
+
+jwt:
+  secret: "BeJ68MaMmRKBn2pVu3AN8M0zkrNVRseV7MEKrrWL3fA="
+  expiration: 3600000
+
