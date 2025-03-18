@@ -28,7 +28,7 @@ public class UserVip {
 
     @JsonBackReference
     @OneToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "user_id")
     private Users users;
 
     @Column(nullable = false)

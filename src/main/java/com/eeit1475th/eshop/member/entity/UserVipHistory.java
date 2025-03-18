@@ -25,7 +25,7 @@ public class UserVipHistory {
     private Integer historyId;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "user_id")
     private Users users;
 
     private Integer vipLevel;

@@ -20,8 +20,8 @@ CREATE TABLE [dbo].[products] (
     [product_description] NVARCHAR(2000),
     [product_price] INT NOT NULL,
     [product_stock] INT NOT NULL,
-    [product_category_id] INT NOT NULL,  -- ³o¬O¥~Áä¡A«ü¦V categories ªí
-    [p_shop_id] INT NOT NULL,  -- ³o¬O¥~Áä¡A«ü¦V shops ªí
+    [product_category_id] INT NOT NULL,  -- ï¿½oï¿½Oï¿½~ï¿½ï¿½Aï¿½ï¿½ï¿½V categories ï¿½ï¿½
+    [p_shop_id] INT NOT NULL,  -- ï¿½oï¿½Oï¿½~ï¿½ï¿½Aï¿½ï¿½ï¿½V shops ï¿½ï¿½
     [product_photo] VARBINARY(MAX),
     [product_status] INT,
     CONSTRAINT FK_Product_Category FOREIGN KEY ([product_category_id]) REFERENCES [dbo].[categories]([category_id]),
@@ -31,20 +31,20 @@ CREATE TABLE [dbo].[products] (
 INSERT INTO [dbo].[users] 
 ([username], [email], [password], [full_name], [phone], [user_photo], [address])
 VALUES
-('john_doe', 'john.doe@example.com', 'hashedpassword123', 'John Doe', '123-456-7890', NULL, '80147°ª¶¯¥««eª÷°Ï¤¤¥¿¥|¸ô211¸¹8¼Ó¤§1'),
-('jane_smith', 'jane.smith@example.com', 'hashedpassword456', 'Jane Smith', '234-567-8901', NULL, '80147°ª¶¯¥««eª÷°Ï¤¤¥¿¥|¸ô211¸¹8¼Ó¤§1'),
-('alex_jones', 'alex.jones@example.com', 'hashedpassword789', 'Alex Jones', '345-678-9012', NULL, '80147°ª¶¯¥««eª÷°Ï¤¤¥¿¥|¸ô211¸¹8¼Ó¤§1'),
-('lisa_white', 'lisa.white@example.com', 'hashedpassword321', 'Lisa White', '456-789-0123', NULL, '80147°ª¶¯¥««eª÷°Ï¤¤¥¿¥|¸ô211¸¹8¼Ó¤§1'),
-('mark_brown', 'mark.brown@example.com', 'hashedpassword654', 'Mark Brown', '567-890-1234', NULL, '80147°ª¶¯¥««eª÷°Ï¤¤¥¿¥|¸ô211¸¹8¼Ó¤§1');
+('john_doe', 'john.doe@example.com', 'hashedpassword123', 'John Doe', '123-456-7890', NULL, '80147ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½eï¿½ï¿½ï¿½Ï¤ï¿½ï¿½ï¿½ï¿½|ï¿½ï¿½211ï¿½ï¿½8ï¿½Ó¤ï¿½1'),
+('jane_smith', 'jane.smith@example.com', 'hashedpassword456', 'Jane Smith', '234-567-8901', NULL, '80147ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½eï¿½ï¿½ï¿½Ï¤ï¿½ï¿½ï¿½ï¿½|ï¿½ï¿½211ï¿½ï¿½8ï¿½Ó¤ï¿½1'),
+('alex_jones', 'alex.jones@example.com', 'hashedpassword789', 'Alex Jones', '345-678-9012', NULL, '80147ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½eï¿½ï¿½ï¿½Ï¤ï¿½ï¿½ï¿½ï¿½|ï¿½ï¿½211ï¿½ï¿½8ï¿½Ó¤ï¿½1'),
+('lisa_white', 'lisa.white@example.com', 'hashedpassword321', 'Lisa White', '456-789-0123', NULL, '80147ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½eï¿½ï¿½ï¿½Ï¤ï¿½ï¿½ï¿½ï¿½|ï¿½ï¿½211ï¿½ï¿½8ï¿½Ó¤ï¿½1'),
+('mark_brown', 'mark.brown@example.com', 'hashedpassword654', 'Mark Brown', '567-890-1234', NULL, '80147ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½eï¿½ï¿½ï¿½Ï¤ï¿½ï¿½ï¿½ï¿½|ï¿½ï¿½211ï¿½ï¿½8ï¿½Ó¤ï¿½1');
 
 insert into categories
  ([category_id],[category_name],[parent_id])
  values
- (1,'¹q¤l²£«~',null),
- (11,'¬ïÀ¹¦¡¸Ë¸m',1),
- (12,'¹qµø',1),
- (13,'¦æ°Ê¹q·½',1),
- (14,'µ§°O«¬¹q¸£',1)
+ (1,'ï¿½qï¿½lï¿½ï¿½ï¿½~',null),
+ (11,'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¸m',1),
+ (12,'ï¿½qï¿½ï¿½',1),
+ (13,'ï¿½ï¿½Ê¹qï¿½ï¿½',1),
+ (14,'ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½qï¿½ï¿½',1)
 
 
 INSERT INTO [dbo].[products] 
@@ -58,7 +58,7 @@ VALUES
 
 CREATE TABLE [dbo].[shops] (
     [shop_id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [user_id] INT NOT NULL¡@FOREIGN KEY ([user_id]) REFERENCES [dbo].[users]([member_id]),
+    [user_id] INT NOT NULLï¿½@FOREIGN KEY ([user_id]) REFERENCES [dbo].[users]([member_id]),
     [store_name] NVARCHAR(1000) NOT NULL,
     [store_description] NVARCHAR(1000),
     [created_at] DATETIME NOT NULL DEFAULT GETDATE(),
@@ -69,38 +69,38 @@ CREATE TABLE [dbo].[shops] (
 INSERT INTO [dbo].[shops] 
 ([user_id], [store_name], [store_description], [created_at], [seller_status], [shop_status])
 VALUES
-(1, '¬ü¨ý¤p¦Y©±', '´£¨Ñ¦U¦¡¤p¦Y¡A¤f¨ý¿W¯S¡Aµ´¹ïÅý§A¦^¨ýµL½a¡C', GETDATE(), 1, 1),
-(2, 'Fashion World', '³Ì¬y¦æªº®É©|ªA¹¢©±¡AÅý§A¦¨¬°µóÀY³Ì«G²´ªº¦s¦b¡C', GETDATE(), 1, 1),
-(3, 'µÎ¾A®a©~À]', 'µÎ¾Aªº©~®a¥Í¬¡¥Î«~¡AÅý§A¦b®a¤]¯à¨É¨ü«×°²·PÄ±¡C', GETDATE(), 1, 1),
-(4, 'ºñ·Nªá¶é', '´£¨Ñ·sÂAªº´Óª«©Mªá¥c¡A¸ËÂI§Aªº®a¡AÅý¥Í¬¡§ó¦³¥Í®ð¡C', GETDATE(), 1, 1),
-(5, 'Tech Gadget Store', '³Ì·s¬ì§Þ²£«~¡AÅý§A»â¥ý¼é¬y¡C', GETDATE(), 1, 1),
-(1, '¤â¤uÃÀ«~±M½æ©±', '¨C¤@­Ó¤â¤uÃÀ«~³£¥Rº¡ÃÀ³N®ð®§¡A¬°±zªº®a¼W²K¿W¯S­·®æ¡C', GETDATE(), 1, 1),
-(2, '¹B°Ê¥Î«~±M½æ©±', '´£¨Ñ¦U¦¡¹B°Ê¥Î«~¡AÅý§A»´ÃP¶}±Ò¹B°Ê¥Í¬¡¡C', GETDATE(), 1, 1),
-(3, '¬ü§©»P«O¾i', '±M·~ªº¬ü®e»P«O¾i²£«~¡AÅý§Aªº¦Ù½§¥Ã»·¦~»´¥ú·Æ¡C', GETDATE(), 1, 1),
-(4, '¹qª±¥@¬É', '¹CÀ¸·R¦nªÌªº¤Ñ°ó¡AÅý§A¨É¨üµL­­ªº¹CÀ¸¼Ö½ì¡C', GETDATE(), 1, 1),
-(5, 'Ãdª«¥Î«~©±', '¬°§AªºÃdª«¬D¿ï³Ì¦X¾Aªº¥Î«~¡AÅý¨e­Ìªº¥Í¬¡§ó©¯ºÖ¡C', GETDATE(), 1, 1);
+(1, 'ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½Yï¿½ï¿½', 'ï¿½ï¿½ï¿½Ñ¦Uï¿½ï¿½ï¿½pï¿½Yï¿½Aï¿½fï¿½ï¿½ï¿½Wï¿½Sï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½^ï¿½ï¿½ï¿½Lï¿½aï¿½C', GETDATE(), 1, 1),
+(2, 'Fashion World', 'ï¿½Ì¬yï¿½æªºï¿½É©|ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Yï¿½Ì«Gï¿½ï¿½ï¿½ï¿½ï¿½sï¿½bï¿½C', GETDATE(), 1, 1),
+(3, 'ï¿½Î¾Aï¿½aï¿½~ï¿½]', 'ï¿½Î¾Aï¿½ï¿½ï¿½~ï¿½aï¿½Í¬ï¿½ï¿½Î«~ï¿½Aï¿½ï¿½ï¿½Aï¿½bï¿½aï¿½]ï¿½ï¿½É¨ï¿½ï¿½×°ï¿½ï¿½PÄ±ï¿½C', GETDATE(), 1, 1),
+(4, 'ï¿½ï¿½Nï¿½ï¿½ï¿½', 'ï¿½ï¿½ï¿½Ñ·sï¿½Aï¿½ï¿½ï¿½Óªï¿½ï¿½Mï¿½ï¿½cï¿½Aï¿½ï¿½ï¿½Iï¿½Aï¿½ï¿½ï¿½aï¿½Aï¿½ï¿½ï¿½Í¬ï¿½ï¿½ó¦³¥Í®ï¿½C', GETDATE(), 1, 1),
+(5, 'Tech Gadget Store', 'ï¿½Ì·sï¿½ï¿½Þ²ï¿½ï¿½~ï¿½Aï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½yï¿½C', GETDATE(), 1, 1),
+(1, 'ï¿½ï¿½uï¿½ï¿½ï¿½~ï¿½Mï¿½æ©±', 'ï¿½Cï¿½@ï¿½Ó¤ï¿½uï¿½ï¿½ï¿½~ï¿½ï¿½ï¿½Rï¿½ï¿½ï¿½ï¿½ï¿½Nï¿½ð®§¡Aï¿½ï¿½ï¿½zï¿½ï¿½ï¿½aï¿½Wï¿½Kï¿½Wï¿½Sï¿½ï¿½ï¿½ï¿½C', GETDATE(), 1, 1),
+(2, 'ï¿½Bï¿½Ê¥Î«~ï¿½Mï¿½æ©±', 'ï¿½ï¿½ï¿½Ñ¦Uï¿½ï¿½ï¿½Bï¿½Ê¥Î«~ï¿½Aï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½Pï¿½}ï¿½Ò¹Bï¿½Ê¥Í¬ï¿½ï¿½C', GETDATE(), 1, 1),
+(3, 'ï¿½ï¿½ï¿½ï¿½ï¿½Pï¿½Oï¿½i', 'ï¿½Mï¿½~ï¿½ï¿½ï¿½ï¿½ï¿½eï¿½Pï¿½Oï¿½iï¿½ï¿½ï¿½~ï¿½Aï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½Ù½ï¿½ï¿½Ã»ï¿½ï¿½~ï¿½ï¿½ï¿½ï¿½ï¿½Æ¡C', GETDATE(), 1, 1),
+(4, 'ï¿½qï¿½ï¿½ï¿½@ï¿½ï¿½', 'ï¿½Cï¿½ï¿½ï¿½Rï¿½nï¿½Ìªï¿½ï¿½Ñ°ï¿½Aï¿½ï¿½ï¿½Aï¿½É¨ï¿½ï¿½Lï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Ö½ï¿½C', GETDATE(), 1, 1),
+(5, 'ï¿½dï¿½ï¿½ï¿½Î«~ï¿½ï¿½', 'ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½dï¿½ï¿½ï¿½Dï¿½ï¿½Ì¦Xï¿½Aï¿½ï¿½ï¿½Î«~ï¿½Aï¿½ï¿½ï¿½eï¿½Ìªï¿½ï¿½Í¬ï¿½ï¿½ó©¯ºÖ¡C', GETDATE(), 1, 1);
 
 CREATE TABLE [dbo].[reviews] (
-    [review_id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,  -- ¥DÁä¡A¦Û°Ê»¼¼W
-    [product_id] INT NOT NULL,  -- ¥~Áä¡A°Ñ¦Ò products ªí®æªº product_id
-    [user_id] INT NOT NULL,  -- ¥~Áä¡A°Ñ¦Ò users ªí®æªº member_id
-    [rating] INT CHECK (rating BETWEEN 1 AND 5) NOT NULL,  -- µû¤À¡A¤¶©ó 1 ¨ì 5 ¤§¶¡
-    [comment] NVARCHAR(1000),  -- µû½×¤º®e
-    [photo] VARBINARY(MAX),  -- ¹Ï¤ù¡AÀx¦s¬°¤G¶i¨î¼Æ¾Ú
-    [created_at] DATETIME NOT NULL DEFAULT GETDATE(),  -- ³Ð«Ø®É¶¡¡A¹w³]¬°·í«e®É¶¡
-    [updated_at] DATETIME NOT NULL DEFAULT GETDATE(),  -- §ó·s®É¶¡¡A¹w³]¬°·í«e®É¶¡
-    CONSTRAINT FK_Product FOREIGN KEY ([product_id]) REFERENCES [dbo].[products]([product_id]),  -- ¥~Áä¬ù§ô¡Gproduct_id °Ñ¦Ò products ªí®æ
-    CONSTRAINT FK_User FOREIGN KEY ([user_id]) REFERENCES [dbo].[users]([member_id])  -- ¥~Áä¬ù§ô¡Guser_id °Ñ¦Ò users ªí®æ
+    [review_id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,  -- ï¿½Dï¿½ï¿½Aï¿½Û°Ê»ï¿½ï¿½W
+    [product_id] INT NOT NULL,  -- ï¿½~ï¿½ï¿½Aï¿½Ñ¦ï¿½ products ï¿½ï¿½ï¿½æªº product_id
+    [user_id] INT NOT NULL,  -- ï¿½~ï¿½ï¿½Aï¿½Ñ¦ï¿½ users ï¿½ï¿½ï¿½æªº member_id
+    [rating] INT CHECK (rating BETWEEN 1 AND 5) NOT NULL,  -- ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ 1 ï¿½ï¿½ 5 ï¿½ï¿½ï¿½ï¿½
+    [comment] NVARCHAR(1000),  -- ï¿½ï¿½ï¿½×¤ï¿½ï¿½e
+    [photo] VARBINARY(MAX),  -- ï¿½Ï¤ï¿½ï¿½Aï¿½xï¿½sï¿½ï¿½ï¿½Gï¿½iï¿½ï¿½Æ¾ï¿½
+    [created_at] DATETIME NOT NULL DEFAULT GETDATE(),  -- ï¿½Ð«Ø®É¶ï¿½ï¿½Aï¿½wï¿½]ï¿½ï¿½ï¿½ï¿½ï¿½eï¿½É¶ï¿½
+    [updated_at] DATETIME NOT NULL DEFAULT GETDATE(),  -- ï¿½ï¿½sï¿½É¶ï¿½ï¿½Aï¿½wï¿½]ï¿½ï¿½ï¿½ï¿½ï¿½eï¿½É¶ï¿½
+    CONSTRAINT FK_Product FOREIGN KEY ([product_id]) REFERENCES [dbo].[products]([product_id]),  -- ï¿½~ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Gproduct_id ï¿½Ñ¦ï¿½ products ï¿½ï¿½ï¿½ï¿½
+    CONSTRAINT FK_User FOREIGN KEY ([user_id]) REFERENCES [dbo].[users]([member_id])  -- ï¿½~ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Guser_id ï¿½Ñ¦ï¿½ users ï¿½ï¿½ï¿½ï¿½
 );
 INSERT INTO [dbo].[reviews] ([product_id], [user_id], [rating], [comment], [created_at], [updated_at]) 
 VALUES 
-    (1, 1, 5, N'«D±`¦n¥Î¡A®ÄªG¥X¥G·N®Æ¡C«Üº¡·N³o¦¸ªºÁÊª«ÅéÅç¡A­È±o±ÀÂË¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
-    (2, 2, 4, N'°Ó«~½è¶qÁÙ¤£¿ù¡A¦ýª«¬yµyºC¤F¤@ÂI¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
-    (3, 3, 3, N'´¶³q°Ó«~¡A¨S¦³¤Ó¤jÅå³ß¡C©Ê»ù¤ñ¤@¯ë¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
-    (4, 4, 2, N'°Ó«~»P´y­z¤£²Å¡A½è¶q¤£¦n¡A¤£¤Óº¡·N¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
-    (5, 5, 5, N'¶W¯Å³ßÅw³o´Ú²£«~¡Aª«¶W©Ò­È¡A«D±`¹ê¥Î¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
-    (1, 2, 4, N'½è¶q«Ü¦n¡A¨Ï¥Î°_¨Ó«Ü¤è«K¡A¾A¦X¤é±`¨Ï¥Î¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
-    (2, 3, 3, N'°Ó«~ÁÙ¥i¥H¡A¨S¦³«Ü¯S§O¡A¾A¦X°ò¥»»Ý¨D¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
-    (3, 4, 1, N'°Ó«~½è¶q®t¡A§¹¥þ¤£²Å¦X¹w´Á¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
-    (4, 5, 4, N'°Ó«~¤£¿ù¡A²Å¦X´y­z¡A¦ýÁÙ¬O§Æ±æ¯à¦A´£¤É½è¶q¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
-    (5, 1, 5, N'³o´Ú²£«~§¹¥þ²Å¦X§Úªº»Ý¨D¡A©Ê»ù¤ñ¶W°ª¡A·|¦A¦¸ÁÊ¶R¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE());
+    (1, 1, 5, N'ï¿½Dï¿½`ï¿½nï¿½Î¡Aï¿½ÄªGï¿½Xï¿½Gï¿½Nï¿½Æ¡Cï¿½Üºï¿½ï¿½Nï¿½oï¿½ï¿½ï¿½ï¿½ï¿½Êªï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½È±oï¿½ï¿½ï¿½Ë¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
+    (2, 2, 4, N'ï¿½Ó«~ï¿½ï¿½qï¿½Ù¤ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½yï¿½yï¿½Cï¿½Fï¿½@ï¿½Iï¿½C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
+    (3, 3, 3, N'ï¿½ï¿½ï¿½qï¿½Ó«~ï¿½Aï¿½Sï¿½ï¿½ï¿½Ó¤jï¿½ï¿½ß¡Cï¿½Ê»ï¿½ï¿½ï¿½@ï¿½ï¿½C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
+    (4, 4, 2, N'ï¿½Ó«~ï¿½Pï¿½yï¿½zï¿½ï¿½ï¿½Å¡Aï¿½ï¿½qï¿½ï¿½ï¿½nï¿½Aï¿½ï¿½ï¿½Óºï¿½ï¿½Nï¿½C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
+    (5, 5, 5, N'ï¿½Wï¿½Å³ï¿½ï¿½wï¿½oï¿½Ú²ï¿½ï¿½~ï¿½Aï¿½ï¿½ï¿½Wï¿½Ò­È¡Aï¿½Dï¿½`ï¿½ï¿½Î¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
+    (1, 2, 4, N'ï¿½ï¿½qï¿½Ü¦nï¿½Aï¿½Ï¥Î°_ï¿½Ó«Ü¤ï¿½Kï¿½Aï¿½Aï¿½Xï¿½ï¿½`ï¿½Ï¥Î¡C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
+    (2, 3, 3, N'ï¿½Ó«~ï¿½Ù¥iï¿½Hï¿½Aï¿½Sï¿½ï¿½ï¿½Ü¯Sï¿½Oï¿½Aï¿½Aï¿½Xï¿½ò¥»»Ý¨Dï¿½C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
+    (3, 4, 1, N'ï¿½Ó«~ï¿½ï¿½qï¿½tï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¦Xï¿½wï¿½ï¿½ï¿½C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
+    (4, 5, 4, N'ï¿½Ó«~ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½Å¦Xï¿½yï¿½zï¿½Aï¿½ï¿½ï¿½Ù¬Oï¿½Æ±ï¿½ï¿½Aï¿½ï¿½ï¿½É½ï¿½qï¿½C', DATEADD(MINUTE, -10, GETDATE()), GETDATE()),
+    (5, 1, 5, N'ï¿½oï¿½Ú²ï¿½ï¿½~ï¿½ï¿½ï¿½ï¿½ï¿½Å¦Xï¿½Úªï¿½ï¿½Ý¨Dï¿½Aï¿½Ê»ï¿½ï¿½ï¿½Wï¿½ï¿½ï¿½Aï¿½|ï¿½Aï¿½ï¿½ï¿½Ê¶Rï¿½C', DATEADD(MINUTE, -10, GETDATE()), GETDATE());

@@ -159,7 +159,7 @@ GO
 CREATE TABLE [dbo].[user_vip](
 	[end_date] [date] NULL,
 	[is_vip] [bit] NOT NULL,
-	[member_id] [int] NULL,
+	[user_id] [int] NULL,
 	[start_date] [date] NOT NULL,
 	[vip_id] [int] IDENTITY(1,1) NOT NULL,
 	[vip_level] [int] NULL,
@@ -174,7 +174,7 @@ GO
 CREATE TABLE [dbo].[user_vip_history](
 	[end_date] [date] NOT NULL,
 	[history_id] [int] IDENTITY(1,1) NOT NULL,
-	[member_id] [int] NULL,
+	[user_id] [int] NULL,
 	[start_date] [date] NOT NULL,
 	[vip_level] [int] NULL,
 	[vip_photo] [varchar](255) NULL,
@@ -189,7 +189,7 @@ GO
 CREATE TABLE [dbo].[reviews] (
     [review_id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,  -- 主鍵，自動遞增
     [reviews_product_id] INT NOT NULL,  -- 外鍵，參考 products 表格的 product_id
-    [reviews_user_id] INT NOT NULL,  -- 外鍵，參考 users 表格的 member_id
+    [reviews_user_id] INT NOT NULL,  -- 外鍵，參考 users 表格的 user_id
     [rating] INT CHECK (rating BETWEEN 1 AND 5) NOT NULL,  -- 評分，介於 1 到 5 之間
     [comment] NVARCHAR(1000),  -- 評論內容
     [photo] VARBINARY(MAX),  -- 圖片，儲存為二進制數據
