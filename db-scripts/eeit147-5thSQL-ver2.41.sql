@@ -198,12 +198,13 @@ CREATE TABLE [dbo].[reviews] (
     CONSTRAINT FK_User FOREIGN KEY ([reviews_user_id]) REFERENCES [dbo].[users]([user_id])  -- 外鍵約束：user_id 參考 users 表格
 );
 
-CREATE TABLE [dbo].[Coupon](
+CREATE TABLE [dbo].[coupon](
 	[coupon_id] [int] IDENTITY(1,1) NOT NULL,
 	[users_id] [int] NOT NULL,
 	[coupon_discount] [int] NOT NULL,
 	[coupon_date_timeout] [datetime] NOT NULL
 );
+
 
 -- 插入假資料到 users 表
 INSERT INTO users (username, [password], email, full_name, phone, user_photo, [address]) VALUES
@@ -294,5 +295,5 @@ VALUES
     (4, 5, 4, N'商品不錯，符合描述，但還是希望能再提升質量。', DATEADD(MINUTE, -10, GETDATE())),
     (5, 1, 5, N'這款產品完全符合我的需求，性價比超高，會再次購買。', DATEADD(MINUTE, -10, GETDATE()));
 
-INSERT [dbo].[Coupon] ([coupon_id], [users_id], [coupon_discount], [coupon_date_timeout]) VALUES (2, 101, 60, CAST(N'2025-03-31T23:59:59.000' AS DateTime))
-INSERT [dbo].[Coupon] ([coupon_id], [users_id], [coupon_discount], [coupon_date_timeout]) VALUES (3, 102, 60, CAST(N'2025-04-30T23:59:59.000' AS DateTime))
+INSERT [dbo].[coupon] ([users_id], [coupon_discount], [coupon_date_timeout]) VALUES (101, 60, CAST(N'2025-03-31T23:59:59.000' AS DateTime))
+INSERT [dbo].[coupon] ([users_id], [coupon_discount], [coupon_date_timeout]) VALUES (102, 60, CAST(N'2025-04-30T23:59:59.000' AS DateTime))
