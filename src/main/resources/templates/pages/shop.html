@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" 
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  layout:decorate="~{/base}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{/base}">
+
 <head>
   <meta charset="utf-8">
   <title>Shop - Fruitables</title>
 </head>
+
 <body>
   <!-- 將此區塊作為 base.html 中 layout:fragment="content" 的替換內容 -->
   <div layout:fragment="content">
@@ -28,10 +28,15 @@
         <div class="row g-4">
           <div class="col-xl-3">
             <div class="input-group w-100 mx-auto d-flex">
-              <input type="search" class="form-control p-3" placeholder="keywords" aria-describedby="search-icon-1">
-              <span id="search-icon-1" class="input-group-text p-3">
+              <input type="search" id="search-input" class="form-control p-3" placeholder="keywords"
+                aria-describedby="search-icon-1">
+              <span id="search-icon-1" class="input-group-text p-3" style="cursor: pointer;">
                 <i class="fa fa-search"></i>
               </span>
+
+              <div id="product-list" class="row g-4">
+                <!-- 搜尋結果會顯示在這裡 -->
+              </div>
             </div>
           </div>
           <div class="col-6"></div>
@@ -51,49 +56,32 @@
           <!-- 此處示範分類篩選區塊 -->
           <div class="col-lg-3">
             <div class="row g-4">
+
               <div class="col-lg-12">
                 <div class="mb-3">
                   <h4>Categories</h4>
                   <ul class="list-unstyled fruite-categorie">
-                    <li>
+                    <li th:each="category : ${categories}">
                       <div class="d-flex justify-content-between fruite-name">
-                        <a href="#"><i class="fas fa-apple-alt me-2"></i>Apples</a>
-                        <span>(3)</span>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="d-flex justify-content-between fruite-name">
-                        <a href="#"><i class="fas fa-apple-alt me-2"></i>Oranges</a>
-                        <span>(5)</span>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="d-flex justify-content-between fruite-name">
-                        <a href="#"><i class="fas fa-apple-alt me-2"></i>Strawbery</a>
-                        <span>(2)</span>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="d-flex justify-content-between fruite-name">
-                        <a href="#"><i class="fas fa-apple-alt me-2"></i>Banana</a>
-                        <span>(8)</span>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="d-flex justify-content-between fruite-name">
-                        <a href="#"><i class="fas fa-apple-alt me-2"></i>Pumpkin</a>
-                        <span>(5)</span>
+                        <a th:href="@{/shop(category=${category.categoryId})}">
+                          <i class="fas fa-apple-alt me-2"></i>
+                          <span th:text="${category.categoryName}"></span>
+                        </a>
+                        <span th:text="${#lists.size(category.products)}"></span>
                       </div>
                     </li>
                   </ul>
                 </div>
               </div>
+
               <div class="col-lg-12">
                 <div class="mb-3">
                   <h4 class="mb-2">Price</h4>
-                  <input type="range" class="form-range w-100" id="rangeInput" name="rangeInput" min="0" max="500" value="0" oninput="amount.value=rangeInput.value">
+                  <input type="range" class="form-range w-100" id="rangeInput" name="rangeInput" min="0" max="500"
+                    value="0" oninput="amount.value=rangeInput.value">
                   <output id="amount" name="amount" for="rangeInput">0</output>
                 </div>
+
               </div>
               <div class="col-lg-12">
                 <h4 class="mb-3">Featured products</h4>
@@ -117,11 +105,14 @@
                     </div>
                   </div>
                 </div>
+
                 <div class="d-flex justify-content-center my-4">
-                  <a th:href="@{/shop}" class="btn border border-secondary px-4 py-3 rounded-pill text-primary w-100">View More</a>
+                  <a th:href="@{/shop}"
+                    class="btn border border-secondary px-4 py-3 rounded-pill text-primary w-100">View More</a>
                 </div>
               </div>
             </div>
+
           </div>
           <!-- 商品清單區 -->
           <div class="col-lg-9">
@@ -132,7 +123,8 @@
                   <div class="fruite-img">
                     <img th:src="@{/img/fruite-item-5.jpg}" class="img-fluid w-100 rounded-top" alt="">
                   </div>
-                  <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">Fruits</div>
+                  <div class="text-white bg-secondary px-3 py-1 rounded position-absolute"
+                    style="top: 10px; left: 10px;">Fruits</div>
                   <div class="p-4 border border-secondary border-top-0 rounded-bottom">
                     <h4>Grapes</h4>
                     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
@@ -153,5 +145,65 @@
     </div>
     <!-- Fruits Shop End-->
   </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      let searchInput = document.getElementById("search-input");
+      let searchButton = document.getElementById("search-icon-1"); // 放大鏡按鈕
+      let productList = document.getElementById("product-list");
+
+      function performSearch() {
+        let keyword = searchInput.value.trim();
+        if (keyword.length === 0) {
+          productList.innerHTML = ""; // 如果輸入為空，清空搜尋結果
+          return;
+        }
+
+        let url = `/api/products/search?keyword=${encodeURIComponent(keyword)}`;
+        console.log("發送請求到:", url); // 檢查請求 URL
+        fetch(url)
+          .then(response => {
+            console.log("收到回應:", response); // 檢查是否有回應
+            return response.json();
+          })
+          .then(data => {
+            console.log("解析後的資料:", data); // 檢查回傳的資料
+            productList.innerHTML = "";
+            if (data.length === 0) {
+              productList.innerHTML = `<p class="text-center">No products found.</p>`;
+            } else {
+              data.forEach(product => {
+                productList.innerHTML += `
+            <div class="col-lg-4 col-md-6">
+              <div class="card">
+                <img src="/img/${product.imageUrl}" class="card-img-top" alt="${product.productName}">
+                <div class="card-body">
+                  <h5 class="card-title">${product.productName}</h5>
+                  <p class="card-text">價格: $${product.unitPrice}</p>
+                </div>
+              </div>
+            </div>
+          `;
+              });
+            }
+          })
+          .catch(error => console.error("Error fetching products:", error));
+      }
+
+      // 綁定「輸入事件」來即時搜尋
+      searchInput.addEventListener("input", performSearch);
+
+      document.getElementById("search-icon-1").addEventListener("click", function (event) {
+        event.stopPropagation(); // 防止事件被 <i> 攔截
+        console.log("Search button clicked!");
+        performSearch();
+      });
+
+
+    });
+
+  </script>
+
 </body>
+
 </html>

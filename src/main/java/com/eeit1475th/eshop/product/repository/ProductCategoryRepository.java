@@ -11,7 +11,8 @@ import com.eeit1475th.eshop.product.entity.ProductCategory;
 @CrossOrigin("http://localhost:4200")
 @RepositoryRestResource(collectionResourceRel = "productCategory", path = "product-category")
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Integer> {
-	
+
+	// 根據分類名稱模糊搜尋（不區分大小寫）
 	List<ProductCategory> findByCategoryNameContainingIgnoreCase(String categoryName);
 
 }
