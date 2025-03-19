@@ -8,13 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eeit1475th.eshop.cart.dto.CartItemsDTO;
-import com.eeit1475th.eshop.cart.dto.ProductDTO;
 import com.eeit1475th.eshop.cart.entity.CartItems;
 import com.eeit1475th.eshop.cart.entity.ShoppingCart;
 import com.eeit1475th.eshop.cart.repository.CartItemsRepository;
 import com.eeit1475th.eshop.cart.repository.ShoppingCartRepository;
 import com.eeit1475th.eshop.member.entity.Users;
 import com.eeit1475th.eshop.member.repository.UsersRepository;
+import com.eeit1475th.eshop.product.dto.ProductDTO;
 import com.eeit1475th.eshop.product.entity.Products;
 import com.eeit1475th.eshop.product.repository.ProductsRepository;
 
@@ -120,9 +120,12 @@ public class ShoppingCartService {
     // 移除購物車內的商品
     @Transactional
     public void removeCartItem(Integer cartItemId) {
-    	CartItems cartItem = cartItemsRepository.findById(cartItemId).orElseThrow(() -> new RuntimeException("找不到該商品，cartItemId: " + cartItemId));
-    	cartItemsRepository.deleteById(cartItemId);
+        if (!cartItemsRepository.existsById(cartItemId)) {
+            throw new RuntimeException("找不到該商品，cartItemId: " + cartItemId);
+        }
+        cartItemsRepository.deleteById(cartItemId);
     }
+
 
     // 清空購物車
     @Transactional

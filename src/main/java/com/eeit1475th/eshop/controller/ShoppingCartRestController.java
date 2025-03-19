@@ -18,6 +18,8 @@ import com.eeit1475th.eshop.cart.dto.CartItemsDTO;
 import com.eeit1475th.eshop.cart.service.ShoppingCartService;
 import com.eeit1475th.eshop.member.entity.Users;
 
+import jakarta.servlet.http.HttpSession;
+
 @RestController
 @RequestMapping("/api/cart")
 public class ShoppingCartRestController {
@@ -27,10 +29,18 @@ public class ShoppingCartRestController {
 
     // 取得購物車資料
     @GetMapping
-    public ResponseEntity<?> getCart(@SessionAttribute(value = "user", required = false) Users user) {
+//    public ResponseEntity<?> getCart(@SessionAttribute(value = "user", required = false) Users user) {
+    public ResponseEntity<?> getCart(@SessionAttribute(value = "user", required = false) Users user,HttpSession session) {
+//        if (user == null) {
+//            return ResponseEntity.badRequest().body("未登入");
+//        }
+    	
         if (user == null) {
-            return ResponseEntity.badRequest().body("未登入");
+            // 暫時指定一個測試用會員（僅限於開發測試階段）
+            user = new Users();
+            user.setUserId(3); // 設定一個測試用的會員ID
         }
+        
         List<CartItemsDTO> cartItems = shoppingCartService.getCartItems(user.getUserId());
         BigDecimal totalAmount = BigDecimal.ZERO;
         for (CartItemsDTO item : cartItems) {
