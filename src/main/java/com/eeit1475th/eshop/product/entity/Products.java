@@ -8,7 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.eeit1475th.eshop.cart.entity.CartItems;
 import com.eeit1475th.eshop.cart.entity.OrderItems;
-import com.eeit1475th.eshop.review.Reviews;
+import com.eeit1475th.eshop.review.entity.Reviews;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 

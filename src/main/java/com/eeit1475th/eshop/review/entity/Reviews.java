@@ -1,4 +1,4 @@
-package com.eeit1475th.eshop.review;
+package com.eeit1475th.eshop.review.entity;
 
 import java.time.LocalDateTime;
 

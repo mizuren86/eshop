@@ -1,6 +1,7 @@
-package com.eeit1475th.eshop.review;
+package com.eeit1475th.eshop.review.repository;
 
 import com.eeit1475th.eshop.product.entity.Products;
+import com.eeit1475th.eshop.review.entity.Reviews;
 import com.eeit1475th.eshop.member.entity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -6,7 +6,7 @@ import java.util.List;
 import com.eeit1475th.eshop.cart.entity.Orders;
 import com.eeit1475th.eshop.cart.entity.Payments;
 import com.eeit1475th.eshop.cart.entity.ShoppingCart;
-import com.eeit1475th.eshop.review.Reviews;
+import com.eeit1475th.eshop.review.entity.Reviews;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
