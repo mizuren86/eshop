@@ -6,6 +6,7 @@ import java.util.List;
 import com.eeit1475th.eshop.cart.entity.Orders;
 import com.eeit1475th.eshop.cart.entity.Payments;
 import com.eeit1475th.eshop.cart.entity.ShoppingCart;
+import com.eeit1475th.eshop.review.Reviews;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -65,10 +66,7 @@ public class Users {
 	
 	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
     private List<Payments> payments = new ArrayList<>();
-	
-	
-	
-	
+			
 	@JsonManagedReference
     @OneToOne(mappedBy = "users", cascade = CascadeType.ALL)
     private UserVip userVip;
@@ -76,5 +74,9 @@ public class Users {
     @JsonManagedReference
     @OneToMany(mappedBy = "users", fetch = FetchType.EAGER)
     private List<UserVipHistory> vipHistories;
+    
+    @OneToMany(mappedBy = "reviews", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "user-reviews")
+    private List<Reviews> userReviews;
 	
 }
