@@ -81,7 +81,7 @@ public class Products {
 	@JsonManagedReference(value = "product-orderItems")
 	private List<OrderItems> orderItems = new ArrayList<>();
 	
-	@OneToMany(mappedBy = "reviews", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "products", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference(value = "product-reviews")
     private List<Reviews> productsReviews;
 

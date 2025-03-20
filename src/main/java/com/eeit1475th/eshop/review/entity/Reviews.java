@@ -18,13 +18,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "reviews", uniqueConstraints = {
+	    @UniqueConstraint(columnNames = {"reviews_user_id", "reviews_product_id"})
+	})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -39,12 +42,12 @@ public class Reviews {
     @ManyToOne(fetch = FetchType.LAZY)  //使用 @ManyToOne 來對應 products 和 users 表的外鍵關係，讓 Spring Data JPA 自動管理這些關聯。
     @JoinColumn(name = "reviews_product_id", nullable = false)
     @JsonBackReference(value = "product-reviews")
-    private Products product;
+    private Products products;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviews_user_id", nullable = false)
     @JsonBackReference(value = "user-reviews")
-    private Users user;
+    private Users users;
 
     @Column(nullable = false)
     //@Min(1)  評分最小值 1

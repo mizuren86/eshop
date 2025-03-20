@@ -27,10 +27,10 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
-    }
+//    public String generateToken(String username) {
+//        Map<String, Object> claims = new HashMap<>();
+//        return createToken(claims, username);
+//    }
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
@@ -70,5 +70,15 @@ public class JwtService {
 
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
+    }
+    
+    public String generateToken(String username, Integer userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);  // 將 userId 添加到 claims 中
+        return createToken(claims, username);
+    }
+
+    public Integer extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Integer.class));
     }
 }

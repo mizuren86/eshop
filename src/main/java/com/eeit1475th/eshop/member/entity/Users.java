@@ -75,7 +75,7 @@ public class Users {
     @OneToMany(mappedBy = "users", fetch = FetchType.EAGER)
     private List<UserVipHistory> vipHistories;
     
-    @OneToMany(mappedBy = "reviews", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "users", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference(value = "user-reviews")
     private List<Reviews> userReviews;
 	
