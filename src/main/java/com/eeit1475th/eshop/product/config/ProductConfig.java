@@ -18,12 +18,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 
 @Configuration
-public class MyDataRestConfig implements RepositoryRestConfigurer {
+public class ProductConfig implements RepositoryRestConfigurer {
 
     private EntityManager entityManager;
 
     @Autowired
-    public MyDataRestConfig(EntityManager theEntityManager) {
+    public ProductConfig(EntityManager theEntityManager) {
         entityManager = theEntityManager;
     }
 

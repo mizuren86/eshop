@@ -10,51 +10,47 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.eeit1475th.eshop.product.entity.ProductCategory;
 import com.eeit1475th.eshop.product.entity.Products;
-import com.eeit1475th.eshop.product.repository.ProductCategoryRepository;
-import com.eeit1475th.eshop.product.repository.ProductsRepository;
+import com.eeit1475th.eshop.product.service.ProductService;
 
 @Controller
 public class ProductController {
 
-    private final ProductCategoryRepository productCategoryRepository;
-    private final ProductsRepository productsRepository;
+	private final ProductService productService;
 
-    // 透過建構子注入 Repository
-    public ProductController(ProductCategoryRepository productCategoryRepository, ProductsRepository productsRepository) {
-        this.productCategoryRepository = productCategoryRepository;
-        this.productsRepository = productsRepository;
-    }
+	// 透過建構子注入 ProductService
+	public ProductController(ProductService productService) {
+		this.productService = productService;
+	}
 
-    // Shop 頁面
-    @GetMapping("/shop")
-    public String shop(@RequestParam(value = "category", required = false) Integer categoryId, Model model) {
-        List<ProductCategory> categories = productCategoryRepository.findAll();
-        model.addAttribute("categories", categories);
-        model.addAttribute("pageTitle", "Shop");
+	// Shop 頁面
+	@GetMapping("/shop")
+	public String shop(@RequestParam(value = "category", required = false) Integer categoryId, Model model) {
+		List<ProductCategory> categories = productService.getAllCategories();
+		model.addAttribute("categories", categories);
+		model.addAttribute("pageTitle", "Shop");
 
-        // 如果有選擇分類，就過濾該分類的商品
-        List<Products> products;
-        if (categoryId != null) {
-            products = productsRepository.findByProductCategoryCategoryId(categoryId, null).getContent();
-        } else {
-            products = productsRepository.findAll();
-        }
-        model.addAttribute("products", products);
+		List<Products> products;
+		if (categoryId != null) {
+			products = productService.getProductsByCategory(categoryId);
+		} else {
+			products = productService.getAllProducts();
+		}
+		model.addAttribute("products", products);
 
-        return "/pages/shop"; // 確保 pages/shop.html 存在
-    }
+		return "/pages/shop"; // 確保 pages/shop.html 存在
+	}
 
-    // Shop Detail 頁面
-    @GetMapping("/shop-detail")
-    public String shopDetail(Model model) {
-        model.addAttribute("pageTitle", "Shop Detail");
-        return "/pages/shop-detail";
-    }
+	// Shop Detail 頁面
+	@GetMapping("/shop-detail")
+	public String shopDetail(Model model) {
+		model.addAttribute("pageTitle", "Shop Detail");
+		return "/pages/shop-detail";
+	}
 
-    // 商品搜尋 API，回傳 JSON
-    @GetMapping("/api/products/search")
-    @ResponseBody
-    public List<Products> searchProducts(@RequestParam("keyword") String keyword) {
-        return productsRepository.findByProductNameContaining(keyword, null).getContent();
-    }
+	// 商品搜尋 API，回傳 JSON
+	@GetMapping("/api/products/search")
+	@ResponseBody
+	public List<Products> searchProducts(@RequestParam("keyword") String keyword) {
+		return productService.searchProducts(keyword);
+	}
 }
