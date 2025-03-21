@@ -36,7 +36,7 @@ public class ProductController {
 		}
 		model.addAttribute("products", products);
 
-		return "/pages/shop"; // 確保 pages/shop.html 存在
+		return "/pages/shop"; 
 	}
 
 	// Shop Detail 頁面
