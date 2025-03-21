@@ -55,33 +55,33 @@ public class UserRestController {
     }
 
     // 用戶登入
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
-        try {
-            Users user = usersService.validateLogin(loginDTO.getUsername(), loginDTO.getPassword());
-            // 生成 JWT token
-            String token = jwtService.generateToken(user.getUsername());
-            // 建立 HTTP-only cookie
-            ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                    .httpOnly(true)
-                    .secure(false) // 生產環境中建議設為 true
-                    .path("/")
-                    .maxAge(24 * 60 * 60) // 24 小時
-                    .sameSite("Strict")
-                    .build();
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("username", user.getUsername());
-            response.put("fullName", user.getFullName());
-            response.put("email", user.getEmail());
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .body(response);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
+//        try {
+//            Users user = usersService.validateLogin(loginDTO.getUsername(), loginDTO.getPassword());
+//            // 生成 JWT token
+//            String token = jwtService.generateToken(user.getUsername());
+//            // 建立 HTTP-only cookie
+//            ResponseCookie cookie = ResponseCookie.from("jwt", token)
+//                    .httpOnly(true)
+//                    .secure(false) // 生產環境中建議設為 true
+//                    .path("/")
+//                    .maxAge(24 * 60 * 60) // 24 小時
+//                    .sameSite("Strict")
+//                    .build();
+//
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("username", user.getUsername());
+//            response.put("fullName", user.getFullName());
+//            response.put("email", user.getEmail());
+//
+//            return ResponseEntity.ok()
+//                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+//                    .body(response);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
     // 獲取當前登入用戶
     @GetMapping("/current")
@@ -297,4 +297,33 @@ public class UserRestController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    
+//     用戶登入
+  @PostMapping("/login")
+  public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
+      try {
+          Users user = usersService.validateLogin(loginDTO.getUsername(), loginDTO.getPassword());
+          // 生成 JWT token
+          String token = jwtService.generateToken(user.getUsername(), user.getUserId());
+          // 建立 HTTP-only cookie
+          ResponseCookie cookie = ResponseCookie.from("jwt", token)
+                  .httpOnly(true)
+                  .secure(false) // 生產環境中建議設為 true
+                  .path("/")
+                  .maxAge(24 * 60 * 60) // 24 小時
+                  .sameSite("Strict")
+                  .build();
+
+          Map<String, Object> response = new HashMap<>();
+          response.put("username", user.getUsername());
+          response.put("fullName", user.getFullName());
+          response.put("email", user.getEmail());
+
+          return ResponseEntity.ok()
+                  .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                  .body(response);
+      } catch (Exception e) {
+          return ResponseEntity.badRequest().body(e.getMessage());
+      }
+  }
 }

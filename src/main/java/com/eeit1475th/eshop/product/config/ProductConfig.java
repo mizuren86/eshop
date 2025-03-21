@@ -18,12 +18,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 
 @Configuration
-public class MyDataRestConfig implements RepositoryRestConfigurer {
+public class ProductConfig implements RepositoryRestConfigurer {
 
     private EntityManager entityManager;
 
     @Autowired
-    public MyDataRestConfig(EntityManager theEntityManager) {
+    public ProductConfig(EntityManager theEntityManager) {
         entityManager = theEntityManager;
     }
 
@@ -49,9 +49,6 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
     }
 
     private void exposeIds(RepositoryRestConfiguration config) {
-
-        // expose entity ids
-        //
 
         // - get a list of all entity classes from the entity manager
         Set<EntityType<?>> entities = entityManager.getMetamodel().getEntities();

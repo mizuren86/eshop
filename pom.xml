@@ -110,6 +110,15 @@
      		<artifactId>com.liferay.portal.kernel</artifactId>
      		<version>4.27.1</version>
    		</dependency>
+   		
+   		
+   		<dependency>
+    <groupId>org.json</groupId>
+    <artifactId>json</artifactId>
+    <version>20210307</version> 
+</dependency>
+
+   		
 
 	</dependencies>
 
@@ -135,6 +144,7 @@
 						<exclude>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+							<optional>true</optional>
 						</exclude>
 					</excludes>
 				</configuration>
