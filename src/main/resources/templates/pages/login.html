@@ -1,71 +1,134 @@
 <!DOCTYPE html>
-<html lang="en" 
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{/base}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{/base}">
+
 <head>
   <meta charset="utf-8">
   <title>Login - Fruitables</title>
+  <style>
+    .error-message {
+      color: red;
+      display: none;
+      margin-top: 10px;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 10px;
+    }
+  </style>
 </head>
+
 <body>
   <!-- 將此區塊作為 base.html 中 layout:fragment="content" 的替換內容 -->
   <div layout:fragment="content">
-    <div class="container py-5">
-      <h1 class="mb-4">Login</h1>
-      <form id="loginForm">
-        <div class="mb-3">
-          <label for="username" class="form-label">Username</label>
-          <input type="text" class="form-control" id="username" name="username" placeholder="Enter username">
+    <div class="container py-5" style="margin-top: 150px;">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h2 class="text-center mb-4">Login</h2>
+              <form id="loginForm">
+                <div class="mb-3">
+                  <label for="username" class="form-label">User</label>
+                  <input type="text" class="form-control" id="username" name="username" required
+                    autocomplete="username">
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <input type="password" class="form-control" id="password" name="password" required
+                    autocomplete="current-password">
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary" id="loginButton">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    Login
+                  </button>
+                </div>
+              </form>
+              <div class="error-message" id="errorMessage"></div>
+              <div class="loading" id="loadingMessage">Loading...</div>
+              <p class="text-center mt-3">Don't have an account? <a th:href="@{/register}">Register here</a></p>
+            </div>
+          </div>
         </div>
-        <div class="mb-3">
-          <label for="password" class="form-label">Password</label>
-          <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
-        </div>
-        <button type="submit" class="btn btn-primary">Login</button>
-      </form>
-      <p class="mt-3">Don't have an account? <a th:href="@{/register}">Register here</a></p>
+      </div>
     </div>
   </div>
 
-  
-  
-  
-    
-  <!-- 使用 fetch API 呼叫 REST API /api/users/login -->
+  <!-- 使用 fetch API 處理登入 -->
   <script th:inline="javascript">
     /*<![CDATA[*/
-    document.getElementById('loginForm').addEventListener('submit', function(event) {
-      event.preventDefault(); // 防止表單預設提交
-      var username = document.getElementById('username').value;
-      var password = document.getElementById('password').value;
-      
-      fetch(/*[[${'/api/users/login'}]]*/ '/api/users/login', {
+    // 獲取應用程序的基礎URL
+    const baseUrl = /*[[@{/}]]*/ '';
+
+    document.getElementById('loginForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const loginButton = document.getElementById('loginButton');
+      const spinner = loginButton.querySelector('.spinner-border');
+      const errorMessage = document.getElementById('errorMessage');
+      const loadingMessage = document.getElementById('loadingMessage');
+
+      // 顯示加載狀態
+      loginButton.disabled = true;
+      spinner.classList.remove('d-none');
+      errorMessage.style.display = 'none';
+      loadingMessage.style.display = 'block';
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      // 使用 fetch 發送 JSON 格式的數據
+      console.log('Sending login request to:', baseUrl + 'api/users/login');
+
+      fetch(baseUrl + 'api/users/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           username: username,
           password: password
+        }),
+        credentials: 'same-origin'
+      })
+        .then(response => {
+          console.log('Response status:', response.status);
+          console.log('Response headers:', response.headers);
+
+          if (!response.ok) {
+            return response.text().then(text => {
+              console.error('Error response:', text);
+              throw new Error(text || 'Login failed');
+            });
+          }
+          return response.json();
         })
-      })
-      .then(response => {
-        if (!response.ok) {
-          // 若非 2xx，嘗試取得錯誤訊息
-          return response.text().then(text => { throw new Error(text) });
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log("Login successful:", data);
-        window.location.href = '/';
-      })
-      .catch(error => {
-        console.error("Login failed:", error);
-        alert("Login failed: " + error.message);
-      });
+        .then(data => {
+          console.log('Login successful:', data);
+          console.log('Current baseUrl:', baseUrl);
+          console.log('Redirecting to:', baseUrl + 'index');
+
+          loadingMessage.textContent = 'Login successful, redirecting...';
+
+          // 使用 window.location.href 進行跳轉
+          window.location.href = baseUrl + 'index';
+        })
+        .catch(error => {
+          console.error('Login error:', error);
+          console.error('Error stack:', error.stack);
+
+          errorMessage.textContent = error.message;
+          errorMessage.style.display = 'block';
+          loadingMessage.style.display = 'none';
+          loginButton.disabled = false;
+          spinner.classList.add('d-none');
+        });
     });
     /*]]>*/
   </script>
 </body>
+
 </html>
