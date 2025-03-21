@@ -215,21 +215,20 @@ INSERT INTO users (username, [password], email, full_name, phone, user_photo, [a
 ('janewang', 'securepass2', 'janewang@example.com', 'Jane Wang', '0922333444', 'janewang.jpg', '台南市東區200號');
 
 
--- 插入假資料到 product_category 表
-INSERT INTO product_category (category_name) VALUES
-('電子產品'),
-('家居用品'),
-('運動器材');
+-- 插入商品分類資料
+INSERT INTO product_category (category_name)
+VALUES ('水果'), ('熱帶水果'), ('柑橘類水果');
 
-
--- 插入假資料到 products 表
-INSERT INTO products (sku, product_name, [description], unit_price, image_url, active, unit_in_stock, date_create, last_update, category_id) VALUES
-('ELEC001', '藍牙耳機', '高品質無線藍牙耳機', 1999.99, 'bluetooth.jpg', 1, 100, '2025-02-15 10:30:00', '2025-03-10 15:45:00', 1),
-('HOME001', '不鏽鋼水壺', '保溫效果佳的不鏽鋼水壺', 599.50, 'bottle.jpg', 1, 200, '2025-02-20 08:15:00', '2025-03-08 12:10:00', 2),
-('SPORT001', '瑜伽墊', '環保無毒瑜伽墊', 899.00, 'yoga_mat.jpg', 1, 150, '2025-01-28 14:00:00', '2025-03-05 09:20:00', 3),
-('ELEC002', '智慧手環', '多功能健康監測智慧手環', 1299.00, 'smart_band.jpg', 1, 80, '2025-02-25 16:40:00', '2025-03-09 11:30:00', 1),
-('HOME002', '電動牙刷', '高速震動清潔電動牙刷', 799.00, 'electric_toothbrush.jpg', 1, 120, '2025-01-18 09:50:00', '2025-03-07 17:00:00', 2);
-
+-- 插入水果商品資料
+INSERT INTO products (sku, product_name, [description], unit_price, image_url, unit_in_stock, category_id)
+VALUES 
+('FRU0001', '蘋果', '新鮮紅蘋果', 99.99, 'https://example.com/apple.jpg', 100, 1),
+('FRU0002', '香蕉', '新鮮黃香蕉', 49.99, 'https://example.com/banana.jpg', 150, 2),
+('FRU0003', '橙子', '新鮮橙子', 79.99, 'https://example.com/orange.jpg', 120, 3),
+('FRU0004', '葡萄', '新鮮紫葡萄', 149.99, 'https://example.com/grape.jpg', 80, 1),
+('FRU0005', '鳳梨', '新鮮甜鳳梨', 119.99, 'https://example.com/pineapple.jpg', 90, 2),
+('FRU0006', '西瓜', '新鮮西瓜', 199.99, 'https://example.com/watermelon.jpg', 60, 2),
+('FRU0007', '檸檬', '新鮮檸檬', 59.99, 'https://example.com/lemon.jpg', 110, 3);
 
 
 -- 插入假資料到 shopping_cart 表

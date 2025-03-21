@@ -21,6 +21,7 @@ spring:
     prefix: classpath:/templates
     suffix: .html
 
+
   # FileUpload 設定
   servlet:
     multipart:
@@ -37,3 +38,6 @@ jwt:
   secret: "BeJ68MaMmRKBn2pVu3AN8M0zkrNVRseV7MEKrrWL3fA="
   expiration: 3600000
 
+rasa:
+  api:
+    url: http://localhost:5005/webhooks/rest/webhook

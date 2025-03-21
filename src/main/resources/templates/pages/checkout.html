@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{/base}"
+>
+    <head>
+        <meta charset="utf-8" />
+        <title>Checkout - Fruitables</title>
+    </head>
+    <body>
+        <!-- 將此區塊作為 base.html 中 layout:fragment="content" 的替換內容 -->
+        <div layout:fragment="content">
+            <!-- Single Page Header Start -->
+            <div class="container-fluid page-header py-5">
+                <h1 class="text-center text-white display-6">Checkout</h1>
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a th:href="@{/index}">Home</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/pages}">Pages</a></li>
+                    <li class="breadcrumb-item active text-white">Checkout</li>
+                </ol>
+            </div>
+            <!-- Single Page Header End -->
+
+            <!-- Checkout Page Start -->
+            <div class="container-fluid py-5">
+                <div class="container py-5">
+                    <!-- 隱藏欄位：模擬取得使用者ID與交易編號（如有需要） -->
+                    <input type="hidden" id="userId" th:value="${userId}" value="1" />
+                    <input type="hidden" id="ecPayTradeNo" value="" />
+
+                    <h1 class="mb-4">Billing details</h1>
+                    <form id="checkoutForm" action="#" method="post">
+                        <div class="row g-5">
+                            <div class="col-md-12 col-lg-6 col-xl-7">
+                                <div class="row">
+                                    <div class="col-md-12 col-lg-6">
+                                        <div class="form-item w-100">
+                                            <label class="form-label my-3">First Name<sup>*</sup></label>
+                                            <input type="text" class="form-control" name="firstName" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 col-lg-6">
+                                        <div class="form-item w-100">
+                                            <label class="form-label my-3">Last Name<sup>*</sup></label>
+                                            <input type="text" class="form-control" name="lastName" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-item">
+                                    <label class="form-label my-3">Address <sup>*</sup></label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="address"
+                                        placeholder="House Number Street Name"
+                                    />
+                                </div>
+                                <div class="form-item">
+                                    <label class="form-label my-3">Town/City<sup>*</sup></label>
+                                    <input type="text" class="form-control" name="town" />
+                                </div>
+                                <div class="form-item">
+                                    <label class="form-label my-3">Country<sup>*</sup></label>
+                                    <input type="text" class="form-control" name="country" />
+                                </div>
+                                <div class="form-item">
+                                    <label class="form-label my-3">Postcode/Zip<sup>*</sup></label>
+                                    <input type="text" class="form-control" name="postcode" />
+                                </div>
+                                <div class="form-item">
+                                    <label class="form-label my-3">Mobile<sup>*</sup></label>
+                                    <input type="tel" class="form-control" name="mobile" />
+                                </div>
+                                <div class="form-item">
+                                    <label class="form-label my-3">Email Address<sup>*</sup></label>
+                                    <input type="email" class="form-control" name="email" />
+                                </div>
+                                <div class="form-check my-3">
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input"
+                                        id="Account-1"
+                                        name="Accounts"
+                                        value="Accounts"
+                                    />
+                                    <label class="form-check-label" for="Account-1">Create an account?</label>
+                                </div>
+                                <hr />
+                                <div class="form-check my-3">
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input"
+                                        id="Address-1"
+                                        name="Address"
+                                        value="Address"
+                                    />
+                                    <label class="form-check-label" for="Address-1"
+                                        >Ship to a different address?</label
+                                    >
+                                </div>
+                                <div class="form-item">
+                                    <textarea
+                                        name="orderNotes"
+                                        class="form-control"
+                                        spellcheck="false"
+                                        cols="30"
+                                        rows="11"
+                                        placeholder="Order Notes (Optional)"
+                                    ></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-lg-6 col-xl-5">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="align-middle text-center"></th>
+                                                <th scope="col" class="align-middle text-center">品名</th>
+                                                <th scope="col" class="align-middle text-center">價格</th>
+                                                <th scope="col" class="align-middle text-center">數量</th>
+                                                <th scope="col" class="align-middle text-center">總價</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="item : ${cartItems}">
+                                                <th scope="row">
+                                                    <div class="d-flex align-items-center mt-2">
+                                                        <img
+                                                            th:src="@{${item.product.imageUrl}}"
+                                                            class="img-fluid rounded-circle"
+                                                            style="width: 90px; height: 90px"
+                                                            alt="Product Image"
+                                                        />
+                                                    </div>
+                                                </th>
+                                                <td class="py-5" th:text="${item.product.productName}">
+                                                    Product Name
+                                                </td>
+                                                <td class="py-5" th:text="${item.price}">$0.00</td>
+                                                <td class="py-5" th:text="${item.quantity}">0</td>
+                                                <td class="py-5" th:text="${item.subTotal}">$0.00</td>
+                                            </tr>
+                                            <!-- 顯示總金額 -->
+                                            <tr>
+                                                <th scope="row"></th>
+                                                <td class="py-5"></td>
+                                                <td class="py-5"></td>
+                                                <td class="py-5">
+                                                    <p class="mb-0 text-dark py-3">結帳金額</p>
+                                                </td>
+                                                <td class="py-5">
+                                                    <div class="py-3 border-bottom border-top">
+                                                        <p class="mb-0 text-dark" th:text="${totalAmount}">
+                                                            $0.00
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <!-- 如有其他明細可依需求增加 -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- 付款方式略 -->
+                                <div
+                                    class="row g-4 text-center align-items-center justify-content-center pt-4"
+                                >
+                                    <!-- 將 Place Order 按鈕加上 id 以便綁定事件 -->
+                                    <button
+                                        id="placeOrderBtn"
+                                        type="button"
+                                        class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary"
+                                    >
+                                        Place Order
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Checkout Page End -->
+
+            <script>
+                // 當頁面載入後，為 Place Order 按鈕綁定 click 事件
+                document.getElementById("placeOrderBtn").addEventListener("click", function () {
+                    // 取得隱藏欄位中的使用者ID與交易編號
+                    var userId = document.getElementById("userId").value;
+                    var ecPayTradeNo = document.getElementById("ecPayTradeNo").value; // 可為空
+
+                    // 使用 fetch 呼叫 REST API，注意此處使用 POST 方法
+                    fetch("/api/checkout/process?userId=" + userId + "&ecPayTradeNo=" + ecPayTradeNo, {
+                        method: "POST",
+                    })
+                        .then(function (response) {
+                            if (!response.ok) {
+                                throw new Error("Checkout failed");
+                            }
+                            return response.json();
+                        })
+                        .then(function (data) {
+                            console.log("Checkout successful", data);
+                            // 導向訂單確認頁面，將訂單ID作為參數傳遞
+                            window.location.href = "/order/confirmation?orderId=" + data.orderId;
+                        })
+                        .catch(function (error) {
+                            console.error("Error:", error);
+                            alert("Checkout failed. Please try again.");
+                        });
+                });
+            </script>
+        </div>
+    </body>
+</html>

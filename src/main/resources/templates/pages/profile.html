@@ -1,24 +1,245 @@
 <!DOCTYPE html>
-<html lang="en" 
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{/base}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{/base}">
+
 <head>
   <meta charset="utf-8">
   <title>Profile - Fruitables</title>
+  <style>
+    .error-message {
+      color: red;
+      display: none;
+      margin-top: 10px;
+    }
+
+    .success-message {
+      color: green;
+      display: none;
+      margin-top: 10px;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .vip-badge {
+      background-color: #ffd700;
+      color: #000;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-weight: bold;
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    .vip-info {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
+
 <body>
   <div layout:fragment="content">
     <div class="container py-5">
-      <h1 class="mb-4">Profile</h1>
-      <div>
-        <p><strong>Username:</strong> <span th:text="${user.username}">username</span></p>
-        <p><strong>Full Name:</strong> <span th:text="${user.fullName}">full name</span></p>
-        <p><strong>Email:</strong> <span th:text="${user.email}">email</span></p>
-        <p><strong>Phone:</strong> <span th:text="${user.phone}">phone</span></p>
-        <p><strong>Address:</strong> <span th:text="${user.address}">address</span></p>
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-body">
+              <h2 class="text-center mb-4">Profile</h2>
+              <div class="text-center mb-4">
+                <img id="userPhoto" src="/img/default-avatar.png" alt="User Photo" class="rounded-circle"
+                  style="width: 150px; height: 150px; object-fit: cover;">
+                <div class="mt-3">
+                  <h3 id="fullName"></h3>
+                  <span id="username"></span>
+                  <span id="vipBadge" class="vip-badge d-none">VIP</span>
+                </div>
+              </div>
+
+              <form id="profileForm">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="tel" class="form-control" id="phone" name="phone" required>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="address" class="form-label">Address</label>
+                  <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="currentPassword" class="form-label">Current Password</label>
+                  <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+                </div>
+                <div class="mb-3">
+                  <label for="newPassword" class="form-label">New Password</label>
+                  <input type="password" class="form-control" id="newPassword" name="newPassword">
+                </div>
+                <div class="mb-3">
+                  <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                  <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary" id="updateButton">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    Update Profile
+                  </button>
+                </div>
+              </form>
+
+              <div class="error-message" id="errorMessage"></div>
+              <div class="success-message" id="successMessage"></div>
+              <div class="loading" id="loadingMessage">Loading...</div>
+
+              <!-- VIP信息部分 -->
+              <div class="vip-info" id="vipInfo">
+                <h4>VIP Status</h4>
+                <div id="vipStatus">
+                  <p>You are not a VIP member.</p>
+                </div>
+                <div id="vipDetails" class="d-none">
+                  <p><strong>Level:</strong> <span id="vipLevel"></span></p>
+                  <p><strong>Start Date:</strong> <span id="vipStartDate"></span></p>
+                  <p><strong>End Date:</strong> <span id="vipEndDate"></span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    // 获取当前用户信息
+    function loadUserProfile() {
+      const loadingMessage = document.getElementById('loadingMessage');
+      const errorMessage = document.getElementById('errorMessage');
+
+      loadingMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+
+      fetch(/*[[${'/api/users/current'}]]*/ '/api/users/current')
+        .then(response => {
+          if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+          }
+          return response.json();
+        })
+        .then(user => {
+          // 填充用户信息
+          document.getElementById('fullName').textContent = user.fullName;
+          document.getElementById('username').textContent = user.username;
+          document.getElementById('email').value = user.email;
+          document.getElementById('phone').value = user.phone;
+          document.getElementById('address').value = user.address;
+
+          // 处理VIP信息
+          if (user.userVip) {
+            document.getElementById('vipBadge').classList.remove('d-none');
+            document.getElementById('vipStatus').innerHTML = '<p>You are a VIP member!</p>';
+            document.getElementById('vipDetails').classList.remove('d-none');
+            document.getElementById('vipLevel').textContent = user.userVip.vipLevel;
+            document.getElementById('vipStartDate').textContent = new Date(user.userVip.startDate).toLocaleDateString();
+            document.getElementById('vipEndDate').textContent = new Date(user.userVip.endDate).toLocaleDateString();
+          }
+
+          // 处理用户头像
+          if (user.userPhoto) {
+            document.getElementById('userPhoto').src = user.userPhoto;
+          }
+        })
+        .catch(error => {
+          console.error("Failed to load profile:", error);
+          errorMessage.textContent = "Failed to load profile: " + error.message;
+          errorMessage.style.display = 'block';
+        })
+        .finally(() => {
+          loadingMessage.style.display = 'none';
+        });
+    }
+
+    // 页面加载时获取用户信息
+    document.addEventListener('DOMContentLoaded', loadUserProfile);
+
+    // 处理表单提交
+    document.getElementById('profileForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const updateButton = document.getElementById('updateButton');
+      const spinner = updateButton.querySelector('.spinner-border');
+      const errorMessage = document.getElementById('errorMessage');
+      const successMessage = document.getElementById('successMessage');
+
+      // 验证新密码
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      if (newPassword && newPassword !== confirmPassword) {
+        errorMessage.textContent = "New passwords do not match";
+        errorMessage.style.display = 'block';
+        return;
+      }
+
+      // 显示加载状态
+      updateButton.disabled = true;
+      spinner.classList.remove('d-none');
+      errorMessage.style.display = 'none';
+      successMessage.style.display = 'none';
+
+      // 收集表单数据
+      const userData = {
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        currentPassword: document.getElementById('currentPassword').value,
+        newPassword: newPassword
+      };
+
+      // 发送更新请求
+      fetch(/*[[${'/api/users/current'}]]*/ '/api/users/current', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      })
+        .then(response => {
+          if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log("Profile updated successfully:", data);
+          successMessage.textContent = "Profile updated successfully!";
+          successMessage.style.display = 'block';
+          // 清空密码字段
+          document.getElementById('currentPassword').value = '';
+          document.getElementById('newPassword').value = '';
+          document.getElementById('confirmPassword').value = '';
+        })
+        .catch(error => {
+          console.error("Failed to update profile:", error);
+          errorMessage.textContent = "Failed to update profile: " + error.message;
+          errorMessage.style.display = 'block';
+        })
+        .finally(() => {
+          // 恢复按钮状态
+          updateButton.disabled = false;
+          spinner.classList.add('d-none');
+        });
+    });
+    /*]]>*/
+  </script>
 </body>
+
 </html>

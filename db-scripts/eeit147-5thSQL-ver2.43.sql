@@ -215,22 +215,21 @@ INSERT INTO users (username, [password], email, full_name, phone, user_photo, [a
 ('janewang', 'securepass2', 'janewang@example.com', 'Jane Wang', '0922333444', 'janewang.jpg', '台南市東區200號');
 
 
--- 插入假資料到 product_category 表
-INSERT INTO product_category (category_name) VALUES
-('電子產品'),
-('家居用品'),
-('運動器材');
+-- 插入商品分類資料
+INSERT INTO product_category (category_name)
+VALUES ('水果'), ('熱帶水果'), ('柑橘類水果');
 
 
--- 插入假資料到 products 表
-INSERT INTO products (sku, product_name, [description], unit_price, image_url, active, unit_in_stock, date_create, last_update, category_id) VALUES
-('ELEC001', '藍牙耳機', '高品質無線藍牙耳機', 1999.99, 'bluetooth.jpg', 1, 100, '2025-02-15 10:30:00', '2025-03-10 15:45:00', 1),
-('HOME001', '不鏽鋼水壺', '保溫效果佳的不鏽鋼水壺', 599.50, 'bottle.jpg', 1, 200, '2025-02-20 08:15:00', '2025-03-08 12:10:00', 2),
-('SPORT001', '瑜伽墊', '環保無毒瑜伽墊', 899.00, 'yoga_mat.jpg', 1, 150, '2025-01-28 14:00:00', '2025-03-05 09:20:00', 3),
-('ELEC002', '智慧手環', '多功能健康監測智慧手環', 1299.00, 'smart_band.jpg', 1, 80, '2025-02-25 16:40:00', '2025-03-09 11:30:00', 1),
-('HOME002', '電動牙刷', '高速震動清潔電動牙刷', 799.00, 'electric_toothbrush.jpg', 1, 120, '2025-01-18 09:50:00', '2025-03-07 17:00:00', 2);
-
-
+-- 插入水果商品資料，圖片路徑指向本機專案的靜態資源
+INSERT INTO products (sku, product_name, [description], unit_price, image_url, unit_in_stock, category_id)
+VALUES 
+('FRU0001', '蘋果', '新鮮紅蘋果', 99.99, '/img/fruite-item-1.jpg', 100, 1),
+('FRU0002', '香蕉', '新鮮黃香蕉', 49.99, '/img/fruite-item-2.jpg', 150, 2),
+('FRU0003', '橙子', '新鮮橙子', 79.99, '/img/fruite-item-3.jpg', 120, 3),
+('FRU0004', '葡萄', '新鮮紫葡萄', 149.99, '/img/fruite-item-4.jpg', 80, 1),
+('FRU0005', '鳳梨', '新鮮甜鳳梨', 119.99, '/img/fruite-item-5.jpg', 90, 2),
+('FRU0006', '西瓜', '新鮮西瓜', 199.99, '/img/fruite-item-6.jpg', 60, 2),
+('FRU0007', '檸檬', '新鮮檸檬', 59.99, '/img/fruite-item-7.jpg', 110, 3);
 
 -- 插入假資料到 shopping_cart 表
 INSERT INTO shopping_cart (user_id, added_at) VALUES
@@ -239,8 +238,6 @@ INSERT INTO shopping_cart (user_id, added_at) VALUES
 (3, '2025-03-05 09:30:00'),
 (4, '2025-03-07 20:10:00'),
 (5, '2025-03-10 16:00:00');
-
-
 
 -- 插入假資料到 cart_items 表
 INSERT INTO cart_items (cart_id, product_id, quantity, price) VALUES
@@ -256,7 +253,6 @@ INSERT INTO orders (user_id, order_date, total_amount, payment_method, payment_s
 (3, '2025-03-05 18:10:00', 899.00, 'Credit Card', 'Paid', '台中市西屯區福星路50號', 'Delivered', 'TNO202503050003'),
 (4, '2025-03-08 09:45:00', 4299.00, 'Mobile Payment', 'Paid', '高雄市三民區博愛一路80號', 'Shipped', 'TNO202503080004'),
 (5, '2025-03-10 20:30:00', 1299.00, 'Credit Card', 'Failed', '台南市東區東門路150號', 'Cancelled', NULL);
-
 
 
 -- 插入假資料到 order_items 表
