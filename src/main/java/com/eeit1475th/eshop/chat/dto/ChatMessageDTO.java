@@ -10,7 +10,6 @@ public class ChatMessageDTO {
     private String userAvatar;
     private String botAvatar;
 
-    // ✅ **第一個建構子 (包含完整參數)**
     public ChatMessageDTO(String userMessage, String botResponse, String timestamp, String userAvatar, String botAvatar) {
         this.userMessage = userMessage;
         this.botResponse = botResponse;
@@ -19,7 +18,6 @@ public class ChatMessageDTO {
         this.botAvatar = botAvatar;
     }
 
-    // ✅ **第二個建構子 (自動帶入時間 & 頭像)**
     public ChatMessageDTO(String userMessage, String botResponse) {
         this(
             userMessage,
@@ -30,7 +28,6 @@ public class ChatMessageDTO {
         );
     }
 
-    // ✅ **Getters & Setters**
     public String getUserMessage() { return userMessage; }
     public void setUserMessage(String userMessage) { this.userMessage = userMessage; }
 
