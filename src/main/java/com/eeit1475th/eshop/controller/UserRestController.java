@@ -31,7 +31,7 @@ import com.eeit1475th.eshop.member.service.VerificationService;
 
 @RestController
 @RequestMapping("/api/users")
-//@CrossOrigin(origins = "http://localhost:8091", allowCredentials = "true")
+// @CrossOrigin(origins = "http://localhost:8091", allowCredentials = "true")
 public class UserRestController {
 
     @Autowired
@@ -48,40 +48,44 @@ public class UserRestController {
     public ResponseEntity<?> registerUser(@RequestBody UsersDTO userDTO) {
         try {
             Users user = usersService.createUser(userDTO);
-            return ResponseEntity.ok(user);
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", user);
+            response.put("redirectUrl", "index");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     // 用戶登入
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
-//        try {
-//            Users user = usersService.validateLogin(loginDTO.getUsername(), loginDTO.getPassword());
-//            // 生成 JWT token
-//            String token = jwtService.generateToken(user.getUsername());
-//            // 建立 HTTP-only cookie
-//            ResponseCookie cookie = ResponseCookie.from("jwt", token)
-//                    .httpOnly(true)
-//                    .secure(false) // 生產環境中建議設為 true
-//                    .path("/")
-//                    .maxAge(24 * 60 * 60) // 24 小時
-//                    .sameSite("Strict")
-//                    .build();
-//
-//            Map<String, Object> response = new HashMap<>();
-//            response.put("username", user.getUsername());
-//            response.put("fullName", user.getFullName());
-//            response.put("email", user.getEmail());
-//
-//            return ResponseEntity.ok()
-//                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
-//                    .body(response);
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//    }
+    // @PostMapping("/login")
+    // public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
+    // try {
+    // Users user = usersService.validateLogin(loginDTO.getUsername(),
+    // loginDTO.getPassword());
+    // // 生成 JWT token
+    // String token = jwtService.generateToken(user.getUsername());
+    // // 建立 HTTP-only cookie
+    // ResponseCookie cookie = ResponseCookie.from("jwt", token)
+    // .httpOnly(true)
+    // .secure(false) // 生產環境中建議設為 true
+    // .path("/")
+    // .maxAge(24 * 60 * 60) // 24 小時
+    // .sameSite("Strict")
+    // .build();
+    //
+    // Map<String, Object> response = new HashMap<>();
+    // response.put("username", user.getUsername());
+    // response.put("fullName", user.getFullName());
+    // response.put("email", user.getEmail());
+    //
+    // return ResponseEntity.ok()
+    // .header(HttpHeaders.SET_COOKIE, cookie.toString())
+    // .body(response);
+    // } catch (Exception e) {
+    // return ResponseEntity.badRequest().body(e.getMessage());
+    // }
+    // }
 
     // 獲取當前登入用戶
     @GetMapping("/current")
@@ -238,20 +242,19 @@ public class UserRestController {
     }
 
     // 批次更新所有用戶密碼為加密格式
-    @PostMapping("/batch-encrypt-passwords")
-    public ResponseEntity<?> batchEncryptPasswords(@RequestBody Map<String, String> request) {
+    @PostMapping("/batch-update-passwords")
+    public ResponseEntity<?> batchUpdatePasswords() {
         try {
-            String adminKey = request.get("adminKey");
-            if (!"your-admin-key".equals(adminKey)) {
-                return ResponseEntity.badRequest().body("管理員密鑰錯誤");
-            }
+            System.out.println("開始批次更新密碼...");
             List<Map<String, Object>> results = usersService.batchUpdatePasswords();
             Map<String, Object> response = new HashMap<>();
             response.put("totalProcessed", results.size());
             response.put("results", results);
+            System.out.println("批次更新密碼完成，共處理 " + results.size() + " 筆資料");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            System.out.println("批次更新密碼時發生錯誤: " + e.getMessage());
+            System.err.println("批次更新密碼時發生錯誤: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", "批次更新密碼時發生錯誤: " + e.getMessage()));
@@ -292,38 +295,63 @@ public class UserRestController {
             userDTO.setPhone(registerDTO.getPhone());
             userDTO.setFullName(registerDTO.getFullName());
             Users user = usersService.createUser(userDTO);
-            return ResponseEntity.ok(user);
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", user);
+            response.put("redirectUrl", "index");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
-//     用戶登入
-  @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
-      try {
-          Users user = usersService.validateLogin(loginDTO.getUsername(), loginDTO.getPassword());
-          // 生成 JWT token
-          String token = jwtService.generateToken(user.getUsername(), user.getUserId());
-          // 建立 HTTP-only cookie
-          ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                  .httpOnly(true)
-                  .secure(false) // 生產環境中建議設為 true
-                  .path("/")
-                  .maxAge(24 * 60 * 60) // 24 小時
-                  .sameSite("Strict")
-                  .build();
 
-          Map<String, Object> response = new HashMap<>();
-          response.put("username", user.getUsername());
-          response.put("fullName", user.getFullName());
-          response.put("email", user.getEmail());
+    // 用戶登入
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
+        try {
+            Users user = usersService.validateLogin(loginDTO.getUsername(), loginDTO.getPassword());
+            // 生成 JWT token
+            String token = jwtService.generateToken(user.getUsername(), user.getUserId());
+            // 建立 HTTP-only cookie
+            ResponseCookie cookie = ResponseCookie.from("jwt", token)
+                    .httpOnly(true)
+                    .secure(false) // 生產環境中建議設為 true
+                    .path("/")
+                    .maxAge(24 * 60 * 60) // 24 小時
+                    .sameSite("Strict")
+                    .build();
 
-          return ResponseEntity.ok()
-                  .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                  .body(response);
-      } catch (Exception e) {
-          return ResponseEntity.badRequest().body(e.getMessage());
-      }
-  }
+            Map<String, Object> response = new HashMap<>();
+            response.put("username", user.getUsername());
+            response.put("fullName", user.getFullName());
+            response.put("email", user.getEmail());
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // 重置用戶密碼
+    @PostMapping("/reset-password/{userId}")
+    public ResponseEntity<?> resetUserPassword(@PathVariable Integer userId, @RequestBody Map<String, String> request) {
+        try {
+            String newPassword = request.get("password");
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("密碼不能為空");
+            }
+
+            Users user = usersService.resetToPlainPassword(userId, newPassword);
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "密碼重置成功");
+            response.put("username", user.getUsername());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()));
+        }
+    }
 }

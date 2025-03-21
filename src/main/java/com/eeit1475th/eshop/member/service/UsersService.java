@@ -182,7 +182,7 @@ public class UsersService {
     }
 
     // 重置用戶密碼
-    public Users resetPassword(Integer id, String newPassword) {
+    public Users resetPassword(Integer id, String newPassword, boolean isEncrypted) {
         try {
             Users user = userRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("用戶不存在 ID: " + id));
@@ -191,18 +191,24 @@ public class UsersService {
                 throw new RuntimeException("密碼不能為空");
             }
 
-            // 檢查密碼是否已經是 BCrypt 格式
-            if (!newPassword.startsWith("$2a$")) {
-                user.setPassword(passwordEncoder.encode(newPassword));
-            } else {
+            // 如果密碼已經加密，直接設置；否則進行加密
+            if (isEncrypted) {
                 user.setPassword(newPassword);
+            } else {
+                user.setPassword(passwordEncoder.encode(newPassword));
             }
+            System.out.println("用戶 " + user.getUsername() + " 的密碼已更新");
 
             return userRepository.save(user);
         } catch (Exception e) {
             System.out.println("重置密碼時發生錯誤 - ID: " + id + ", 錯誤: " + e.getMessage());
             throw new RuntimeException("重置密碼失敗: " + e.getMessage());
         }
+    }
+
+    // 重置為指定的明文密碼
+    public Users resetToPlainPassword(Integer id, String plainPassword) {
+        return resetPassword(id, plainPassword, false);
     }
 
     // 批次更新密碼
@@ -217,15 +223,10 @@ public class UsersService {
 
             try {
                 String currentPassword = user.getPassword();
-                // 如果密碼已經是 BCrypt 格式，跳過
-                if (currentPassword.startsWith("$2a$")) {
-                    result.put("status", "skipped");
-                    result.put("message", "密碼已經是加密格式");
-                } else {
-                    resetPassword(user.getUserId(), currentPassword);
-                    result.put("status", "success");
-                    result.put("message", "密碼已更新為加密格式");
-                }
+                // 強制更新所有密碼
+                resetPassword(user.getUserId(), currentPassword, true);
+                result.put("status", "success");
+                result.put("message", "密碼已更新為加密格式");
             } catch (Exception e) {
                 System.out.println("處理用戶時發生錯誤 - " + user.getUsername() + ": " + e.getMessage());
                 result.put("status", "error");
