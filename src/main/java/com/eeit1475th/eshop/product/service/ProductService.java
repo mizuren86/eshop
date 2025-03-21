@@ -1,6 +1,7 @@
 package com.eeit1475th.eshop.product.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,11 +31,17 @@ public class ProductService {
         return productsRepository.findAll();
     }
 
+    public List<Products> searchProducts(String keyword) {
+        return productsRepository.findByProductNameContaining(keyword, null).getContent();
+    }
+
     public List<ProductCategory> getAllCategories() {
         return productCategoryRepository.findAll();
     }
 
-    public List<Products> searchProducts(String keyword) {
-        return productsRepository.findByProductNameContaining(keyword, null).getContent();
+    // 新增 getProductById() 方法
+    public Products getProductById(Integer productId) {
+        Optional<Products> product = productsRepository.findById(productId);
+        return product.orElse(null); // 若找不到則回傳 null（你也可以改為拋出異常）
     }
 }

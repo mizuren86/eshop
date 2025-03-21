@@ -17,7 +17,6 @@ public class ProductController {
 
 	private final ProductService productService;
 
-	// 透過建構子注入 ProductService
 	public ProductController(ProductService productService) {
 		this.productService = productService;
 	}
@@ -53,4 +52,6 @@ public class ProductController {
 	public List<Products> searchProducts(@RequestParam("keyword") String keyword) {
 		return productService.searchProducts(keyword);
 	}
+	
+	
 }
