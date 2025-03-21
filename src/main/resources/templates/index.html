@@ -5,11 +5,17 @@
       layout:decorate="~{/base}">
 <head>
   <meta charset="utf-8">
+  
   <title>Home - Fruitables</title>
 </head>
 <body>
+	
+
+	
   <div layout:fragment="content">
     <!-- Hero Section Start -->
+	
+	
     <div class="container-fluid py-5 mb-5 hero-header">
       <div class="container py-5">
         <div class="row g-5 align-items-center">
@@ -53,6 +59,31 @@
       <h2>Welcome to Fruitables!</h2>
       <p>This is your homepage content.</p>
     </div>
+	
+
+	
+	
+	
+	
+	
+	<div th:replace="@{/fragments/chat-widget.html}"></div>
+
+	
+
+	
+	
+	
+	
+	
+	
   </div>
+
+	 <!-- <div th:replace="~{fragments/chat-widget :: chatWidget}"></div>-->
+
+  
 </body>
+
+
+
+
 </html>

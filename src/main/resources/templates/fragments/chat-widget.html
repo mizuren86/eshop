@@ -1,0 +1,244 @@
+<div th:fragment="chatWidget">
+    <style>
+        .chat-icon {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+        }
+
+        .chat-container {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            width: 450px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 9999;
+            border: 1px solid #28a745;
+        }
+
+        .chat-header {
+            background: #28a745;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            font-size: 18px;
+            position: relative;
+        }
+
+        .btn-close {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            max-width: 85%;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: #28a745;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: #e6f7e1;
+            color: black;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 10px;
+        }
+
+        .message-text {
+            display: block;
+        }
+
+        .message-time {
+            display: block;
+            font-size: 12px;
+            color: gray;
+            margin-top: 5px;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background: #f8f9fa;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .chat-input button {
+            padding: 10px 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .chat-input button:hover {
+            background-color: #218838;
+        }
+    </style>
+
+    <!-- 客服按鈕 -->
+    <div class="chat-icon" onclick="toggleChatWindow()">💬</div>
+
+    <!-- 聊天窗口 -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <strong>客服對話</strong>
+            <button class="btn-close" onclick="toggleChatWindow()">✖</button>
+        </div>
+
+        <!-- 聊天內容 -->
+        <div class="chat-box" id="chatBox">
+            <div th:each="message : ${chatHistory}">
+                <!-- 使用者訊息 -->
+                <div class="message-container user-message">
+                    <span class="message-text" th:text="${message.userMessage}"></span>
+                    <img th:src="${message.userAvatar}" class="avatar">
+                    <span class="message-time" th:text="${#dates.format(message.timestamp, 'HH:mm')}"></span>
+                </div>
+                <!-- 客服訊息 -->
+                <div class="message-container bot-message">
+                    <img th:src="${message.botAvatar}" class="avatar">
+                    <span class="message-text" th:text="${message.botResponse}"></span>
+                    <span class="message-time" th:text="${#dates.format(message.timestamp, 'HH:mm')}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 輸入框 -->
+        <form id="chatForm" class="chat-input">
+            <input type="text" id="message" placeholder="輸入訊息..." required class="form-control">
+            <button type="submit">傳送</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleChatWindow() {
+            var chatContainer = document.getElementById('chatContainer');
+            chatContainer.style.display = (chatContainer.style.display === 'none' || chatContainer.style.display === '') ? 'block' : 'none';
+        }
+
+        document.getElementById("chatForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            var userMessage = document.getElementById("message").value;
+            if (userMessage.trim() !== "") {
+                sendMessage(userMessage);
+                document.getElementById("message").value = "";
+            }
+        });
+
+        function sendMessage(message) {
+            fetch('/chat/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayMessage(data.userMessage, "user", data.timestamp, data.userAvatar);
+                displayMessage(data.botResponse, "bot", data.timestamp, data.botAvatar);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function displayMessage(message, sender, timestamp, avatar) {
+            var chatBox = document.getElementById("chatBox");
+            var messageContainer = document.createElement("div");
+            messageContainer.classList.add("message-container", sender === "user" ? "user-message" : "bot-message");
+
+            var avatarImg = document.createElement("img");
+            avatarImg.src = avatar;
+            avatarImg.classList.add("avatar");
+
+            var messageText = document.createElement("span");
+            messageText.textContent = message;
+            messageText.classList.add("message-text");
+
+            var messageTime = document.createElement("span");
+            messageTime.textContent = formatTime(timestamp);
+            messageTime.classList.add("message-time");
+
+            if (sender === "user") {
+                messageContainer.appendChild(messageText);
+                messageContainer.appendChild(avatarImg);
+                messageContainer.appendChild(messageTime);
+            } else {
+                messageContainer.appendChild(avatarImg);
+                messageContainer.appendChild(messageText);
+                messageContainer.appendChild(messageTime);
+            }
+
+            chatBox.appendChild(messageContainer);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function formatTime(timestamp) {
+            var date = new Date(timestamp);
+            return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0');
+        }
+    </script>
+</div>
+
