@@ -28,4 +28,5 @@ public interface ReviewsRepository extends JpaRepository<Reviews, Integer> {
 
     // 根據 reviews_user_id 查詢 Reviews，依 updated_at 由新到舊排序，並支援分頁
     Page<Reviews> findByUsersOrderByUpdatedAtDesc(Users user, Pageable pageable); 
+    //merge test
 }
