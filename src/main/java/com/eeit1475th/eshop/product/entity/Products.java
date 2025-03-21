@@ -8,12 +8,14 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.eeit1475th.eshop.cart.entity.CartItems;
 import com.eeit1475th.eshop.cart.entity.OrderItems;
+import com.eeit1475th.eshop.review.entity.Reviews;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -78,6 +80,10 @@ public class Products {
 	@OneToMany(mappedBy = "products", cascade = CascadeType.ALL)
 	@JsonManagedReference(value = "product-orderItems")
 	private List<OrderItems> orderItems = new ArrayList<>();
+	
+	@OneToMany(mappedBy = "products", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "product-reviews")
+    private List<Reviews> productsReviews;
 
     @Override
     public String toString() {
