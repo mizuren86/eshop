@@ -35,6 +35,19 @@
               </div>
 
               <div class="mb-3">
+                <label for="verificationCode" class="form-label">驗證碼</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="verificationCode" name="verificationCode" required
+                    autocomplete="one-time-code">
+                  <button type="button" class="btn btn-outline-primary" id="sendVerificationCodeBtn">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    發送驗證碼
+                  </button>
+                </div>
+                <div id="verificationMessage" class="form-text text-success" style="display: none;"></div>
+              </div>
+
+              <div class="mb-3">
                 <label for="password" class="form-label">密碼</label>
                 <input type="password" class="form-control" id="password" name="password" required
                   autocomplete="new-password">
@@ -79,7 +92,8 @@
   <script th:inline="javascript">
     /*<![CDATA[*/
     // 定義 API URL
-    const registerUrl = /*[[@{/api/users/register}]]*/ '';
+    const registerUrl = /*[[@{/api/users/register-with-verification}]]*/ '';
+    const sendVerificationUrl = /*[[@{/api/users/send-verification}]]*/ '';
     const loginUrl = /*[[@{/login}]]*/ '';
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -90,6 +104,62 @@
       const errorDiv = document.getElementById('errorMessage');
       const loadingDiv = document.getElementById('loadingMessage');
       const spinner = button.querySelector('.spinner-border');
+      const sendVerificationBtn = document.getElementById('sendVerificationCodeBtn');
+      const verificationSpinner = sendVerificationBtn.querySelector('.spinner-border');
+      const verificationMessage = document.getElementById('verificationMessage');
+
+      // 發送驗證碼按鈕點擊事件
+      sendVerificationBtn.addEventListener('click', async function () {
+        const email = document.getElementById('email').value;
+        if (!email) {
+          errorDiv.textContent = '請先輸入電子郵件';
+          errorDiv.style.display = 'block';
+          return;
+        }
+
+        sendVerificationBtn.disabled = true;
+        verificationSpinner.classList.remove('d-none');
+        verificationMessage.style.display = 'none';
+
+        try {
+          const response = await fetch(sendVerificationUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Accept': 'application/json'
+            },
+            body: new URLSearchParams({ email: email })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || '發送驗證碼失敗');
+          }
+
+          verificationMessage.textContent = '驗證碼已發送到您的郵箱';
+          verificationMessage.style.display = 'block';
+
+          // 禁用按鈕60秒
+          let countdown = 60;
+          const timer = setInterval(() => {
+            countdown--;
+            sendVerificationBtn.textContent = `重新發送(${countdown}s)`;
+            if (countdown <= 0) {
+              clearInterval(timer);
+              sendVerificationBtn.disabled = false;
+              sendVerificationBtn.textContent = '發送驗證碼';
+            }
+          }, 1000);
+
+        } catch (error) {
+          console.error('發送驗證碼失敗:', error);
+          errorDiv.textContent = error.message || '發送驗證碼失敗，請稍後重試';
+          errorDiv.style.display = 'block';
+        } finally {
+          verificationSpinner.classList.add('d-none');
+        }
+      });
 
       form.addEventListener('submit', async function (event) {
         event.preventDefault();
@@ -119,7 +189,8 @@
             password: password,
             fullName: document.getElementById('fullName').value,
             phone: document.getElementById('phone').value,
-            address: document.getElementById('address').value
+            address: document.getElementById('address').value,
+            verificationCode: document.getElementById('verificationCode').value
           };
 
           console.log('發送註冊請求到:', registerUrl);
@@ -161,6 +232,67 @@
           spinner.classList.add('d-none');
         }
       });
+
+      async function sendVerificationCode() {
+        const email = document.getElementById('email').value;
+        if (!email) {
+          alert('請先輸入電子郵件');
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/users/send-verification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ email: email })
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            alert('驗證碼已發送到您的郵箱');
+            document.getElementById('verificationCode').disabled = false;
+          } else {
+            alert(data.error || '發送驗證碼失敗');
+          }
+        } catch (error) {
+          alert('發送驗證碼時發生錯誤');
+        }
+      }
+
+      async function verifyCode() {
+        const email = document.getElementById('email').value;
+        const code = document.getElementById('verificationCode').value;
+
+        if (!code) {
+          alert('請輸入驗證碼');
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/users/verify', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              email: email,
+              code: code
+            })
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            alert('驗證成功！');
+            document.getElementById('verificationCode').disabled = true;
+          } else {
+            alert(data.error || '驗證失敗');
+          }
+        } catch (error) {
+          alert('驗證時發生錯誤');
+        }
+      }
     });
     /*]]>*/
   </script>

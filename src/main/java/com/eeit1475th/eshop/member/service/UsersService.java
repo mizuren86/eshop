@@ -39,26 +39,35 @@ public class UsersService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private VerificationService verificationService;
+
+    @Autowired
+    private EmailVerificationService emailVerificationService;
+
     // 創建用戶
+    @Transactional
     public Users createUser(UsersDTO userDTO) {
-        // 1. 檢查用戶名是否已存在
-        if (userRepository.existsByUsername(userDTO.getUsername())) {
+        // 檢查用戶名是否已存在
+        if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
             throw new RuntimeException("用戶名已存在");
         }
 
-        // 2. 檢查郵箱是否已存在
-        if (userDTO.getEmail() != null && userRepository.existsByEmail(userDTO.getEmail())) {
+        // 檢查郵箱是否已存在
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
             throw new RuntimeException("郵箱已被使用");
         }
 
-        // 3. 創建新用戶
+        // 創建新用戶
         Users user = new Users();
-        BeanUtils.copyProperties(userDTO, user);
-
-        // 4. 加密密碼
+        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setFullName(userDTO.getFullName());
+        user.setPhone(userDTO.getPhone());
+        user.setAddress(userDTO.getAddress());
 
-        // 5. 保存用戶
+        // 保存用戶
         return userRepository.save(user);
     }
 
@@ -237,5 +246,61 @@ public class UsersService {
         }
 
         return results;
+    }
+
+    public String login(String email, String password) {
+        // 查找用戶
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("用戶不存在"));
+
+        // 驗證密碼
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("密碼錯誤");
+        }
+
+        // 檢查郵箱是否已驗證
+        if (!emailVerificationService.isEmailVerified(email)) {
+            throw new RuntimeException("請先驗證您的郵箱");
+        }
+
+        // TODO: 生成 JWT token
+        return "dummy-token";
+    }
+
+    public Users getUserByToken(String token) {
+        // TODO: 從 token 中獲取用戶 ID
+        Integer userId = 1; // 臨時寫死
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("用戶不存在"));
+    }
+
+    @Transactional
+    public Users updateUser(String token, UsersDTO userDTO) {
+        Users user = getUserByToken(token);
+
+        // 更新用戶信息
+        user.setFullName(userDTO.getFullName());
+        user.setPhone(userDTO.getPhone());
+        user.setAddress(userDTO.getAddress());
+
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public void updatePassword(String token, String oldPassword, String newPassword) {
+        Users user = getUserByToken(token);
+
+        // 驗證舊密碼
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("舊密碼錯誤");
+        }
+
+        // 更新密碼
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    public void logout(String token) {
+        // TODO: 實現登出邏輯，例如使 token 失效
     }
 }
