@@ -15,7 +15,7 @@ import com.eeit1475th.eshop.product.service.ProductService;
 @Controller
 public class ProductController {
 
-	private final ProductService productService;
+	private ProductService productService;
 
 	public ProductController(ProductService productService) {
 		this.productService = productService;
@@ -41,10 +41,18 @@ public class ProductController {
 
 	// Shop Detail 頁面
 	@GetMapping("/shop-detail")
-	public String shopDetail(Model model) {
-		model.addAttribute("pageTitle", "Shop Detail");
-		return "/pages/shop-detail";
+	public String shopDetail(@RequestParam("productId") Integer productId, Model model) {
+	    Products product = productService.getProductById(productId);
+	    if (product == null) {
+	        return "redirect:/shop"; // 如果找不到商品，回到商店頁面
+	    }
+
+	    model.addAttribute("product", product);
+	    model.addAttribute("pageTitle", "Shop Detail");
+
+	    return "/pages/shop-detail";
 	}
+
 
 	// 商品搜尋 API，回傳 JSON
 	@GetMapping("/api/products/search")

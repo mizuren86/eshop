@@ -30,12 +30,12 @@
               <div class="col-lg-6">
                 <div class="border rounded">
                   <a href="#">
-                    <img th:src="@{/img/single-item.jpg}" class="img-fluid rounded" alt="Product Image">
+                    <img th:src="@{/img/hero-img-1.png}" class="img-fluid rounded" alt="Product Image">
                   </a>
                 </div>
               </div>
               <div class="col-lg-6">
-                <h4 class="fw-bold mb-3">Brocoli</h4>
+                <h4 class="fw-bold mb-3" th:text="${product.productName}">Product Name</h4>
                 <p class="mb-3">Category: Vegetables</p>
                 <h5 class="fw-bold mb-3">3,35 $</h5>
                 <div class="d-flex mb-4">
