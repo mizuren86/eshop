@@ -9,6 +9,11 @@ public class ChatMessageDTO {
     private String timestamp;
     private String userAvatar;
     private String botAvatar;
+    
+    
+    
+    
+    
 
     public ChatMessageDTO(String userMessage, String botResponse, String timestamp, String userAvatar, String botAvatar) {
         this.userMessage = userMessage;
