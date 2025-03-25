@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <title>產品評論</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
+    <style scoped>
       .pagination {
         margin: 10px 0;
       }
@@ -12,7 +12,7 @@
         margin: 0 5px;
         padding: 5px 10px;
       }
-      .active {
+      .active2 {
         background-color: #007bff;
         color: white;
       }
@@ -96,10 +96,11 @@
 
         for (let i = 0; i < data.totalPages; i++) {
           const button = document.createElement("button");
-          button.className = `page-btn ${i === currentPage ? "active" : ""}`;
+          button.className = `page-btn ${i === currentPage ? "active2" : ""}`;
           button.textContent = i + 1;
           button.onclick = () => {
             if (i !== currentPage) {
+              currentPage = i; // 立即更新 currentPage
               loadReviews(i);
             }
           };

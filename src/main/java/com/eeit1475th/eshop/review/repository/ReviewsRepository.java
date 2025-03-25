@@ -33,10 +33,17 @@ public interface ReviewsRepository extends JpaRepository<Reviews, Integer> {
     Page<Reviews> findByUsersOrderByUpdatedAtDesc(Users user, Pageable pageable); 
     //merge test
     
+ // 計算平均評分
+    @Query("SELECT AVG(r.rating) " +
+           "FROM Reviews r " +
+           "JOIN r.products p " +
+           "WHERE p.productId = :productId")
+    Double findAverageRatingByProductId(@Param("productId") Integer productId);
+    
     @Query("SELECT r FROM Reviews r JOIN FETCH r.users JOIN FETCH r.products WHERE r.products = :product ORDER BY r.updatedAt DESC")
     Page<Reviews> findByProductsOrderByUpdatedAtDesc(@Param("product") Products product, Pageable pageable);
     
-    @Query("SELECT new com.eeit1475th.eshop.review.dto.ReviewsDto(r.users.username, r.users.userPhoto, r.rating, r.comment, r.photo, r.updatedAt) " +
+    @Query("SELECT new com.eeit1475th.eshop.review.dto.ReviewsDto(r.users.username, r.rating, r.comment, r.photo, r.updatedAt) " +
             "FROM Reviews r " +
             "JOIN r.products p " +
             "JOIN r.users u " +
@@ -44,4 +51,18 @@ public interface ReviewsRepository extends JpaRepository<Reviews, Integer> {
             "ORDER BY r.updatedAt DESC")
      Page<ReviewsDto> findByProductsOrderByUpdatedAtDesc(@Param("productId") Integer productId,
                                                          Pageable pageable);
+    
+ // 按評分篩選 (使用相同的JOIN和DTO結構)
+    @Query("SELECT new com.eeit1475th.eshop.review.dto.ReviewsDto(r.users.username, r.rating, r.comment, r.photo, r.updatedAt) " +
+    	       "FROM Reviews r " +
+    	       "JOIN r.products p " +
+    	       "JOIN r.users u " +
+    	       "WHERE p.productId = :productId " +
+    	       "AND (:rating IS NULL OR r.rating = :rating) " +
+    	       "ORDER BY r.updatedAt DESC")
+    Page<ReviewsDto> findByProductIdAndRating(
+            @Param("productId") Integer productId,
+            @Param("rating") Integer rating,
+            Pageable pageable);
 }
+

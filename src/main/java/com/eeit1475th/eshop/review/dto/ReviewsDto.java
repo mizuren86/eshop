@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReviewsDto {
     private String username;
-    private String userPhoto;
+//    private String userPhoto;
     private Integer rating;
     private String comment;
     private byte[] photo;
