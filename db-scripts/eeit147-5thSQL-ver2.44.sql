@@ -200,9 +200,10 @@ CREATE TABLE [dbo].[reviews] (
 
 CREATE TABLE [dbo].[coupon](
 	[coupon_id] [int] IDENTITY(1,1) NOT NULL,
-	[users_id] [int] NOT NULL,
-	[coupon_discount] [int] NOT NULL,
-	[coupon_date_timeout] [datetime] NOT NULL
+	[coupon_code] [varchar](50) NOT NULL,
+	[target_amount] [int] NOT NULL,
+	[discount_amount] [int] NOT NULL,
+	[end_date] [datetime] NOT NULL,
 );
 
 
@@ -219,17 +220,17 @@ INSERT INTO users (username, [password], email, full_name, phone, user_photo, [a
 INSERT INTO product_category (category_name)
 VALUES ('水果'), ('熱帶水果'), ('柑橘類水果');
 
--- 插入水果商品資料
+
+-- 插入水果商品資料，圖片路徑指向本機專案的靜態資源
 INSERT INTO products (sku, product_name, [description], unit_price, image_url, unit_in_stock, category_id)
 VALUES 
-('FRU0001', '蘋果', '新鮮紅蘋果', 99.99, 'https://example.com/apple.jpg', 100, 1),
-('FRU0002', '香蕉', '新鮮黃香蕉', 49.99, 'https://example.com/banana.jpg', 150, 2),
-('FRU0003', '橙子', '新鮮橙子', 79.99, 'https://example.com/orange.jpg', 120, 3),
-('FRU0004', '葡萄', '新鮮紫葡萄', 149.99, 'https://example.com/grape.jpg', 80, 1),
-('FRU0005', '鳳梨', '新鮮甜鳳梨', 119.99, 'https://example.com/pineapple.jpg', 90, 2),
-('FRU0006', '西瓜', '新鮮西瓜', 199.99, 'https://example.com/watermelon.jpg', 60, 2),
-('FRU0007', '檸檬', '新鮮檸檬', 59.99, 'https://example.com/lemon.jpg', 110, 3);
-
+('FRU0001', '蘋果', '新鮮紅蘋果', 99.99, '/img/fruite-item-1.jpg', 100, 1),
+('FRU0002', '香蕉', '新鮮黃香蕉', 49.99, '/img/fruite-item-2.jpg', 150, 2),
+('FRU0003', '橙子', '新鮮橙子', 79.99, '/img/fruite-item-3.jpg', 120, 3),
+('FRU0004', '葡萄', '新鮮紫葡萄', 149.99, '/img/fruite-item-4.jpg', 80, 1),
+('FRU0005', '鳳梨', '新鮮甜鳳梨', 119.99, '/img/fruite-item-5.jpg', 90, 2),
+('FRU0006', '西瓜', '新鮮西瓜', 199.99, '/img/fruite-item-6.jpg', 60, 2),
+('FRU0007', '檸檬', '新鮮檸檬', 59.99, '/img/fruite-item-7.jpg', 110, 3);
 
 -- 插入假資料到 shopping_cart 表
 INSERT INTO shopping_cart (user_id, added_at) VALUES
@@ -238,8 +239,6 @@ INSERT INTO shopping_cart (user_id, added_at) VALUES
 (3, '2025-03-05 09:30:00'),
 (4, '2025-03-07 20:10:00'),
 (5, '2025-03-10 16:00:00');
-
-
 
 -- 插入假資料到 cart_items 表
 INSERT INTO cart_items (cart_id, product_id, quantity, price) VALUES
@@ -255,7 +254,6 @@ INSERT INTO orders (user_id, order_date, total_amount, payment_method, payment_s
 (3, '2025-03-05 18:10:00', 899.00, 'Credit Card', 'Paid', '台中市西屯區福星路50號', 'Delivered', 'TNO202503050003'),
 (4, '2025-03-08 09:45:00', 4299.00, 'Mobile Payment', 'Paid', '高雄市三民區博愛一路80號', 'Shipped', 'TNO202503080004'),
 (5, '2025-03-10 20:30:00', 1299.00, 'Credit Card', 'Failed', '台南市東區東門路150號', 'Cancelled', NULL);
-
 
 
 -- 插入假資料到 order_items 表
@@ -294,5 +292,8 @@ VALUES
     (4, 5, 4, N'商品不錯，符合描述，但還是希望能再提升質量。', DATEADD(MINUTE, -10, GETDATE())),
     (5, 1, 5, N'這款產品完全符合我的需求，性價比超高，會再次購買。', DATEADD(MINUTE, -10, GETDATE()));
 
-INSERT [dbo].[coupon] ([users_id], [coupon_discount], [coupon_date_timeout]) VALUES (101, 60, CAST(N'2025-03-31T23:59:59.000' AS DateTime))
-INSERT [dbo].[coupon] ([users_id], [coupon_discount], [coupon_date_timeout]) VALUES (102, 60, CAST(N'2025-04-30T23:59:59.000' AS DateTime))
+INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'SAVE50', 300, 50, CAST(N'2025-06-30T23:59:59.000' AS DateTime))
+INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'DISCOUNT100', 600, 100, CAST(N'2025-12-31T23:59:59.000' AS DateTime))
+INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'NEWYEAR2025', 10000, 8000, CAST(N'2025-01-01T23:59:59.000' AS DateTime))
+INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'SUMMER20', 1200, 400, CAST(N'2025-08-15T23:59:59.000' AS DateTime))
+INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'FREESHIP', 2000, 500, CAST(N'2025-07-01T23:59:59.000' AS DateTime))
