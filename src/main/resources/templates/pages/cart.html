@@ -54,6 +54,7 @@
             }
         </style>
     </head>
+
     <body>
         <div layout:fragment="content">
             <!-- 頁首 -->
@@ -78,7 +79,7 @@
                                     <th class="text-center">品名</th>
                                     <th class="text-center">價格</th>
                                     <th class="text-center">數量</th>
-                                    <th class="text-center">總價</th>
+                                    <th class="text-center">小計</th>
                                     <th class="text-center"></th>
                                 </tr>
                             </thead>
@@ -206,7 +207,7 @@
                             <!-- 前往結帳 -->
                             <button
                                 id="goToCheckout"
-                                class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase d-block"
+                                class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase"
                             >
                                 去買單
                             </button>
@@ -219,7 +220,6 @@
             <script th:inline="javascript">
                 /*<![CDATA[*/
                 // 購物車資料載入
-
                 // 全域變數：保存購物車小記
                 let currentSubtotal = 0;
 
@@ -326,6 +326,7 @@
                             { method: "POST" }
                         );
                         if (!response.ok) throw new Error("Error updating quantity");
+                        sessionStorage.setItem("cartItem_" + cartItemId, newQuantity);
                         fetchCartData();
                     } catch (error) {
                         console.error("Error updating cart item quantity:", error);
@@ -354,18 +355,6 @@
                                 label: "7-11 取貨不付款（寄出日系統會發電子郵件通知，一般寄出日+2日會抵達門市）",
                                 shippingNote: "",
                                 paymentOptions: {
-                                    jkos: {
-                                        label: "街口支付",
-                                        message: `
-                                                <p style="margin: 0;">
-                                                    <strong>2025/3/1~2025/3/31</strong><br>
-                                                    至街口支付APP「SHOPLINE」活動頁領券，享滿 1,500 現折 100
-                                                </p>
-                                                <p style="margin: 0; margin-top: 8px;">
-                                                    *活動詳情以街口支付APP活動頁公告為準
-                                                </p>
-                                                `,
-                                    },
                                     linepay: {
                                         label: "LINE Pay",
                                         message: `★ 若您選擇 LINE PAY，於付款程序中，不小心跳離或是關閉頁面，請重新下單即可。`,
@@ -398,18 +387,6 @@
                                             </ol>
                                             `,
                                 paymentOptions: {
-                                    jkos: {
-                                        label: "街口支付",
-                                        message: `
-                                                <p style="margin: 0;">
-                                                    <strong>2025/3/1~2025/3/31</strong><br>
-                                                    至街口支付APP「SHOPLINE」活動頁領券，享滿 1,500 現折 100
-                                                </p>
-                                                <p style="margin: 0; margin-top: 8px;">
-                                                    *活動詳情以街口支付APP活動頁公告為準
-                                                </p>
-                                                `,
-                                    },
                                     linepay: {
                                         label: "LINE Pay",
                                         message: `★ 若您選擇 LINE PAY，於付款程序中不小心關閉頁面，請重新下單即可。`,
@@ -434,18 +411,6 @@
                                 label: "外島郵寄",
                                 shippingNote: "",
                                 paymentOptions: {
-                                    jkos: {
-                                        label: "街口支付",
-                                        message: `
-                                                <p style="margin: 0;">
-                                                    <strong>2025/3/1~2025/3/31</strong><br>
-                                                    至街口支付APP「SHOPLINE」活動頁領券，享滿 1,500 現折 100
-                                                </p>
-                                                <p style="margin: 0; margin-top: 8px;">
-                                                    *活動詳情以街口支付APP活動頁公告為準
-                                                </p>
-                                                `,
-                                    },
                                     linepay: {
                                         label: "LINE Pay",
                                         message: `★ 若您選擇 LINE PAY，於付款程序中不小心跳離頁面，請重新下單即可。`,
@@ -588,16 +553,53 @@
                     });
                 });
 
-                document.addEventListener("DOMContentLoaded", () => {
-                    // 當點擊「去買單」時，將選擇存入 localStorage，再跳轉到 checkout.html
+                document.addEventListener("DOMContentLoaded", function () {
+                    // 假設你的送貨方式、付款方式分別在下拉選單中
+                    // 並且這些選單有 id 為 "deliveryMethod" 與 "paymentMethod"
                     document.getElementById("goToCheckout").addEventListener("click", function () {
+                        // 取得下拉選單的選取值
                         const shippingMethod = document.getElementById("deliveryMethod").value;
                         const paymentMethod = document.getElementById("paymentMethod").value;
-                        localStorage.setItem("selectedShippingMethod", shippingMethod);
-                        localStorage.setItem("selectedPaymentMethod", paymentMethod);
-                        window.location.href = "/checkout";
+
+                        // 組合成 URL query string (記得 encodeURIComponent)
+                        const url =
+                            "/checkout?shippingMethod=" +
+                            encodeURIComponent(shippingMethod) +
+                            "&paymentMethod=" +
+                            encodeURIComponent(paymentMethod);
+                        window.location.href = url;
                     });
                 });
+
+                var sessionShippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
+                var sessionPaymentMethod = /*[[${paymentMethod}]]*/ "711-cod-only";
+
+                document.addEventListener("DOMContentLoaded", () => {
+                    initCountryOptions();
+                    onCountryChange();
+
+                    // 如果 Session 中有預設的送貨方式，就設定
+                    if (sessionShippingMethod) {
+                        // 設定送貨方式下拉選單的值，然後觸發 onMethodChange() 更新付款方式
+                        methodSelect.value = sessionShippingMethod;
+                        onMethodChange();
+                    }
+                    // 設定付款方式下拉選單的值
+                    if (sessionPaymentMethod) {
+                        paymentSelect.value = sessionPaymentMethod;
+                        onPaymentChange();
+                    }
+
+                    // 顯示優惠代碼區塊的事件...
+                    const showCouponLink = document.getElementById("showCouponLink");
+                    const couponForm = document.getElementById("couponForm");
+                    showCouponLink.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        couponForm.style.display = "block";
+                        showCouponLink.style.display = "none";
+                    });
+                });
+
                 /*]]>*/
             </script>
         </div>
