@@ -14,8 +14,8 @@ import com.eeit1475th.eshop.product.repository.ProductsRepository;
 @Service
 public class ProductService {
 
-    private final ProductsRepository productsRepository;
-    private final ProductCategoryRepository productCategoryRepository;
+    private ProductsRepository productsRepository;
+    private ProductCategoryRepository productCategoryRepository;
 
     @Autowired
     public ProductService(ProductsRepository productsRepository, ProductCategoryRepository productCategoryRepository) {
@@ -39,9 +39,9 @@ public class ProductService {
         return productCategoryRepository.findAll();
     }
 
-    // 新增 getProductById() 方法
     public Products getProductById(Integer productId) {
         Optional<Products> product = productsRepository.findById(productId);
-        return product.orElse(null); // 若找不到則回傳 null（你也可以改為拋出異常）
+        return product.orElse(null); 
     }
+    
 }

@@ -14,11 +14,14 @@ import com.eeit1475th.eshop.member.repository.UsersRepository;
 import com.eeit1475th.eshop.member.service.JwtService;
 import com.eeit1475th.eshop.product.entity.Products;
 import com.eeit1475th.eshop.product.repository.ProductsRepository;
+import com.eeit1475th.eshop.review.dto.ReviewsDto;
 import com.eeit1475th.eshop.review.entity.Reviews;
 import com.eeit1475th.eshop.review.repository.ReviewsRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewsService {
@@ -118,12 +121,12 @@ public class ReviewsService {
     }
     
     @Transactional(readOnly = true)
-    public Page<Reviews> getReviewsByProductId(Integer productId, Pageable pageable) {
+    public Page<ReviewsDto> getReviewsByProductId(Integer productId, Pageable pageable) {
         // 檢查產品是否存在
         Products product = productsRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("找不到該商品"));
         
         // 透過 repository 查詢該商品的評論
-        return reviewsRepository.findByProductsOrderByUpdatedAtDesc(product, pageable);
+        return reviewsRepository.findByProductsOrderByUpdatedAtDesc(productId, pageable);
     }
 }

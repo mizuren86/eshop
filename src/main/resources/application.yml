@@ -58,3 +58,7 @@ jwt:
 rasa:
   api:
     url: http://localhost:5005/webhooks/rest/webhook
+human:
+  agent:
+    ws:
+      url: ws://localhost:8080/human-chat

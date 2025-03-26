@@ -200,9 +200,10 @@ CREATE TABLE [dbo].[reviews] (
 
 CREATE TABLE [dbo].[coupon](
 	[coupon_id] [int] IDENTITY(1,1) NOT NULL,
-	[users_id] [int] NOT NULL,
-	[coupon_discount] [int] NOT NULL,
-	[coupon_date_timeout] [datetime] NOT NULL
+	[coupon_code] [varchar](50) NOT NULL,
+	[target_amount] [int] NOT NULL,
+	[discount_amount] [int] NOT NULL,
+	[end_date] [datetime] NOT NULL,
 );
 
 
@@ -291,5 +292,8 @@ VALUES
     (4, 5, 4, N'商品不錯，符合描述，但還是希望能再提升質量。', DATEADD(MINUTE, -10, GETDATE())),
     (5, 1, 5, N'這款產品完全符合我的需求，性價比超高，會再次購買。', DATEADD(MINUTE, -10, GETDATE()));
 
-INSERT [dbo].[coupon] ([users_id], [coupon_discount], [coupon_date_timeout]) VALUES (101, 60, CAST(N'2025-03-31T23:59:59.000' AS DateTime))
-INSERT [dbo].[coupon] ([users_id], [coupon_discount], [coupon_date_timeout]) VALUES (102, 60, CAST(N'2025-04-30T23:59:59.000' AS DateTime))
+INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'SAVE50', 300, 50, CAST(N'2025-06-30T23:59:59.000' AS DateTime))
+INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'DISCOUNT100', 600, 100, CAST(N'2025-12-31T23:59:59.000' AS DateTime))
+INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'NEWYEAR2025', 10000, 8000, CAST(N'2025-01-01T23:59:59.000' AS DateTime))
+INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'SUMMER20', 1200, 400, CAST(N'2025-08-15T23:59:59.000' AS DateTime))
+INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'FREESHIP', 2000, 500, CAST(N'2025-07-01T23:59:59.000' AS DateTime))
