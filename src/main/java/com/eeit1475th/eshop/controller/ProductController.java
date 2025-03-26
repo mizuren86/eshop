@@ -41,7 +41,12 @@ public class ProductController {
 
 	// Shop Detail 頁面
 	@GetMapping("/shop-detail")
-	public String shopDetail(Model model) {
+	public String shopDetail(@RequestParam("id") Integer productId, Model model) {
+		Products product = productService.getProductById(productId);
+		if (product == null) {
+			return "redirect:/shop";
+		}
+		model.addAttribute("product", product);
 		model.addAttribute("pageTitle", "Shop Detail");
 		return "/pages/shop-detail";
 	}
@@ -52,6 +57,5 @@ public class ProductController {
 	public List<Products> searchProducts(@RequestParam("keyword") String keyword) {
 		return productService.searchProducts(keyword);
 	}
-	
-	
+
 }

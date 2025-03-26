@@ -105,23 +105,40 @@
             </a> -->
             <!-- 用戶圖示和下拉選單 -->
             <div class="nav-item dropdown">
-              <a href="#" class="nav-link" data-bs-toggle="dropdown">
-                <i class="fas fa-user fa-2x"></i>
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <i class="fas fa-user"></i>
               </a>
-              <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                <!-- 未登入時顯示 -->
-                <div th:if="${session.user == null}">
-                  <a th:href="@{/login}" class="dropdown-item">登入</a>
-                  <a th:href="@{/register}" class="dropdown-item">註冊</a>
-                </div>
-                <!-- 已登入時顯示 -->
-                <div th:if="${session.user != null}">
-                  <a th:href="@{/profile}" class="dropdown-item">個人資料</a>
-                  <a th:href="@{/orders}" class="dropdown-item">訂單記錄</a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <!-- 未登录状态 -->
+                <li th:if="${session.user == null}">
+                  <a class="dropdown-item" href="/login">
+                    <i class="fas fa-sign-in-alt me-2"></i>登入
+                  </a>
+                </li>
+                <li th:if="${session.user == null}">
+                  <a class="dropdown-item" href="/register">
+                    <i class="fas fa-user-plus me-2"></i>註冊
+                  </a>
+                </li>
+                <!-- 已登录状态 -->
+                <li th:if="${session.user != null}">
+                  <a class="dropdown-item" href="/profile">
+                    <i class="fas fa-user-circle me-2"></i>個人資料
+                  </a>
+                </li>
+                <li th:if="${session.user != null}">
+                  <a class="dropdown-item" href="/orders">
+                    <i class="fas fa-shopping-bag me-2"></i>訂單記錄
+                  </a>
+                </li>
+                <li th:if="${session.user != null}">
                   <div class="dropdown-divider"></div>
-                  <a th:href="@{/logout}" class="dropdown-item">登出</a>
-                </div>
-              </div>
+                  <a class="dropdown-item" href="#" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i>登出
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -278,6 +295,43 @@
   <script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
   <!-- Template Javascript -->
   <script th:src="@{/js/main.js}"></script>
+  <script th:src="@{/js/login.js}"></script>
+
+  <script>
+    // 登出功能
+    function logout() {
+      console.log('開始登出流程...');
+      console.log('當前Token:', localStorage.getItem('token'));
+      console.log('當前Cookies:', document.cookie);
+
+      // 清除本地存储
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      // 发送登出请求
+      fetch('/api/users/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+        .then(response => {
+          console.log('登出響應狀態:', response.status);
+          return response.json();
+        })
+        .then(data => {
+          console.log('登出響應數據:', data);
+          // 无论服务器响应如何，都清除本地状态并重定向
+          window.location.href = '/';
+        })
+        .catch(error => {
+          console.error('登出過程發生錯誤:', error);
+          // 即使发生错误也重定向到首页
+          window.location.href = '/';
+        });
+    }
+  </script>
 </body>
 
 </html>

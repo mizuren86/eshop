@@ -45,6 +45,9 @@ public class UsersService {
     @Autowired
     private EmailVerificationService emailVerificationService;
 
+    @Autowired
+    private JwtService jwtService;
+
     // 創建用戶
     @Transactional
     public Users createUser(UsersDTO userDTO) {
@@ -248,28 +251,19 @@ public class UsersService {
         return results;
     }
 
-    public String login(String email, String password) {
-        // 查找用戶
-        Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("用戶不存在"));
+    public String login(String username, String password) {
+        // 验证用户名和密码
+        Users user = validateLogin(username, password);
 
-        // 驗證密碼
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("密碼錯誤");
-        }
+        // 生成JWT token
+        String token = jwtService.generateToken(user.getUsername(), user.getUserId());
 
-        // 檢查郵箱是否已驗證
-        if (!emailVerificationService.isEmailVerified(email)) {
-            throw new RuntimeException("請先驗證您的郵箱");
-        }
-
-        // TODO: 生成 JWT token
-        return "dummy-token";
+        return token;
     }
 
     public Users getUserByToken(String token) {
-        // TODO: 從 token 中獲取用戶 ID
-        Integer userId = 1; // 臨時寫死
+        // 从 token 中获取用户 ID
+        Integer userId = jwtService.extractUserId(token);
         return userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("用戶不存在"));
     }

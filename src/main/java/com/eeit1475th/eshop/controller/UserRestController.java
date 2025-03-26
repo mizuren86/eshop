@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
+
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/users")
@@ -36,13 +39,16 @@ public class UserRestController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UsersDTO userDTO) {
         try {
-            // 創建用戶
+            // 先验证验证码
+            boolean verified = emailVerificationService.verifyToken(userDTO.getEmail(), userDTO.getVerificationCode());
+            if (!verified) {
+                return ResponseEntity.badRequest().body(new ApiResponse(false, "驗證碼無效或已過期"));
+            }
+
+            // 创建用户
             Users user = usersService.createUser(userDTO);
 
-            // 發送驗證郵件
-            emailVerificationService.saveVerificationToken(user.getEmail());
-
-            return ResponseEntity.ok(new ApiResponse(true, "註冊成功，請檢查您的郵箱進行驗證", "/login"));
+            return ResponseEntity.ok(new ApiResponse(true, "註冊成功", "/login"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
         }
@@ -63,16 +69,19 @@ public class UserRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
         try {
-            // 檢查郵箱是否已驗證
-            if (!emailVerificationService.isEmailVerified(loginRequest.getEmail())) {
-                return ResponseEntity.badRequest().body(new ApiResponse(false, "請先驗證您的郵箱"));
-            }
+            String token = usersService.login(request.getUsername(), request.getPassword());
+            Users user = usersService.findByUsername(request.getUsername());
 
-            // 執行登入
-            String token = usersService.login(loginRequest.getEmail(), loginRequest.getPassword());
-            return ResponseEntity.ok(new ApiResponse(true, "登入成功", token));
+            // 将用户信息存储在会话中
+            session.setAttribute("user", user);
+
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("token", token);
+            responseData.put("user", user);
+
+            return ResponseEntity.ok(new ApiResponse(true, "登入成功", responseData));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
         }
@@ -111,12 +120,62 @@ public class UserRestController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> logout(HttpSession session) {
         try {
-            usersService.logout(token);
+            System.out.println("正在處理登出請求...");
+            System.out.println("Session ID: " + session.getId());
+
+            // 清除会话
+            session.invalidate();
+            System.out.println("會話已清除");
+
             return ResponseEntity.ok(new ApiResponse(true, "登出成功"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
+            System.out.println("登出過程發生錯誤: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.ok(new ApiResponse(true, "登出成功")); // 即使发生错误也返回成功
         }
+    }
+
+    @GetMapping("/current")
+    public ResponseEntity<?> getCurrentUser(HttpSession session) {
+        try {
+            System.out.println("正在檢查當前用戶會話...");
+            System.out.println("Session ID: " + session.getId());
+            System.out.println("Session 創建時間: " + session.getCreationTime());
+            System.out.println("Session 最後訪問時間: " + session.getLastAccessedTime());
+
+            Users user = (Users) session.getAttribute("user");
+            if (user != null) {
+                System.out.println("找到用戶: " + user.getUsername());
+                Map<String, Object> userData = new HashMap<>();
+                userData.put("userId", user.getUserId());
+                userData.put("username", user.getUsername());
+                userData.put("email", user.getEmail());
+                return ResponseEntity.ok(userData);
+            } else {
+                System.out.println("未找到用戶信息");
+                return ResponseEntity.ok(new HashMap<>());
+            }
+        } catch (Exception e) {
+            System.out.println("檢查當前用戶時發生錯誤: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.ok(new HashMap<>());
+        }
+    }
+
+    @GetMapping("/login")
+    public String showLoginPage() {
+        return "login";
+    }
+
+    @GetMapping("/register")
+    public String showRegisterPage() {
+        return "register";
+    }
+
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordPage() {
+        return "forgot-password";
     }
 }
