@@ -1,6 +1,7 @@
 package com.eeit1475th.eshop.review.entity;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 import com.eeit1475th.eshop.member.entity.Users;
 import com.eeit1475th.eshop.product.entity.Products;
@@ -20,16 +21,14 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "reviews", uniqueConstraints = {
 	    @UniqueConstraint(columnNames = {"reviews_user_id", "reviews_product_id"})
 	})
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Reviews {
@@ -74,5 +73,12 @@ public class Reviews {
     public void prePersist() {
         this.updatedAt = LocalDateTime.now();
     }
+	@Override
+	public String toString() {
+		return "Reviews [reviewId=" + reviewId + ", products=" + products + ", users=" + users + ", rating=" + rating
+				+ ", comment=" + comment + ", photo=" + Arrays.toString(photo) + ", updatedAt=" + updatedAt + "]";
+	}
     //這樣就不用手動在 Service 層或 Repository 層設定 updatedAt，JPA 會自動處理！
+    
+    
 }
