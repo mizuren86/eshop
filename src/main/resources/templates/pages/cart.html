@@ -217,24 +217,57 @@
 
                 // 全域變數：保存購物車小記
                 let currentSubtotal = 0;
+                
+                // 曾毓皓 全域變數：優惠折抵
+                let coupondiscount_overall = 0
 
                 // 重新計算小記
                 function recalcSubtotal(cartItems) {
                     return cartItems.reduce((sum, item) => sum + item.subTotal, 0);
                 }
-
+                
+                /*曾毓皓 優惠券改動*/
+                document.getElementById("applyCouponBtn").addEventListener("click", function () {
+                    const couponCode = document.getElementById("couponInput").value.trim();
+                    let  coupons = /*[[${coupons}]]*/ [];
+                    console.log("優惠券列表:", coupons);
+                    const matchedCoupon = coupons.find(coupon => coupon.couponCode === couponCode);
+                    const today = new Date();
+                    const matchedCouponEndDate = new Date(matchedCoupon.endDate); 
+                    if (!couponCode || !matchedCoupon) {
+                        alert("請輸入正確的優惠碼");
+                        coupondiscount_overall = 0;
+                        updateGrandTotal();
+                        return;
+                    } else {
+                        if (matchedCouponEndDate < today) {
+                            alert("優惠碼無效或已過期");
+                            coupondiscount_overall = 0;
+                            updateGrandTotal();
+                            return;
+                        } else {
+                            coupondiscount_overall = matchedCoupon.discountAmount;
+                            alert("折扣金額: " + coupondiscount_overall);
+                            updateGrandTotal();
+                            return;
+                        }
+                    }
+                });
+                /*曾毓皓 優惠券改動結束*/
                 // 更新結帳金額：合計 = 小記 + 運費 - 優惠券
                 function updateGrandTotal() {
                     // 若運費欄位隱藏（新竹貨運 / 外島郵寄），則不更新合計
                     const shippingFeeRow = document.getElementById("shippingFeeRow");
                     if (shippingFeeRow.classList.contains("d-none")) return;
-                    const couponDiscount = 300; // 優惠券金額
+                    // 曾毓皓 優惠券金額 這邊會用全域變數coupondiscount_overall代替
+                    //const修改成let
+                    const couponDiscount = coupondiscount_overall; 
                     const shippingFee =
                         parseInt(document.getElementById("shippingFee").textContent.replace("$", "")) || 0;
                     const grandTotalValue = currentSubtotal + shippingFee - couponDiscount;
                     document.getElementById("grandTotal").textContent = "$" + grandTotalValue;
                 }
-
+                /*優惠券改動結束*/
                 async function fetchCartData() {
                     try {
                         const response = await fetch("/api/cart");

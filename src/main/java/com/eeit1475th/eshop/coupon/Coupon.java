@@ -30,17 +30,33 @@ import lombok.Setter;
 @Table(name="coupon")
 public class Coupon {
 	
-	@Id
-	@Column(name = "coupon_id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer couponId;
-	
-	@ManyToOne
-	@JoinColumn(name = "users_id", nullable = false)
-	private Users users;
-	
-	@JoinColumn(name = "coupon_discount", nullable = false)
-	private Integer coupon_discount;
-	
+//	@Id
+//	@Column(name = "coupon_id")
+//	@GeneratedValue(strategy = GenerationType.IDENTITY)
+//	private Integer couponId;
+//	
+//	@ManyToOne
+//	@JoinColumn(name = "users_id", nullable = false)
+//	private Users users;
+//	
+//	@JoinColumn(name = "coupon_discount", nullable = false)
+//	private Integer coupon_discount;
+    @Id
+    @Column(name = "coupon_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer couponId;
+
+    @Column(name = "coupon_code", nullable = false)
+    private String couponCode;
+
+    @Column(name = "target_amount", nullable = false)
+    private Integer targetAmount;
+
+    @Column(name = "discount_amount", nullable = false)
+    private Integer discountAmount;
+
+    @Column(name = "end_date", nullable = false)
+    private LocalDateTime endDate;
+
 	
 }
