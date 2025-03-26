@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.eeit1475th.eshop.coupon.Coupon;
 import com.eeit1475th.eshop.coupon.CouponRepository;
-import com.eeit1475th.eshop.coupon.CouponService;
 import com.eeit1475th.eshop.member.entity.Users;
 
 import jakarta.servlet.http.HttpSession;
