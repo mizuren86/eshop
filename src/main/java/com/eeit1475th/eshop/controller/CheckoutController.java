@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.eeit1475th.eshop.cart.dto.CartItemsDTO;
@@ -23,7 +24,11 @@ public class CheckoutController {
 
     @GetMapping("/checkout")
 //    public String showCheckoutPage(Model model, HttpSession session) {
-    public String showCheckoutPage(Model model, HttpSession session,@SessionAttribute(value = "user", required = false) Users user) {
+    public String showCheckoutPage(Model model, HttpSession session,
+            @SessionAttribute(value = "user", required = false) Users user,
+            @RequestParam(value="shippingMethod", required=false) String shippingMethod,
+            @RequestParam(value="paymentMethod", required=false) String paymentMethod) {
+    	
 //        // 假設使用者ID存在 session 中
 //        Integer userId = (Integer) session.getAttribute("userId");
 //        if (userId == null) {
@@ -31,23 +36,51 @@ public class CheckoutController {
 //            return "redirect:/login";
 //        }
     	
-    	if (user == null) {
-            user = new Users();
-            user.setUserId(3);  // 測試用會員 ID，可依需求調整
-            session.setAttribute("user", user);
-        }
+    	if (user == null || user.getUsername() == null) {
+    	    user = new Users();
+    	    user.setUserId(3);  // 測試用會員 ID
+    	    user.setUsername("測試使用者");
+    	    user.setEmail("test@example.com");
+    	    user.setPhone("0912345678");
+    	    session.setAttribute("user", user);
+    	}
         Integer userId = user.getUserId();
         
         // 取得該使用者購物車商品列表
         List<CartItemsDTO> cartItems = shoppingCartService.getCartItems(userId);
         model.addAttribute("cartItems", cartItems);
         
-        // 計算總金額（假設 CartItemsDTO 有 subTotal 屬性）
+        // 從 Session 讀取優惠券折扣，如果沒有就預設為 0
+        BigDecimal couponDiscount = (session.getAttribute("couponDiscount") != null)
+            ? (BigDecimal) session.getAttribute("couponDiscount")
+            : BigDecimal.ZERO;
+        model.addAttribute("couponDiscount", couponDiscount);
+        
+        // 計算購物車小計
         BigDecimal totalAmount = cartItems.stream()
-            .map(item -> item.getSubTotal())
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(CartItemsDTO::getSubTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         model.addAttribute("totalAmount", totalAmount);
+        
+        // 儲存運送與付款方式到 Session
+        if (shippingMethod != null && !shippingMethod.trim().isEmpty()) {
+            session.setAttribute("shippingMethod", shippingMethod.trim());
+        } else if (session.getAttribute("shippingMethod") == null) {
+            session.setAttribute("shippingMethod", "711-cod");
+        }
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            session.setAttribute("paymentMethod", paymentMethod.trim());
+        } else if (session.getAttribute("paymentMethod") == null) {
+            session.setAttribute("paymentMethod", "711-cod-only");
+        }
+        String sessionShippingMethod = (String) session.getAttribute("shippingMethod");
+        String sessionPaymentMethod = (String) session.getAttribute("paymentMethod");
+        model.addAttribute("shippingMethod", sessionShippingMethod);
+        model.addAttribute("paymentMethod", sessionPaymentMethod);
+        
+        // 取得會員資料
         model.addAttribute("userId", userId);
+        model.addAttribute("users", user);
         
         return "/pages/checkout";  // 對應到 src/main/resources/templates/checkout.html
     }
