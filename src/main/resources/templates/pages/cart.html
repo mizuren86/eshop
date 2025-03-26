@@ -20,7 +20,7 @@
                 appearance: none;
             }
 
-            /* 父容器 position-relative 供箭頭絕對定位 */
+            /* position-relative 供箭頭絕對定位 */
             .select-wrapper {
                 position: relative;
                 display: inline-block;
@@ -37,18 +37,24 @@
                 padding-right: 2rem !important;
             }
 
-            /* 下拉選單專用的 class => .form-control-select */
+            /* 下拉選單專用的 class */
             .form-control-select {
                 line-height: 2rem !important;
-                height: 2rem !important; /* 固定高度 */
+                height: 2rem !important;
                 padding: 0.375rem 2rem 0.375rem 0.75rem !important;
                 box-sizing: border-box;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+
+            /* 隱藏區塊 */
+            .hidden {
+                display: none !important;
+            }
         </style>
     </head>
+
     <body>
         <div layout:fragment="content">
             <!-- 頁首 -->
@@ -73,7 +79,7 @@
                                     <th class="text-center">品名</th>
                                     <th class="text-center">價格</th>
                                     <th class="text-center">數量</th>
-                                    <th class="text-center">總價</th>
+                                    <th class="text-center">小計</th>
                                     <th class="text-center"></th>
                                 </tr>
                             </thead>
@@ -199,12 +205,12 @@
                                 <span id="grandTotal">$0</span>
                             </div>
                             <!-- 前往結帳 -->
-                            <a
-                                th:href="@{/checkout}"
-                                class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase d-block"
+                            <button
+                                id="goToCheckout"
+                                class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase"
                             >
                                 去買單
-                            </a>
+                            </button>
                         </aside>
                     </div>
                 </div>
@@ -214,7 +220,6 @@
             <script th:inline="javascript">
                 /*<![CDATA[*/
                 // 購物車資料載入
-
                 // 全域變數：保存購物車小記
                 let currentSubtotal = 0;
                 
@@ -280,29 +285,27 @@
                         cartItems.forEach((item) => {
                             const row = document.createElement("tr");
                             row.innerHTML = `
-                                      <td class="text-center align-middle">
-                                        <img src="${item.product.imageUrl}" alt="" class="img-fluid rounded-circle" style="width:80px; height:80px;">
-                                      </td>
-                                      <td class="text-center align-middle">${item.product.productName}</td>
-                                      <td class="text-center align-middle">$${item.price}</td>
-                                      <td class="text-center align-middle">
-                                        <div class="d-flex justify-content-center align-items-center mx-auto" style="width:100px;">
-                                          <button class="btn btn-sm btn-minus" onclick="updateQuantity(${item.cartItemId}, -1)">
-                                            <i class="fa fa-minus"></i>
-                                          </button>
-                                          <input type="text" id="quantity-${item.cartItemId}" value="${item.quantity}"
-                                                 class="form-control form-control-sm text-center mx-2" style="width:50px;"
-                                                 onchange="updateQuantityFromInput(${item.cartItemId}, this.value)">
-                                          <button class="btn btn-sm btn-plus" onclick="updateQuantity(${item.cartItemId}, 1)">
-                                            <i class="fa fa-plus"></i>
-                                          </button>
-                                        </div>
-                                      </td>
-                                      <td class="text-center align-middle">$${item.subTotal}</td>
-                                      <td class="text-center align-middle">
-                                        <button class="btn btn-danger" onclick="removeCartItem(${item.cartItemId})"><i class="fa fa-trash"></i></button>
-                                      </td>
-                                    `;
+                                            <td class="text-center align-middle">
+                                                <img src="${item.product.imageUrl}" alt="" class="img-fluid rounded-circle" style="width:80px; height:80px;">
+                                            </td>
+                                            <td class="text-center align-middle">${item.product.productName}</td>
+                                            <td class="text-center align-middle">$${item.price}</td>
+                                            <td class="text-center align-middle">
+                                                <div class="d-flex justify-content-center align-items-center mx-auto" style="width:100px;">
+                                                    <button class="btn btn-sm btn-minus" onclick="updateQuantity(${item.cartItemId}, -1)">
+                                                    <i class="fa fa-minus"></i>
+                                                    </button>
+                                                    <input type="text" id="quantity-${item.cartItemId}" value="${item.quantity}"class="form-control form-control-sm text-center mx-2" style="width:50px;"onchange="updateQuantityFromInput(${item.cartItemId}, this.value)">
+                                                    <button class="btn btn-sm btn-plus" onclick="updateQuantity(${item.cartItemId}, 1)">
+                                                    <i class="fa fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td class="text-center align-middle">$${item.subTotal}</td>
+                                            <td class="text-center align-middle">
+                                                <button class="btn btn-danger" onclick="removeCartItem(${item.cartItemId})"><i class="fa fa-trash"></i></button>
+                                            </td>
+                                            `;
                             cartItemsContainer.appendChild(row);
                         });
 
@@ -356,6 +359,7 @@
                             { method: "POST" }
                         );
                         if (!response.ok) throw new Error("Error updating quantity");
+                        sessionStorage.setItem("cartItem_" + cartItemId, newQuantity);
                         fetchCartData();
                     } catch (error) {
                         console.error("Error updating cart item quantity:", error);
@@ -384,21 +388,23 @@
                                 label: "7-11 取貨不付款（寄出日系統會發電子郵件通知，一般寄出日+2日會抵達門市）",
                                 shippingNote: "",
                                 paymentOptions: {
-                                    jkos: {
-                                        label: "街口支付",
-                                        message: `2025/3/1~2025/3/31
-                                                至街口支付APP「SHOPLINE」活動頁領券，享滿 1,500 現折 100
-                                                *活動詳情以街口支付APP活動頁公告為準`,
-                                    },
                                     linepay: {
                                         label: "LINE Pay",
                                         message: `★ 若您選擇 LINE PAY，於付款程序中，不小心跳離或是關閉頁面，請重新下單即可。`,
                                     },
                                     credit: {
                                         label: "信用卡",
-                                        message: `2025/1/1-2025/3/31
-                                                刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
-                                                *活動詳情請參閱星展銀行官網公告`,
+                                        message: `
+                                                <p style="margin: 0;">
+                                                    <strong>2025/1/1-2025/3/31</strong><br>
+                                                    刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
+                                                </p>
+                                                <p style="margin: 0; margin-top: 8px;">
+                                                    *每月活動獨立於 1/22、2/26、3/27 下午2點開始至
+                                                    「星展Card+信用卡數位服務」登錄【SHOPLINE】活動，
+                                                    活動詳情請參閱星展銀行官網公告
+                                                </p>
+                                                `,
                                     },
                                 },
                             },
@@ -414,18 +420,6 @@
                                             </ol>
                                             `,
                                 paymentOptions: {
-                                    jkos: {
-                                        label: "街口支付",
-                                        message: `
-                                                <p style="margin: 0;">
-                                                    <strong>2025/3/1~2025/3/31</strong><br>
-                                                    至街口支付APP「SHOPLINE」活動頁領券，享滿 1,500 現折 100
-                                                </p>
-                                                <p style="margin: 0; margin-top: 8px;">
-                                                    *活動詳情以街口支付APP活動頁公告為準
-                                                </p>
-                                                `,
-                                    },
                                     linepay: {
                                         label: "LINE Pay",
                                         message: `★ 若您選擇 LINE PAY，於付款程序中不小心關閉頁面，請重新下單即可。`,
@@ -450,27 +444,29 @@
                                 label: "外島郵寄",
                                 shippingNote: "",
                                 paymentOptions: {
-                                    jkos: {
-                                        label: "街口支付",
-                                        message: `2025/3/1~2025/3/31
-                                                至街口支付APP「SHOPLINE」活動頁領券，享滿 1,500 現折 100
-                                                *活動詳情以街口支付APP活動頁公告為準`,
-                                    },
                                     linepay: {
                                         label: "LINE Pay",
                                         message: `★ 若您選擇 LINE PAY，於付款程序中不小心跳離頁面，請重新下單即可。`,
                                     },
                                     credit: {
                                         label: "信用卡",
-                                        message: `2025/1/1-2025/3/31
-                                                刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
-                                                *活動詳情請參閱星展銀行官網公告`,
+                                        message: `
+                                                <p style="margin: 0;">
+                                                    <strong>2025/1/1-2025/3/31</strong><br>
+                                                    刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
+                                                </p>
+                                                <p style="margin: 0; margin-top: 8px;">
+                                                    *每月活動獨立於 1/22、2/26、3/27 下午2點開始至
+                                                    「星展Card+信用卡數位服務」登錄【SHOPLINE】活動，
+                                                    活動詳情請參閱星展銀行官網公告
+                                                </p>
+                                                `,
                                     },
                                 },
                             },
                         },
                     },
-                    // 其他國家 (US, JP...) 如有需要可在此擴充
+                    // 其他國家 (US, JP...)
                 };
 
                 const countrySelect = document.getElementById("deliveryCountry");
@@ -589,6 +585,54 @@
                         showCouponLink.style.display = "none";
                     });
                 });
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    // 假設你的送貨方式、付款方式分別在下拉選單中
+                    // 並且這些選單有 id 為 "deliveryMethod" 與 "paymentMethod"
+                    document.getElementById("goToCheckout").addEventListener("click", function () {
+                        // 取得下拉選單的選取值
+                        const shippingMethod = document.getElementById("deliveryMethod").value;
+                        const paymentMethod = document.getElementById("paymentMethod").value;
+
+                        // 組合成 URL query string (記得 encodeURIComponent)
+                        const url =
+                            "/checkout?shippingMethod=" +
+                            encodeURIComponent(shippingMethod) +
+                            "&paymentMethod=" +
+                            encodeURIComponent(paymentMethod);
+                        window.location.href = url;
+                    });
+                });
+
+                var sessionShippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
+                var sessionPaymentMethod = /*[[${paymentMethod}]]*/ "711-cod-only";
+
+                document.addEventListener("DOMContentLoaded", () => {
+                    initCountryOptions();
+                    onCountryChange();
+
+                    // 如果 Session 中有預設的送貨方式，就設定
+                    if (sessionShippingMethod) {
+                        // 設定送貨方式下拉選單的值，然後觸發 onMethodChange() 更新付款方式
+                        methodSelect.value = sessionShippingMethod;
+                        onMethodChange();
+                    }
+                    // 設定付款方式下拉選單的值
+                    if (sessionPaymentMethod) {
+                        paymentSelect.value = sessionPaymentMethod;
+                        onPaymentChange();
+                    }
+
+                    // 顯示優惠代碼區塊的事件...
+                    const showCouponLink = document.getElementById("showCouponLink");
+                    const couponForm = document.getElementById("couponForm");
+                    showCouponLink.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        couponForm.style.display = "block";
+                        showCouponLink.style.display = "none";
+                    });
+                });
+
                 /*]]>*/
             </script>
         </div>

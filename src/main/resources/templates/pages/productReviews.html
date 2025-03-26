@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+
+<head>
+  <meta charset="UTF-8">
+  <title>產品評論</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>產品評論</h1>
+
+    <div>
+      <table id="reviewsTable">
+        <thead>
+          <tr>
+            <th>使用者名稱</th>
+            <th>使用者照片</th>
+            <th>評分</th>
+            <th>評論內容</th>
+            <th>評論照片</th>
+            <th>更新時間</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="review : ${reviews.content}">
+            <td th:text="${review.users.username}"></td>
+            <td>
+<!--               <img th:if="${review.users.userPhoto}" th:src="${review.users.userPhoto}" alt="User Photo" style="width:50px;"/> -->
+            </td>
+            <td th:text="${review.rating}"></td>
+            <td th:text="${review.comment}"></td>
+            <td>
+              <img th:if="${review.photo}" th:src="@{${review.photo}}" alt="Review Photo" style="width:50px;"/>
+            </td>
+            <td th:text="${review.updatedAt.toString()}" class="updated-at"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button id="loadMoreBtn">載入更多</button>
+  </div>
+
+  <script>
+  let currentPage = 0; // 當前頁碼
+  const productId = 1; // 替換為你想查詢的產品 ID
+  const pageSize = 3; // 每頁顯示的評論數量
+
+//   document.getElementById('loadMoreBtn').addEventListener('click', () => {
+//     loadReviews(currentPage);
+//   });
+
+//   function loadReviews(page) {
+//     axios.get(`/reviews/api/reviews/product/${productId}?page=${page}&size=${pageSize}`)
+//       .then(response => {
+//         htmlMaker(response.data);
+//         currentPage++; // 增加頁碼
+//       })
+//       .catch(error => console.log(error));
+//   }
+
+//   function htmlMaker(data) {
+//     let reviewsData = '';
+//     data.content.forEach(review => {
+//       reviewsData += '<tr>';
+//       reviewsData += `<td>${review.users.username}</td>`;
+//       reviewsData += `<td>${review.users.userPhoto ? `<img src="${review.users.userPhoto}" alt="User Photo" style="width:50px;"/>` : ''}</td>`;
+//       reviewsData += `<td>${review.rating}</td>`;
+//       reviewsData += `<td>${review.comment}</td>`;
+//       reviewsData += `<td>${review.photo ? `<img src="${URL.createObjectURL(new Blob([review.photo]))}" alt="Review Photo" style="width:50px;"/>` : ''}</td>`;
+//       reviewsData += `<td>${new Date(review.updatedAt).toLocaleDateString()}</td>`;
+//       reviewsData += '</tr>';
+//     });
+
+//     document.querySelector('#reviewsTable tbody').innerHTML += reviewsData;
+//   }
+
+// document.querySelectorAll('.updated-at').forEach(cell => {
+// 	    const dateTime = new Date(cell.innerText);
+// 	    const formattedDate = dateTime.toISOString().slice(0, 16).replace('T', ' ');
+// 	    cell.innerText = formattedDate;
+// 	});
+
+  </script>
+
+</body>
+
+</html>

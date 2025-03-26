@@ -7,6 +7,7 @@ import com.eeit1475th.eshop.cart.entity.Orders;
 import com.eeit1475th.eshop.cart.entity.Payments;
 import com.eeit1475th.eshop.cart.entity.ShoppingCart;
 import com.eeit1475th.eshop.review.entity.Reviews;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -77,6 +78,7 @@ public class Users {
     
     @OneToMany(mappedBy = "users", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference(value = "user-reviews")
+    @JsonIgnore
     private List<Reviews> userReviews;
 	
 }
