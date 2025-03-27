@@ -1,6 +1,8 @@
 package com.eeit1475th.eshop.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -8,16 +10,24 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.data.domain.Sort.Direction;
 
 import com.eeit1475th.eshop.review.dto.ReviewsDto;
+import com.eeit1475th.eshop.review.entity.Reviews;
 import com.eeit1475th.eshop.review.repository.ReviewsRepository;
 import com.eeit1475th.eshop.review.service.ReviewsService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import lombok.RequiredArgsConstructor;
 
@@ -75,9 +85,71 @@ public class ReviewController {
             productId, 
             rating, 
             pageable
-        );
-        
-        
+        );        
         return ResponseEntity.ok(reviews);
     }
+    
+    @GetMapping("/createreviews/{productId}")
+    public String createReviews(@PathVariable Integer productId, Model m) {
+    	logger.info("Attempting to load template: pages/creatreviews");
+        m.addAttribute("productId", productId);
+        return "/pages/creatreviews";
+    }
+    
+    @PostMapping("/create")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> createReview(
+            @RequestBody Reviews review,
+            @RequestHeader("Authorization") String token) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Reviews createdReview = reviewsService.createReview(review, token);
+            response.put("success", true);
+            response.put("review", createdReview);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    @PutMapping("/update/{reviewId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateReview(
+            @PathVariable Integer reviewId,
+            @RequestBody Reviews reviewUpdate,
+            @RequestHeader("Authorization") String token) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Reviews updatedReview = reviewsService.updateReview(reviewId, reviewUpdate, token);
+            response.put("success", true);
+            response.put("review", updatedReview);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @DeleteMapping("/delete/{reviewId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> deleteReview(
+            @PathVariable Integer reviewId,
+            @RequestHeader("Authorization") String token) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            reviewsService.deleteReview(reviewId, token);
+            response.put("success", true);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    private static final Logger logger = LoggerFactory.getLogger(ReviewController.class);
+
 }

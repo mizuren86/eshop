@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/base}">
+<head>
+  <meta charset="utf-8">
+  <title>Create Reviews</title>
+</head>
+<body>
+  <!-- 將所有內容放在 layout:fragment 內 -->
+  <div layout:fragment="content">
+    <!-- Single Page Header Start -->
+    <div class="container-fluid page-header py-5">
+      <h1 class="text-center text-white display-6">Contact</h1>
+      <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a th:href="@{/index}">Home</a></li>
+        <li class="breadcrumb-item"><a th:href="@{/pages}">Pages</a></li>
+        <li class="breadcrumb-item active text-white">Create Reviews</li>
+      </ol>
+    </div>
+
+    <!-- 新增/編輯評論的表單 -->
+    <div class="container my-5"> <!-- 添加容器確保內容有適當間距 -->
+      <form id="reviewForm" th:action="@{/reviews/create}" method="post">
+        <input type="hidden" name="products.productId" th:value="${productId}">
+        
+        <!-- 下拉式選單限制 1-5 -->
+        <div class="mb-3">
+            <label class="form-label">評分</label>
+            <select name="rating" class="form-select" required 
+                    id="ratingSelect" onchange="validateRating()">
+                <option value="">請選擇評分</option>
+                <option th:each="i : ${#numbers.sequence(1, 5)}" 
+                        th:value="${i}"
+                        th:text="${i} + '星'"></option>
+            </select>
+            <small id="ratingHelp" class="text-danger d-none">請選擇1-5星評分</small>
+        </div>
+        
+        <!-- 文字區塊限制 1000 字 -->
+        <div class="mb-3">
+            <label class="form-label">評論內容</label>
+            <textarea name="comment" class="form-control" 
+                      id="commentInput" maxlength="1000"
+                      oninput="updateCharCounter()"></textarea>
+            <div class="text-end">
+                <span id="charCounter">0/1000</span>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">提交評論</button>
+      </form>
+    </div>
+
+    <!-- 錯誤彈窗 -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">錯誤</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+       
+    <script th:inline="javascript">
+    function showErrorModal(message) {
+        const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+        document.getElementById('errorMessage').innerText = message;
+        modal.show();
+    }
+
+    
+    
+ // 處理圖片上傳轉換為 byte[]
+    document.getElementById('reviewForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const reviewData = {
+            products: { productId: formData.get('products.productId') },
+            rating: formData.get('rating'),
+            comment: formData.get('comment')
+        };
+        
+        const photoFile = formData.get('photoFile');
+        if (photoFile.size > 0) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const arrayBuffer = event.target.result;
+                reviewData.photo = Array.from(new Uint8Array(arrayBuffer));
+                submitReview(reviewData);
+            };
+            reader.readAsArrayBuffer(photoFile);
+        } else {
+            submitReview(reviewData);
+        }
+    });
+
+    function submitReview(reviewData) {
+    	// 提交表單時
+        fetch('/reviews/create', {
+            method: 'POST',
+            headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+            body: JSON.stringify(reviewData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 成功處理
+            } else {
+                showErrorModal(data.message);
+            }
+        });
+    }
+    
+ // 字數計數器
+    function updateCharCounter() {
+        const textarea = document.getElementById('commentInput');
+        const counter = document.getElementById('charCounter');
+        const currentLength = textarea.value.length;
+        counter.textContent = `${currentLength}/1000`;
+        
+        // 可選：超過限制時變色
+        if (currentLength > 1000) {
+            counter.classList.add('text-danger');
+        } else {
+            counter.classList.remove('text-danger');
+        }
+    }
+
+    // 評分驗證
+    function validateRating() {
+        const select = document.getElementById('ratingSelect');
+        const helpText = document.getElementById('ratingHelp');
+        const value = parseInt(select.value);
+        
+        if (isNaN(value)) {
+            helpText.classList.remove('d-none');
+            return false;
+        }
+        
+        if (value < 1 || value > 5) {
+            helpText.classList.remove('d-none');
+            return false;
+        }
+        
+        helpText.classList.add('d-none');
+        return true;
+    }
+
+    // 表單提交攔截
+    document.getElementById('reviewForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // 驗證評分
+        if (!validateRating()) {
+            showErrorModal('請選擇有效的評分(1-5星)');
+            return;
+        }
+        
+        // 驗證評論長度
+        const comment = document.getElementById('commentInput').value;
+        if (comment.length > 1000) {
+            showErrorModal('評論內容不能超過1000字元');
+            return;
+        }
+        
+        // 組裝資料
+        const formData = {
+            products: { productId: this.elements['products.productId'].value },
+            rating: parseInt(this.elements['rating'].value),
+            comment: comment
+        };
+        
+        // 原有提交邏輯
+        fetch('/reviews/create', {
+            method: 'POST',
+            headers: { 
+                'Authorization': 'Bearer ' + getToken(), // 假設有取得token的方法
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload(); // 成功後刷新頁面
+            } else {
+                showErrorModal(data.message);
+            }
+        });
+    });
+
+    </script>
+</body>
+</html>
+    
