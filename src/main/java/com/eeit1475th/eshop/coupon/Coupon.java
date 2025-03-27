@@ -16,9 +16,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name="coupon")
+@Table(name = "coupon")
 public class Coupon {
-	
+
     @Id
     @Column(name = "coupon_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,5 +36,4 @@ public class Coupon {
     @Column(name = "end_date", nullable = false)
     private LocalDateTime endDate;
 
-	
 }

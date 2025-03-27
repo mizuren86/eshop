@@ -52,21 +52,6 @@ public class EmailVerificationService {
         emailService.sendVerificationEmail(email, verificationCode);
     }
 
-<<<<<<< HEAD
-    public boolean verifyToken(String email, String code) {
-        // 獲取該郵箱的所有未驗證且未過期的記錄
-        List<EmailVerification> verifications = emailVerificationRepository
-                .findByEmailAndIsVerifiedFalseAndExpiresAtAfterOrderByCreatedAtDesc(
-                        email, LocalDateTime.now());
-
-        if (!verifications.isEmpty()) {
-            EmailVerification verification = verifications.get(0); // 獲取最新的記錄
-            if (verification.getToken().equals(code)) {
-                verification.setVerified(true);
-                emailVerificationRepository.save(verification);
-                return true;
-            }
-=======
     @Transactional
     public boolean verifyToken(String email, String token) {
         EmailVerification verification = emailVerificationRepository.findByEmail(email)
@@ -80,7 +65,6 @@ public class EmailVerificationService {
             verification.setVerified(true);
             emailVerificationRepository.save(verification);
             return true;
->>>>>>> f447786f764262bb7788a6076d7ac2e6536f6cac
         }
 
         return false;

@@ -89,24 +89,6 @@ public class UserRestController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
         try {
-<<<<<<< HEAD
-            // 執行登入
-            String token = usersService.login(loginRequest.getEmail(), loginRequest.getPassword());
-
-            // 獲取用戶信息
-            Users user = usersService.getUserByEmail(loginRequest.getEmail());
-
-            // 轉換為DTO
-            UsersDTO userDTO = new UsersDTO();
-            BeanUtils.copyProperties(user, userDTO);
-            userDTO.setPassword(null); // 不返回密碼
-
-            // 返回成功響應
-            return ResponseEntity.ok(new ApiResponse(true, "登入成功", Map.of(
-                    "token", token,
-                    "user", userDTO,
-                    "redirectUrl", "/")));
-=======
             String token = usersService.login(request.getUsername(), request.getPassword());
             Users user = usersService.findByUsername(request.getUsername());
 
@@ -118,7 +100,6 @@ public class UserRestController {
             responseData.put("user", user);
 
             return ResponseEntity.ok(new ApiResponse(true, "登入成功", responseData));
->>>>>>> f447786f764262bb7788a6076d7ac2e6536f6cac
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
         }

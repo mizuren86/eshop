@@ -114,7 +114,6 @@
 
           // 保存用戶信息到 sessionStorage
           if (data.data && data.data.user) {
-<<<<<<< HEAD
             const userData = data.data.user;
             console.log('準備保存用戶信息到 sessionStorage');
 
@@ -131,14 +130,6 @@
             // 觸發 storage 事件以更新導覽列
             console.log('觸發 storage 事件更新導覽列');
             window.dispatchEvent(new Event('storage'));
-=======
-            sessionStorage.setItem('user', JSON.stringify(data.data.user));
-          }
-
-          // 保存 token 到 localStorage
-          if (data.data && data.data.token) {
-            localStorage.setItem('token', 'Bearer ' + data.data.token);
->>>>>>> f447786f764262bb7788a6076d7ac2e6536f6cac
           }
           console.log('=== 登入處理完成 ===\n');
 
@@ -146,11 +137,7 @@
           const redirectUrl = data.data && data.data.redirectUrl ? window.location.origin + data.data.redirectUrl : homeUrl;
           console.log('準備跳轉到:', redirectUrl);
           setTimeout(() => {
-<<<<<<< HEAD
             window.location.replace(redirectUrl);
-=======
-            window.location.replace(data.data.redirectUrl || homeUrl);
->>>>>>> f447786f764262bb7788a6076d7ac2e6536f6cac
           }, 1500);
 
         } catch (error) {

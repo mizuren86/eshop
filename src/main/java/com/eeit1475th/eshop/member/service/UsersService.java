@@ -97,8 +97,8 @@ public class UsersService {
             throw new RuntimeException("密碼錯誤");
         }
 
-        // TODO: 生成 JWT token
-        return "dummy-token";
+        // 生成 JWT token
+        return jwtService.generateToken(user.getUsername(), user.getUserId());
     }
 
     // 更新用戶資料
@@ -187,12 +187,10 @@ public class UsersService {
 
     public void updateUserVip(Integer memberId, UserVipDTO vipDTO1) {
         // TODO Auto-generated method stub
-
     }
 
     public void addVipHistory(Integer memberId, UserVipDTO historyDTO1) {
         // TODO Auto-generated method stub
-
     }
 
     // 根據郵箱查詢
@@ -259,19 +257,6 @@ public class UsersService {
         return results;
     }
 
-<<<<<<< HEAD
-=======
-    public String login(String username, String password) {
-        // 验证用户名和密码
-        Users user = validateLogin(username, password);
-
-        // 生成JWT token
-        String token = jwtService.generateToken(user.getUsername(), user.getUserId());
-
-        return token;
-    }
-
->>>>>>> f447786f764262bb7788a6076d7ac2e6536f6cac
     public Users getUserByToken(String token) {
         // 从 token 中获取用户 ID
         Integer userId = jwtService.extractUserId(token);

@@ -36,23 +36,11 @@ public class ProductController {
 		}
 		model.addAttribute("products", products);
 
-		return "/pages/shop"; 
+		return "/pages/shop";
 	}
 
 	// Shop Detail 頁面
 	@GetMapping("/shop-detail")
-<<<<<<< HEAD
-	public String shopDetail(@RequestParam("productId") Integer productId, Model model) {
-	    Products product = productService.getProductById(productId);
-	    if (product == null) {
-	        return "redirect:/shop"; // 如果找不到商品，回到商店頁面
-	    }
-
-	    model.addAttribute("product", product);
-	    model.addAttribute("pageTitle", "Shop Detail");
-
-	    return "/pages/shop-detail";
-=======
 	public String shopDetail(@RequestParam("id") Integer productId, Model model) {
 		Products product = productService.getProductById(productId);
 		if (product == null) {
@@ -61,9 +49,7 @@ public class ProductController {
 		model.addAttribute("product", product);
 		model.addAttribute("pageTitle", "Shop Detail");
 		return "/pages/shop-detail";
->>>>>>> f447786f764262bb7788a6076d7ac2e6536f6cac
 	}
-
 
 	// 商品搜尋 API，回傳 JSON
 	@GetMapping("/api/products/search")
