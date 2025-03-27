@@ -25,8 +25,8 @@
 
             <form id="loginForm">
               <div class="mb-3">
-                <label for="username" class="form-label">用戶名</label>
-                <input type="text" class="form-control" id="username" name="username" required autocomplete="username">
+                <label for="email" class="form-label">電子郵件</label>
+                <input type="email" class="form-control" id="email" name="email" required autocomplete="email">
               </div>
 
               <div class="mb-3">
@@ -81,7 +81,7 @@
         try {
           // 準備登入數據
           const loginData = {
-            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
             password: document.getElementById('password').value
           };
 
@@ -107,17 +107,38 @@
           }
 
           // 登入成功
-          console.log('登入成功:', data);
-          loadingDiv.textContent = '登入成功！正在跳轉...';
+          console.log('=== 登入成功 ===');
+          console.log('接收到的數據:', data);
+          console.log('用戶信息:', data.data.user);
+          console.log('Token:', data.data.token);
+          loadingDiv.textContent = `歡迎回來，${data.data.user.username}！正在跳轉...`;
 
           // 保存用戶信息到 sessionStorage
-          if (data.user) {
-            sessionStorage.setItem('user', JSON.stringify(data.user));
+          if (data.data && data.data.user) {
+            const userData = data.data.user;
+            console.log('準備保存用戶信息到 sessionStorage');
+
+            sessionStorage.setItem('user', JSON.stringify(userData));
+            sessionStorage.setItem('token', data.data.token);
+            sessionStorage.setItem('welcomeMessage', `歡迎回來，${userData.username}！`);
+
+            console.log('用戶信息已保存:', {
+              user: userData,
+              token: data.data.token ? '已保存' : '未保存',
+              welcomeMessage: `歡迎回來，${userData.username}！`
+            });
+
+            // 觸發 storage 事件以更新導覽列
+            console.log('觸發 storage 事件更新導覽列');
+            window.dispatchEvent(new Event('storage'));
           }
+          console.log('=== 登入處理完成 ===\n');
 
           // 延遲跳轉
+          const redirectUrl = data.data && data.data.redirectUrl ? window.location.origin + data.data.redirectUrl : homeUrl;
+          console.log('準備跳轉到:', redirectUrl);
           setTimeout(() => {
-            window.location.replace(data.redirectUrl ? window.location.origin + data.redirectUrl : homeUrl);
+            window.location.replace(redirectUrl);
           }, 1500);
 
         } catch (error) {

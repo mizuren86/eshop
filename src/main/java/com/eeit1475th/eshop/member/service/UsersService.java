@@ -83,6 +83,21 @@ public class UsersService {
         return user;
     }
 
+    // 登入
+    public String login(String email, String password) {
+        // 查找用戶
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("用戶不存在"));
+
+        // 驗證密碼
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("密碼錯誤");
+        }
+
+        // TODO: 生成 JWT token
+        return "dummy-token";
+    }
+
     // 更新用戶資料
     public Users updateUser(Integer id, UsersDTO userDTO) {
         Users existingUser = userRepository.findById(id)
@@ -100,20 +115,12 @@ public class UsersService {
             throw new RuntimeException("郵箱已被使用");
         }
 
-        // 如果要更新密碼，需要加密
-        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        }
-
-        // 更新其他資料
-        if (userDTO.getEmail() != null)
-            existingUser.setEmail(userDTO.getEmail());
-        if (userDTO.getFullName() != null)
-            existingUser.setFullName(userDTO.getFullName());
-        if (userDTO.getPhone() != null)
-            existingUser.setPhone(userDTO.getPhone());
-        if (userDTO.getAddress() != null)
-            existingUser.setAddress(userDTO.getAddress());
+        // 更新用戶資料
+        existingUser.setUsername(userDTO.getUsername());
+        existingUser.setEmail(userDTO.getEmail());
+        existingUser.setFullName(userDTO.getFullName());
+        existingUser.setPhone(userDTO.getPhone());
+        existingUser.setAddress(userDTO.getAddress());
 
         return userRepository.save(existingUser);
     }
@@ -186,8 +193,9 @@ public class UsersService {
     }
 
     // 根據郵箱查詢
-    public Optional<Users> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Users getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("用戶不存在"));
     }
 
     // 重置用戶密碼
@@ -246,25 +254,6 @@ public class UsersService {
         }
 
         return results;
-    }
-
-    public String login(String email, String password) {
-        // 查找用戶
-        Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("用戶不存在"));
-
-        // 驗證密碼
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("密碼錯誤");
-        }
-
-        // 檢查郵箱是否已驗證
-        if (!emailVerificationService.isEmailVerified(email)) {
-            throw new RuntimeException("請先驗證您的郵箱");
-        }
-
-        // TODO: 生成 JWT token
-        return "dummy-token";
     }
 
     public Users getUserByToken(String token) {

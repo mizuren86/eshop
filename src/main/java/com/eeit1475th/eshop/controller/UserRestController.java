@@ -7,6 +7,7 @@ import com.eeit1475th.eshop.member.dto.UsersDTO;
 import com.eeit1475th.eshop.member.entity.Users;
 import com.eeit1475th.eshop.member.service.EmailVerificationService;
 import com.eeit1475th.eshop.member.service.UsersService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,23 @@ public class UserRestController {
         try {
             emailVerificationService.saveVerificationToken(email);
             return ResponseEntity.ok(new ApiResponse(true, "驗證碼已發送到您的郵箱"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
+        }
+    }
+
+    @PostMapping("/register-with-verification")
+    public ResponseEntity<?> registerWithVerification(@RequestBody UsersDTO userDTO) {
+        try {
+            // 驗證驗證碼
+            boolean verified = emailVerificationService.verifyToken(userDTO.getEmail(), userDTO.getVerificationCode());
+            if (!verified) {
+                return ResponseEntity.badRequest().body(new ApiResponse(false, "驗證碼無效或已過期"));
+            }
+
+            // 創建用戶
+            Users user = usersService.createUser(userDTO);
+            return ResponseEntity.ok(new ApiResponse(true, "註冊成功", "/login"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
         }
@@ -65,14 +83,22 @@ public class UserRestController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            // 檢查郵箱是否已驗證
-            if (!emailVerificationService.isEmailVerified(loginRequest.getEmail())) {
-                return ResponseEntity.badRequest().body(new ApiResponse(false, "請先驗證您的郵箱"));
-            }
-
             // 執行登入
             String token = usersService.login(loginRequest.getEmail(), loginRequest.getPassword());
-            return ResponseEntity.ok(new ApiResponse(true, "登入成功", token));
+
+            // 獲取用戶信息
+            Users user = usersService.getUserByEmail(loginRequest.getEmail());
+
+            // 轉換為DTO
+            UsersDTO userDTO = new UsersDTO();
+            BeanUtils.copyProperties(user, userDTO);
+            userDTO.setPassword(null); // 不返回密碼
+
+            // 返回成功響應
+            return ResponseEntity.ok(new ApiResponse(true, "登入成功", Map.of(
+                    "token", token,
+                    "user", userDTO,
+                    "redirectUrl", "/")));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
         }
@@ -99,7 +125,7 @@ public class UserRestController {
         }
     }
 
-    @PutMapping("/password")
+    @PutMapping("/profile/password")
     public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String token,
             @RequestBody PasswordUpdateRequest request) {
         try {

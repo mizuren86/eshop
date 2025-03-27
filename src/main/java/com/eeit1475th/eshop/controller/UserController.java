@@ -11,14 +11,14 @@ public class UserController {
     @GetMapping("/login")
     public String loginPage(Model model) {
         model.addAttribute("pageTitle", "Login");
-        return "/pages/login";  // 對應 templates/pages/login.html
+        return "/pages/login"; // 對應 templates/pages/login.html
     }
 
     // 顯示註冊頁面
     @GetMapping("/register")
     public String registerPage(Model model) {
         model.addAttribute("pageTitle", "Register");
-        return "/pages/register";  // 對應 templates/pages/register.html
+        return "/pages/register"; // 對應 templates/pages/register.html
     }
 
     // 顯示用戶個人資料頁面
@@ -26,6 +26,12 @@ public class UserController {
     public String profilePage(Model model) {
         model.addAttribute("pageTitle", "Profile");
         // 依需求從 session 或 service 中取得用戶資料，加入 model
-        return "/pages/profile";  // 對應 templates/pages/profile.html
+        return "/pages/profile"; // 對應 templates/pages/profile.html
+    }
+
+    @GetMapping("/logout")
+    public String logoutPage(Model model) {
+        model.addAttribute("pageTitle", "登出");
+        return "pages/logout.html";
     }
 }

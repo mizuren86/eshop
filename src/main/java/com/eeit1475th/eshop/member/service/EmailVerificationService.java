@@ -5,6 +5,7 @@ import com.eeit1475th.eshop.member.repository.EmailVerificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -37,26 +38,25 @@ public class EmailVerificationService {
     }
 
     public boolean verifyToken(String email, String code) {
-        EmailVerification verification = emailVerificationRepository.findByEmail(email)
-                .orElse(null);
+        // 獲取該郵箱的所有未驗證且未過期的記錄
+        List<EmailVerification> verifications = emailVerificationRepository
+                .findByEmailAndIsVerifiedFalseAndExpiresAtAfterOrderByCreatedAtDesc(
+                        email, LocalDateTime.now());
 
-        if (verification != null &&
-                !verification.isVerified() &&
-                verification.getExpiresAt().isAfter(LocalDateTime.now()) &&
-                verification.getToken().equals(code)) {
-
-            verification.setVerified(true);
-            emailVerificationRepository.save(verification);
-            return true;
+        if (!verifications.isEmpty()) {
+            EmailVerification verification = verifications.get(0); // 獲取最新的記錄
+            if (verification.getToken().equals(code)) {
+                verification.setVerified(true);
+                emailVerificationRepository.save(verification);
+                return true;
+            }
         }
 
         return false;
     }
 
     public boolean isEmailVerified(String email) {
-        return emailVerificationRepository.findByEmail(email)
-                .map(EmailVerification::isVerified)
-                .orElse(false);
+        return emailVerificationRepository.findByEmailAndIsVerifiedTrue(email).isPresent();
     }
 
     private String generateVerificationCode() {

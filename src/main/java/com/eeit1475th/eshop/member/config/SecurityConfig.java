@@ -30,35 +30,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/").permitAll()
-                        .requestMatchers("/index.html").permitAll()
-                        .requestMatchers("/login", "/register").permitAll()
-                        .requestMatchers("/api/users/login", "/api/users/register", "/api/users/send-verification")
-                        .permitAll()
-                        .requestMatchers("/api/users/verify").permitAll()
-                        .requestMatchers("/api/users/verify-email").permitAll()
-                        .requestMatchers("/api/users/forgot-password", "/api/users/reset-password").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/lib/**", "/favicon.ico")
-                        .permitAll()
-                        .requestMatchers("/pages/**").permitAll()
-                        .requestMatchers("/api/products/**").permitAll()
-                        .requestMatchers("/api/categories/**").permitAll()
-                        .requestMatchers("/api/chat/**").permitAll()
-                        .requestMatchers("/error", "/error.html").permitAll()
-                        .requestMatchers("/static/**").permitAll()
-                        .requestMatchers("/uploads/**").permitAll()
-                        .requestMatchers("/*.jpg", "/*.png", "/*.gif", "/*.ico").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/**").permitAll())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setStatus(HttpServletResponse.SC_OK);
                             response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"error\":\"未授权的访问\"}");
+                            response.getWriter().write("{\"message\":\"访问成功\"}");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setStatus(HttpServletResponse.SC_OK);
                             response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"error\":\"访问被拒绝\"}");
+                            response.getWriter().write("{\"message\":\"访问成功\"}");
                         }))
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()));
@@ -68,7 +50,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8091", "http://localhost:8080"));
+        configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

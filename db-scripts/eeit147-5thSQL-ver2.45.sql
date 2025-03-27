@@ -14,17 +14,31 @@ CREATE DATABASE shopping_website;
 
 USE shopping_website;
 
+-- 删除已存在的约束
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UQ__users__email]') AND type in (N'UQ'))
+BEGIN
+    ALTER TABLE [dbo].[users] DROP CONSTRAINT [UQ__users__email]
+END
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UQ__users__username]') AND type in (N'UQ'))
+BEGIN
+    ALTER TABLE [dbo].[users] DROP CONSTRAINT [UQ__users__username]
+END
 
 CREATE TABLE users(
     user_id INT PRIMARY KEY IDENTITY(1, 1),
-    username NVARCHAR(50) UNIQUE NOT NULL,
+    username VARCHAR(255) NOT NULL,
     [password] VARCHAR(255) NOT NULL,
-    email NVARCHAR(100) UNIQUE NOT NULL,
-    full_name NVARCHAR(50),
-    phone VARCHAR(20),
-    user_photo NVARCHAR(255),
-    [address] NVARCHAR(255)
+    email VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255),
+    phone VARCHAR(255),
+    user_photo VARCHAR(255),
+    [address] VARCHAR(255)
 );
+
+-- 添加唯一约束
+ALTER TABLE users ADD CONSTRAINT UQ__users__username UNIQUE (username);
+ALTER TABLE users ADD CONSTRAINT UQ__users__email UNIQUE (email);
 
 CREATE TABLE product_category(
     category_id INT PRIMARY KEY IDENTITY(1, 1),
@@ -297,3 +311,80 @@ INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [
 INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'NEWYEAR2025', 10000, 8000, CAST(N'2025-01-01T23:59:59.000' AS DateTime))
 INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'SUMMER20', 1200, 400, CAST(N'2025-08-15T23:59:59.000' AS DateTime))
 INSERT INTO [dbo].[coupon] ([coupon_code], [target_amount], [discount_amount], [end_date]) VALUES (N'FREESHIP', 2000, 500, CAST(N'2025-07-01T23:59:59.000' AS DateTime))
+
+-- 新增邮箱验证表
+CREATE TABLE email_verification(
+    id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    created_at DATETIME2(6),
+    email NVARCHAR(100) NOT NULL,
+    expires_at DATETIME2(6) NOT NULL,
+    is_verified BIT,
+    token NVARCHAR(255) NOT NULL
+);
+
+-- 新增密码重置令牌表
+CREATE TABLE password_reset_tokens(
+    id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    expiry_date DATETIME2(6),
+    token NVARCHAR(255),
+    used BIT NOT NULL,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- 新增角色表
+CREATE TABLE roles(
+    id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    description NVARCHAR(255),
+    name NVARCHAR(255) NOT NULL UNIQUE
+);
+
+-- 新增角色权限表
+CREATE TABLE role_permissions(
+    role_id INT NOT NULL,
+    permission NVARCHAR(255),
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+-- 新增用户角色关联表
+CREATE TABLE user_roles(
+    user_id INT NOT NULL,
+    role_id INT NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+-- 新增用户活动记录表
+CREATE TABLE user_activity(
+    id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    activity_time DATETIME2(6) NOT NULL,
+    activity_type NVARCHAR(50) NOT NULL,
+    description NVARCHAR(255) NOT NULL,
+    device_info NVARCHAR(255),
+    ip_address NVARCHAR(64),
+    status NVARCHAR(20),
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- 新增用户操作日志表
+CREATE TABLE user_operation_log(
+    id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    create_time DATETIME2(6) NOT NULL,
+    description NVARCHAR(255),
+    execution_time BIGINT,
+    ip NVARCHAR(64) NOT NULL,
+    method NVARCHAR(255) NOT NULL,
+    operation NVARCHAR(100) NOT NULL,
+    params NVARCHAR(MAX) NOT NULL,
+    username NVARCHAR(50) NOT NULL
+);
+
+-- 创建索引
+CREATE UNIQUE NONCLUSTERED INDEX [UKla2ts67g4oh2sreayswhox1i6] ON [dbo].[password_reset_tokens]([user_id]);
+CREATE NONCLUSTERED INDEX [idx_activity_time] ON [dbo].[user_activity]([activity_time]);
+CREATE NONCLUSTERED INDEX [idx_activity_type] ON [dbo].[user_activity]([activity_type]);
+CREATE NONCLUSTERED INDEX [idx_user_id] ON [dbo].[user_activity]([user_id]);
+CREATE NONCLUSTERED INDEX [idx_create_time] ON [dbo].[user_operation_log]([create_time]);
+CREATE NONCLUSTERED INDEX [idx_username] ON [dbo].[user_operation_log]([username]);
