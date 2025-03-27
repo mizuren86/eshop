@@ -22,6 +22,16 @@ spring:
     suffix: .html
     cache: false
 
+  # Session 設定
+  session:
+    store-dir: ./session-store
+    timeout: 30m
+    cookie:
+      http-only: true
+      secure: false
+      max-age: 1800
+      path: /
+
   # 郵件配置
   mail:
     host: smtp.gmail.com
@@ -51,7 +61,7 @@ spring:
 
 # JWT 配置（24小時 = 86400000毫秒）
 jwt:
-  secret: your-secret-key-here-make-it-long-and-secure
+  secret: VG9rZW5TZWNyZXRLZXlGb3JTaG9wcGluZ1dlYnNpdGUxMjM0NTY3ODkw
   expiration: 86400000
 
 # Rasa API 配置

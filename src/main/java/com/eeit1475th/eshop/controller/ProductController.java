@@ -41,6 +41,7 @@ public class ProductController {
 
 	// Shop Detail 頁面
 	@GetMapping("/shop-detail")
+<<<<<<< HEAD
 	public String shopDetail(@RequestParam("productId") Integer productId, Model model) {
 	    Products product = productService.getProductById(productId);
 	    if (product == null) {
@@ -51,6 +52,16 @@ public class ProductController {
 	    model.addAttribute("pageTitle", "Shop Detail");
 
 	    return "/pages/shop-detail";
+=======
+	public String shopDetail(@RequestParam("id") Integer productId, Model model) {
+		Products product = productService.getProductById(productId);
+		if (product == null) {
+			return "redirect:/shop";
+		}
+		model.addAttribute("product", product);
+		model.addAttribute("pageTitle", "Shop Detail");
+		return "/pages/shop-detail";
+>>>>>>> f447786f764262bb7788a6076d7ac2e6536f6cac
 	}
 
 
@@ -60,6 +71,5 @@ public class ProductController {
 	public List<Products> searchProducts(@RequestParam("keyword") String keyword) {
 		return productService.searchProducts(keyword);
 	}
-	
-	
+
 }
