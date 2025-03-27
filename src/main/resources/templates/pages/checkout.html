@@ -22,9 +22,51 @@
 			color: #555;
 		}
 
+
+		/* 下拉選單移除預設箭頭 */
+		.select-wrapper select {
+			-webkit-appearance: none;
+			-moz-appearance: none;
+			appearance: none;
+		}
+
+		/* position-relative 供箭頭絕對定位 */
+		.select-wrapper {
+			position: relative;
+			display: inline-block;
+			width: 100%;
+		}
+
+		/* 箭頭位置設定 */
+		.select-wrapper .fa-caret-down {
+			position: absolute;
+			top: 50%;
+			right: 1rem;
+			transform: translateY(-50%);
+			pointer-events: none;
+		}
+
+		/* 讓 select 右側預留空間給箭頭 */
+		.pe-arrow {
+			padding-right: 2rem !important;
+		}
+
+		/* 針對 <select> 被 disabled 時的樣式 */
+		select:disabled {
+			background-color: #e0e0e0;
+			/* 背景顏色 */
+			color: #888;
+			/* 文字顏色 */
+			cursor: not-allowed;
+			/* 滑鼠指標顯示禁止符號 */
+			opacity: 0.8;
+			/* 文字透明度 */
+		}
+
 		/* placeholder 樣式 */
 		#customerPhone::placeholder,
-		#recipientPhone::placeholder {
+		#recipientPhone::placeholder,
+		#shippingAddress::placeholder {
 			color: lightgray;
 		}
 
@@ -114,7 +156,7 @@
 							<div class="card p-3 mb-4">
 								<h4 class="mb-3">顧客資料</h4>
 								<div class="mb-3">
-									<label for="customerName" class="form-label">顧客名稱</label>
+									<label for="customerName" class="form-label">顧客姓名</label>
 									<input type="text" class="form-control" id="customerName" name="customerName"
 										placeholder="" th:value="${users.username}" />
 								</div>
@@ -192,7 +234,7 @@
 									<div class="card p-3 mb-4">
 										<h4 class="mb-3">顧客資料</h4>
 										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客名稱</label>
+											<label for="customerName" class="form-label">顧客姓名</label>
 											<input type="text" class="form-control" id="customerName"
 												name="customerName" placeholder="" th:value="${users.username}" />
 										</div>
@@ -266,7 +308,7 @@
 									<div class="card p-3 mb-4">
 										<h4 class="mb-3">顧客資料</h4>
 										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客名稱</label>
+											<label for="customerName" class="form-label">顧客姓名</label>
 											<input type="text" class="form-control" id="customerName"
 												name="customerName" placeholder="" th:value="${users.username}" />
 										</div>
@@ -346,7 +388,7 @@
 									<div class="card p-3 mb-4">
 										<h4 class="mb-3">顧客資料</h4>
 										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客名稱</label>
+											<label for="customerName" class="form-label">顧客姓名</label>
 											<input type="text" class="form-control" id="customerName"
 												name="customerName" placeholder="" th:value="${users.username}" />
 										</div>
@@ -380,13 +422,8 @@
 											<p id="shippingFeeText" class="mb-0">運費 NT$60</p>
 										</div>
 										<p class="mb-1">
-											已選擇的送貨方式: 新竹貨運（請填寫送貨地址）<br />
+											已選擇的送貨方式: 新竹貨運<br />
 										</p>
-										<div class="mb-3">
-											<label for="shippingAddress" class="form-label">送貨地址</label>
-											<input type="text" class="form-control" id="shippingAddress"
-												name="shippingAddress" placeholder="請輸入詳細送貨地址" />
-										</div>
 										<div class="mb-3 mt-2">
 											<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
 											<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
@@ -404,7 +441,31 @@
 											<input type="text" class="form-control" id="recipientPhone"
 												name="recipientPhone" placeholder="0912 345 678" />
 										</div>
-										<button type="button" class="btn btn-outline-secondary">選擇門市</button>
+										<hr />
+										<div class="mb-3 mt-3">
+											<label class="form-label">地址</label>
+											<div class="dropdown-container"
+												style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+												<!-- 城市/縣下拉選單 -->
+												<div class="form-group select-wrapper">
+													<select id="city" class="form-control pe-arrow">
+														<!-- 動態生成城市/縣選項 -->
+													</select>
+													<i class="fa fa-caret-down position-absolute"
+														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+												</div>
+												<!-- 地區下拉選單 -->
+												<div class="form-group select-wrapper">
+													<select id="district" class="form-control pe-arrow">
+														<!-- 動態生成地區選項 -->
+													</select>
+													<i class="fa fa-caret-down position-absolute"
+														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+												</div>
+											</div>
+											<input type="text" class="form-control" id="shippingAddress"
+												name="shippingAddress" placeholder="地址" />
+										</div>
 									</div>
 									<div class="card p-3">
 										<div class="d-flex justify-content-between align-items-center mb-3">
@@ -424,7 +485,7 @@
 									<div class="card p-3 mb-4">
 										<h4 class="mb-3">顧客資料</h4>
 										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客名稱</label>
+											<label for="customerName" class="form-label">顧客姓名</label>
 											<input type="text" class="form-control" id="customerName"
 												name="customerName" placeholder="" th:value="${users.username}" />
 										</div>
@@ -458,13 +519,8 @@
 											<p id="shippingFeeText" class="mb-0">運費 NT$60</p>
 										</div>
 										<p class="mb-1">
-											已選擇的送貨方式: 新竹貨運（請填寫送貨地址）<br />
+											已選擇的送貨方式: 新竹貨運<br />
 										</p>
-										<div class="mb-3">
-											<label for="shippingAddress" class="form-label">送貨地址</label>
-											<input type="text" class="form-control" id="shippingAddress"
-												name="shippingAddress" placeholder="請輸入詳細送貨地址" />
-										</div>
 										<div class="mb-3 mt-2">
 											<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
 											<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
@@ -482,7 +538,31 @@
 											<input type="text" class="form-control" id="recipientPhone"
 												name="recipientPhone" placeholder="0912 345 678" />
 										</div>
-										<button type="button" class="btn btn-outline-secondary">選擇門市</button>
+										<hr />
+										<div class="mb-3 mt-3">
+											<label class="form-label">地址</label>
+											<div class="dropdown-container"
+												style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+												<!-- 城市/縣下拉選單 -->
+												<div class="form-group select-wrapper">
+													<select id="city" class="form-control pe-arrow">
+														<!-- 動態生成城市/縣選項 -->
+													</select>
+													<i class="fa fa-caret-down position-absolute"
+														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+												</div>
+												<!-- 地區下拉選單 -->
+												<div class="form-group select-wrapper">
+													<select id="district" class="form-control pe-arrow">
+														<!-- 動態生成地區選項 -->
+													</select>
+													<i class="fa fa-caret-down position-absolute"
+														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+												</div>
+											</div>
+											<input type="text" class="form-control" id="shippingAddress"
+												name="shippingAddress" placeholder="地址" />
+										</div>
 									</div>
 									<div class="card p-3">
 										<div class="d-flex justify-content-between align-items-center mb-3">
@@ -508,7 +588,7 @@
 									<div class="card p-3 mb-4">
 										<h4 class="mb-3">顧客資料</h4>
 										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客名稱</label>
+											<label for="customerName" class="form-label">顧客姓名</label>
 											<input type="text" class="form-control" id="customerName"
 												name="customerName" placeholder="" th:value="${users.username}" />
 										</div>
@@ -565,7 +645,31 @@
 											<input type="text" class="form-control" id="recipientPhone"
 												name="recipientPhone" placeholder="0912 345 678" />
 										</div>
-										<button type="button" class="btn btn-outline-secondary">選擇門市</button>
+										<hr />
+										<div class="mb-3 mt-3">
+											<label class="form-label">地址</label>
+											<div class="dropdown-container"
+												style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+												<!-- 城市/縣下拉選單 -->
+												<div class="form-group select-wrapper">
+													<select id="city" class="form-control pe-arrow">
+														<!-- 動態生成城市/縣選項 -->
+													</select>
+													<i class="fa fa-caret-down position-absolute"
+														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+												</div>
+												<!-- 地區下拉選單 -->
+												<div class="form-group select-wrapper">
+													<select id="district" class="form-control pe-arrow">
+														<!-- 動態生成地區選項 -->
+													</select>
+													<i class="fa fa-caret-down position-absolute"
+														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+												</div>
+											</div>
+											<input type="text" class="form-control" id="shippingAddress"
+												name="shippingAddress" placeholder="地址" />
+										</div>
 									</div>
 									<div class="card p-3">
 										<div class="d-flex justify-content-between align-items-center mb-3">
@@ -585,7 +689,7 @@
 									<div class="card p-3 mb-4">
 										<h4 class="mb-3">顧客資料</h4>
 										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客名稱</label>
+											<label for="customerName" class="form-label">顧客姓名</label>
 											<input type="text" class="form-control" id="customerName"
 												name="customerName" placeholder="" th:value="${users.username}" />
 										</div>
@@ -643,7 +747,31 @@
 											<input type="text" class="form-control" id="recipientPhone"
 												name="recipientPhone" placeholder="0912 345 678" />
 										</div>
-										<button type="button" class="btn btn-outline-secondary">選擇門市</button>
+										<hr />
+										<div class="mb-3 mt-3">
+											<label class="form-label">地址</label>
+											<div class="dropdown-container"
+												style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+												<!-- 城市/縣下拉選單 -->
+												<div class="form-group select-wrapper">
+													<select id="city" class="form-control pe-arrow">
+														<!-- 動態生成城市/縣選項 -->
+													</select>
+													<i class="fa fa-caret-down position-absolute"
+														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+												</div>
+												<!-- 地區下拉選單 -->
+												<div class="form-group select-wrapper">
+													<select id="district" class="form-control pe-arrow">
+														<!-- 動態生成地區選項 -->
+													</select>
+													<i class="fa fa-caret-down position-absolute"
+														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+												</div>
+											</div>
+											<input type="text" class="form-control" id="shippingAddress"
+												name="shippingAddress" placeholder="地址" />
+										</div>
 									</div>
 									<div class="card p-3">
 										<div class="d-flex justify-content-between align-items-center mb-3">
@@ -724,7 +852,7 @@
 
 				// 重新載入購物車資料 //
 				document.addEventListener("DOMContentLoaded", fetchCartData);
-				
+
 				function updateShippingFeeFromShippingInfo() {
 					// 讀取運費文字，例如 "運費 NT$60"
 					const feeText = document.getElementById("shippingFeeText").textContent;
@@ -776,6 +904,164 @@
 						console.error("Error fetching cart data:", error);
 					}
 				}
+
+				// 地址下拉選單 //
+				document.addEventListener("DOMContentLoaded", function () {
+					// 定義城市與地區的對應資料
+					var cityDistricts = {
+						"台北市": ["100中正區", "103大同區", "104中山區", "105松山區", "106大安區",
+							"108萬華區", "110信義區", "111士林區", "112北投區", "114內湖區",
+							"115南港區", "116文山區"],
+						"基隆市": ["200仁愛區", "201信義區", "202中正區", "203中山區", "204安樂區",
+							"205暖暖區", "206七堵區"],
+						"新北市": ["207萬里區", "208金山區", "220板橋區", "221汐止區", "222深坑區",
+							"223石碇區", "224瑞芳區", "226平溪區", "227雙溪區", "228貢寮區",
+							"231新店區", "232坪林區", "233烏來區", "234永和區", "235中和區",
+							"236土城區", "237三峽區", "238樹林區", "239鶯歌區", "241三重區",
+							"242新莊區", "243泰山區", "244林口區", "247蘆洲區", "248五股區",
+							"249八里區", "251淡水區", "252三芝區", "253石門區"],
+						"宜蘭縣": ["207萬里區", "208金山區", "220板橋區", "221汐止區", "222深坑區",
+							"207萬里區", "208金山區", "220板橋區", "221汐止區", "222深坑區",
+							"207萬里區", "208金山區"],
+						"新竹縣": ["300北區", "300東區", "300香山區"],
+						"新竹市": ["302竹北區", "303湖口鄉", "304新豐鄉", "305新埔鎮", "306關西鎮",
+							"307芎林鄉", "308寶山鄉", "310竹東鎮", "311五峰鄉", "312橫山鄉",
+							"313尖石鄉", "314北埔鄉", "315峨眉鄉"],
+						"桃園市": ["320中壢區", "324平鎮區", "325龍潭區", "326楊梅區", "327新屋區",
+							"328觀音區", "330桃園區", "333龜山區", "334八德區", "335大溪區",
+							"336復興區", "337大園區", "338蘆竹區"],
+						"苗栗縣": ["350竹南鎮", "351頭份市", "352三灣鄉", "353南庄鄉", "354獅潭鄉",
+							"356後龍鎮", "357通霄鎮", "358苑裡鎮", "360苗栗市", "361造橋鄉",
+							"362頭屋鄉", "363公館鄉", "364大湖鄉", "365泰安鄉", "366銅鑼鄉",
+							"367三義鄉", "368西湖鄉", "369卓蘭鎮"],
+						"台中市": ["400中區", "401東區", "402南區", "403西區", "404北區",
+							"406北屯區", "407西屯區", "408南屯區", "411太平區", "412大里區",
+							"413霧峰區", "414烏日區", "420豐原區", "421后里區", "422石岡區",
+							"423東勢區", "424和平區", "426新社區", "427潭子區", "428大雅區",
+							"429神岡區", "432大肚區", "433沙鹿區", "434龍井區", "435梧棲區",
+							"436清水區", "437大甲區", "438外埔區", "439大安區"],
+						"彰化縣": ["500彰化市", "502芬園鄉", "503花壇鄉", "504秀水鄉", "505鹿港鎮",
+							"506福興鄉", "507線西鄉", "508和美鎮", "509伸港鄉", "510員林市",
+							"511社頭鄉", "512永靖鄉", "513埔心鄉", "514溪湖鎮", "515大村鄉",
+							"516埔鹽鄉", "520田中鎮", "521北斗鎮", "522田尾鄉", "523埤頭鄉",
+							"524溪州鄉", "525竹塘鄉", "526二林鎮", "527大城鄉", "528芳苑鄉",
+							"530二水鄉"],
+						"南投縣": ["540南投市", "541中寮鄉", "542草屯鎮", "544國姓鄉", "545埔里鎮",
+							"546仁愛鄉", "551名間鄉", "552集集鎮", "553水里鄉", "555魚池鄉",
+							"556信義鄉", "557竹山鎮", "558鹿谷鄉"],
+						"嘉義市": ["600東區", "600大西區"],
+						"嘉義縣": ["602番路鄉", "603梅山鄉", "604竹崎鄉", "605阿里山鄉", "606中埔鄉",
+							"607大埔鄉", "608水上鄉", "611鹿草鄉", "612太保市", "613朴子市",
+							"614東石鄉", "615六腳鄉", "616新港鄉", "621民雄鄉", "622大林鎮",
+							"623溪口鄉", "624義竹鄉", "625布袋鎮"],
+						"雲林縣": ["630斗南鎮", "631大埤鄉", "632虎尾鎮", "633土庫鎮", "634褒忠鄉",
+							"635東勢鄉", "636臺西鄉", "637崙背鄉", "638麥寮鄉", "640斗六市",
+							"643林內鄉", "646古坑鄉", "647莿桐鄉", "648西螺鎮", "649二崙鄉",
+							"651北港鎮", "652水林鄉", "653口湖鄉", "654四湖鄉", "655元長鄉"],
+						"台南市": ["700中西區", "701東區", "702南區", "704北區", "708安平區",
+							"709安南區", "710永康區", "711歸仁區", "712新化區", "713左鎮區",
+							"714玉井區", "715楠西區", "716南化區", "717仁德區", "718關廟區",
+							"719龍崎區", "720官田區", "721麻豆區", "722佳里區", "723西港區",
+							"724七股區", "725將軍區", "726學甲區", "727北門區", "730新營區",
+							"731後壁區", "732白河區", "733東山區", "734六甲區", "735下營區",
+							"736柳營區", "737鹽水區", "741善化區", "742大內區", "743山上區",
+							"744新市區", "745安定區"],
+						"高雄市": ["800新興區", "801前金區", "802苓雅區", "803鹽埕區", "804鼓山區",
+							"805旗津區", "806前鎮區", "807三民區", "811楠梓區", "812小港區",
+							"813左營區", "814仁武區", "815大社區", "820岡山區", "821路竹區",
+							"822阿蓮區", "823田寮區", "824燕巢區", "825橋頭區", "826梓官區",
+							"827彌陀區", "828永安區", "829湖內區", "830鳳山區", "831大寮區",
+							"832林園區", "833鳥松區", "840大樹區", "842旗山區", "843美濃區",
+							"844六龜區", "845內門區", "846杉林區", "847甲仙區", "848桃源區",
+							"849那瑪夏區", "851茂林區", "852茄萣區"],
+						"屏東縣": ["900屏東市", "901三地門鄉", "902霧臺鄉", "903瑪家鄉", "904九如鄉",
+							"905里港鄉", "906高樹鄉", "907鹽埔鄉", "908長治鄉", "909麟洛鄉",
+							"911竹田鄉", "912內埔鄉", "913萬丹鄉", "920潮州鎮", "921泰武鄉",
+							"922來義鄉", "923萬巒鄉", "924崁頂鄉", "925新埤鄉", "926南州鄉",
+							"927林邊鄉", "928東港鎮", "931佳冬鄉", "932新園鄉", "940枋寮鄉",
+							"941枋山鄉", "942春日鄉", "943獅子鄉", "944車城鄉", "945牡丹鄉",
+							"946恆春鎮", "947滿州鄉"],
+						"臺東縣": ["950臺東市", "953延平鄉", "954卑南鄉", "955鹿野鄉", "956關山鎮",
+							"957海端鄉", "958池上鄉", "959東河鄉", "961成功鎮", "962長濱鄉",
+							"963太麻里鄉", "964金峰鄉", "965大武鄉", "966達仁鄉"],
+						"花蓮縣": ["970花蓮市", "971新城鄉", "972秀林鄉", "973吉安鄉", "974壽豐鄉",
+							"975鳳林鎮", "976光復鄉", "977豐濱鄉", "978瑞穗鄉", "979萬榮鄉",
+							"981玉里鎮", "982卓溪鄉", "983富里鄉"],
+					};
+
+					var citySelect = document.getElementById("city");
+					var districtSelect = document.getElementById("district");
+
+					// citySelect 提示選項「城市/縣」
+					citySelect.innerHTML = "";
+					var defaultCityOption = document.createElement("option");
+					defaultCityOption.value = "";
+					defaultCityOption.textContent = "城市/縣";
+					defaultCityOption.disabled = true;
+					defaultCityOption.selected = true;
+					citySelect.appendChild(defaultCityOption);
+
+					// districtSelect 提示選項「地區」，預設禁用
+					districtSelect.innerHTML = "";
+					var defaultDistOption = document.createElement("option");
+					defaultDistOption.value = "";
+					defaultDistOption.textContent = "地區";
+					defaultDistOption.disabled = true;
+					defaultDistOption.selected = true;
+					districtSelect.appendChild(defaultDistOption);
+					districtSelect.disabled = true; // 預設禁用
+
+					// 動態填入城市/縣選項
+					for (var city in cityDistricts) {
+						var option = document.createElement("option");
+						option.value = city;
+						option.textContent = city;
+						citySelect.appendChild(option);
+					}
+
+					// 當城市選項改變時，更新地區選單
+					function updateDistrictOptions() {
+						var selectedCity = citySelect.value;
+						var districts = cityDistricts[selectedCity] || [];
+
+						// 若沒選城市，districtSelect 保持「地區」並禁用
+						if (!selectedCity) {
+							districtSelect.innerHTML = "";
+							var defaultDist = document.createElement("option");
+							defaultDist.value = "";
+							defaultDist.textContent = "地區";
+							defaultDist.disabled = true;
+							defaultDist.selected = true;
+							districtSelect.appendChild(defaultDist);
+							districtSelect.disabled = true;
+							return;
+						}
+
+						// 有選城市，重新生成地區選單
+						districtSelect.innerHTML = "";
+						districtSelect.disabled = false; // 啟用地區下拉
+						var defaultDistOption = document.createElement("option");
+						defaultDistOption.value = "";
+						defaultDistOption.textContent = "地區";
+						defaultDistOption.disabled = true;
+						defaultDistOption.selected = true;
+						districtSelect.appendChild(defaultDistOption);
+
+						// 生成對應的地區選項
+						districts.forEach(function (dist) {
+							var option = document.createElement("option");
+							option.value = dist;
+							option.textContent = dist;
+							districtSelect.appendChild(option);
+						});
+					}
+
+					// 綁定事件
+					citySelect.addEventListener("change", updateDistrictOptions);
+
+					// 初始化時更新地區選單
+					updateDistrictOptions();
+				});
 				/*]]>*/
 			</script>
 
