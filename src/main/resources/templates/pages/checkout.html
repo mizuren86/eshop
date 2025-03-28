@@ -89,17 +89,18 @@
 								<td class="text-end align-middle"><strong>運費：</strong></td>
 								<td id="shippingFee" class="text-center align-middle"><strong>$0</strong></td>
 							</tr>
-							<tr>
+							<!-- 優惠券折扣列，預設隱藏，由 JS 控制顯示 -->
+							<tr id="couponDiscountRow" style="display: none;">
 								<td colspan="3"></td>
 								<td class="text-end align-middle"><strong>優惠券：</strong></td>
-								<td id="couponDiscount" class="text-center align-middle"><strong>$0</strong></td>
+								<td id="couponDiscount" class="text-center align-middle"><strong>-$0</strong></td>
 							</tr>
 							<tr>
 								<td colspan="3"></td>
 								<td class="text-end align-middle"><strong>合計：</strong></td>
 								<td id="grandTotal" class="text-center align-middle"><strong>$0</strong></td>
 							</tr>
-						</tfoot>  
+						</tfoot>
 					</table>
 				</div>
 			</section>
@@ -676,60 +677,56 @@
 			<script th:inline="javascript">
 				/*<![CDATA[*/
 				var cartSubtotal = /*[[${totalAmount}]]*/ 0;
+
 				// 運費 60
 				var fixedShippingFee = 60;
 
-				// 購物車資料載入
-                // 全域變數：保存購物車小記
-                let currentSubtotal = 0;
+				// 全域變數：保存購物車小記
+				let currentSubtotal = 0;
 
-                // 重新計算小記
-                function recalcSubtotal(cartItems) {
-                    return cartItems.reduce((sum, item) => sum + item.subTotal, 0);
-                }
+				// 重新計算小記
+				function recalcSubtotal(cartItems) {
+					return cartItems.reduce((sum, item) => sum + item.subTotal, 0);
+				}
 
-                async function fetchCartData() {
-                    try {
-                        const response = await fetch("/api/cart");
-                        if (!response.ok) throw new Error("Network response was not ok");
-                        const { cartItems, totalAmount } = await response.json();
-                        currentSubtotal = recalcSubtotal(cartItems);
-                        const cartItemsContainer = document.getElementById("cartItems");
-                        cartItemsContainer.innerHTML = "";
+				// 讀取 Session 中的 couponDiscount //
+				var sessionCouponDiscount = /*[[${couponDiscount != null ? couponDiscount : 0}]]*/ 0;
 
-                        cartItems.forEach((item) => {
-							// 從 sessionStorage 中讀取用戶在 cart 頁面選定的數量
-							const storedQuantity = sessionStorage.getItem("cartItem_" + item.cartItemId);
-							if(storedQuantity !== null) {
-								item.quantity = parseInt(storedQuantity);
-                				item.subTotal = item.price * item.quantity;
-							}
-                            const row = document.createElement("tr");
-                            row.innerHTML = `
-                                            <td class="text-center align-middle">
-                                                <img src="${item.product.imageUrl}" alt="" class="img-fluid rounded-circle" style="width:80px; height:80px;">
-                                            </td>
-                                            <td class="text-center align-middle">${item.product.productName}</td>
-                                            <td class="text-center align-middle">$${item.price}</td>
-                                            <td class="text-center align-middle">
-												<div class="d-flex justify-content-center align-items-center mx-auto" style="width:100px;">
-													<span id="quantity-${item.cartItemId}" class="text-center">${item.quantity}</span>
-												</div>
-											</td>
-                                            <td class="text-center align-middle">$${item.subTotal}</td>
-                                            `;
-                            cartItemsContainer.appendChild(row);
-                        });
+				// 全域變數
+				var couponDiscountOverall = sessionCouponDiscount;
 
-                        document.getElementById("subtotalAmount").textContent = "$" + currentSubtotal;
-                        updateGrandTotal();
-                    } catch (error) {
-                        console.error("Error fetching cart data:", error);
-                    }
-                }
+				document.addEventListener("DOMContentLoaded", () => {
+					initCountryOptions();
+					onCountryChange();
+					// 更新優惠券折扣和總計
+					updateGrandTotal();
+				});
 
+				// 更新總計 //
+				function updateGrandTotal() {
+					// 從小計欄位讀取當前小計
+					const currentSubtotal = parseInt(document.getElementById("subtotalAmount").textContent.replace("$", "")) || 0;
+					// 從送貨資訊抓取運費
+					const shippingFee = updateShippingFeeFromShippingInfo();
+					const grandTotalValue = currentSubtotal + shippingFee - couponDiscountOverall;
+					document.getElementById("grandTotal").textContent = "$" + grandTotalValue;
+					document.getElementById("paymentGrandTotal").textContent = "$" + grandTotalValue;
+
+					// 控制優惠券行的顯示：當折扣大於 0 時顯示，否則隱藏
+					const couponRow = document.getElementById("couponDiscountRow");
+					if (couponDiscountOverall > 0) {
+						couponRow.style.display = "table-row";  // 對於 <tr> 元素使用 table-row
+						document.getElementById("couponDiscount").textContent = "-$" + couponDiscountOverall;
+					} else {
+						couponRow.style.display = "none";
+					}
+				}
+
+				// 重新載入購物車資料 //
+				document.addEventListener("DOMContentLoaded", fetchCartData);
+				
 				function updateShippingFeeFromShippingInfo() {
-  					// 讀取運費文字，例如 "運費 NT$60"
+					// 讀取運費文字，例如 "運費 NT$60"
 					const feeText = document.getElementById("shippingFeeText").textContent;
 					// 用正則表達式找出數字部分
 					const match = feeText.match(/\d+/);
@@ -740,22 +737,45 @@
 					return feeValue;
 				}
 
-				var couponDiscount = /*[[${couponDiscount}]]*/ 0; // 優惠券 300
-    			// 更新優惠券欄位
-				document.getElementById("couponDiscount").textContent = "折$" + couponDiscount;
+				async function fetchCartData() {
+					try {
+						const response = await fetch("/api/cart");
+						if (!response.ok) throw new Error("Network response was not ok");
+						const {cartItems, totalAmount} = await response.json();
+						currentSubtotal = recalcSubtotal(cartItems);
+						const cartItemsContainer = document.getElementById("cartItems");
+						cartItemsContainer.innerHTML = "";
 
-				function updateGrandTotal() {
-  					// 從 <tfoot> 中的小計取得當前小計
-					const currentSubtotal = parseInt(document.getElementById("subtotalAmount").textContent.replace("$", "")) || 0;
-  					// 從送貨資料中抓取運費數字
-					const shippingFee = updateShippingFeeFromShippingInfo();
-					const grandTotalValue = currentSubtotal + shippingFee - couponDiscount;
-					document.getElementById("grandTotal").textContent = "$" + grandTotalValue;
-					document.getElementById("paymentGrandTotal").textContent = "$" + grandTotalValue;
+						cartItems.forEach((item) => {
+							// 從 sessionStorage 中讀取用戶在 cart 頁面選定的數量
+							const storedQuantity = sessionStorage.getItem("cartItem_" + item.cartItemId);
+							if (storedQuantity !== null) {
+								item.quantity = parseInt(storedQuantity);
+								item.subTotal = item.price * item.quantity;
+							}
+							const row = document.createElement("tr");
+							row.innerHTML = `
+				            	<td class="text-center align-middle">
+				                	<img src="${item.product.imageUrl}" alt="" class="img-fluid rounded-circle" style="width:80px; height:80px;">
+				                </td>
+				               	<td class="text-center align-middle">${item.product.productName}</td>
+				                <td class="text-center align-middle">$${item.price}</td>
+				                <td class="text-center align-middle">
+									<div class="d-flex justify-content-center align-items-center mx-auto" style="width:100px;">
+										<span id="quantity-${item.cartItemId}" class="text-center">${item.quantity}</span>
+									</div>
+								</td>
+				                <td class="text-center align-middle">$${item.subTotal}</td>
+				            `;
+							cartItemsContainer.appendChild(row);
+						});
+
+						document.getElementById("subtotalAmount").textContent = "$" + currentSubtotal;
+						updateGrandTotal();
+					} catch (error) {
+						console.error("Error fetching cart data:", error);
+					}
 				}
-
-                // 載入購物車資料
-                document.addEventListener("DOMContentLoaded", fetchCartData);
 				/*]]>*/
 			</script>
 

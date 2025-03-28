@@ -1,18 +1,11 @@
 package com.eeit1475th.eshop.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import java.math.BigDecimal;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
-import com.eeit1475th.eshop.coupon.Coupon;
-import com.eeit1475th.eshop.coupon.CouponRepository;
 import com.eeit1475th.eshop.member.entity.Users;
 
 import jakarta.servlet.http.HttpSession;
@@ -21,12 +14,7 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/cart")
 public class ShoppingCartController {
 
-	/*更改的地方*/
-	@Autowired
-    private CouponRepository couponrepository;
-	/**/
-
-	// 返回購物車頁面 (模板位於 /templates/pages/cart.html)
+	// 返回購物車頁面
 	@GetMapping
 	public String showCart(Model model, HttpSession session,
 			@SessionAttribute(value = "user", required = false) Users user) {
@@ -54,16 +42,14 @@ public class ShoppingCartController {
         model.addAttribute("shippingMethod", sessionShippingMethod);
         model.addAttribute("paymentMethod", sessionPaymentMethod);
         
-        // 假設優惠券折扣固定為 300 儲存在 session
-        BigDecimal couponDiscount = new BigDecimal("300");
-        session.setAttribute("couponDiscount", couponDiscount);
+        // 從 session 讀取優惠券折扣，若不存在則預設為 0
+        Integer couponDiscount = (Integer) session.getAttribute("couponDiscount");
+        if (couponDiscount == null) {
+            couponDiscount = 0;
+            session.setAttribute("couponDiscount", couponDiscount);
+        }
         model.addAttribute("couponDiscount", couponDiscount);
         
-    	/*曾毓皓 更動的地方*/
-    	List<Coupon> coupon = couponrepository.findAll();
-    	model.addAttribute("coupons", coupon);
-    	/**/
-
 		return "/pages/cart";
 	}
 }

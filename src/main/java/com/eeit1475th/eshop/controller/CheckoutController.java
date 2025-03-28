@@ -51,10 +51,13 @@ public class CheckoutController {
         model.addAttribute("cartItems", cartItems);
         
         // 從 Session 讀取優惠券折扣，如果沒有就預設為 0
-        BigDecimal couponDiscount = (session.getAttribute("couponDiscount") != null)
-            ? (BigDecimal) session.getAttribute("couponDiscount")
-            : BigDecimal.ZERO;
+        Integer couponDiscount = (Integer) session.getAttribute("couponDiscount");
+        if (couponDiscount == null) {
+            couponDiscount = 0;
+            session.setAttribute("couponDiscount", couponDiscount);
+        }
         model.addAttribute("couponDiscount", couponDiscount);
+
         
         // 計算購物車小計
         BigDecimal totalAmount = cartItems.stream()
