@@ -41,7 +41,9 @@ public class ProductController {
 
 	// Shop Detail 頁面
 	@GetMapping("/shop-detail")
+
 	public String shopDetail(@RequestParam("productId") Integer productId, Model model) {
+
 		Products product = productService.getProductById(productId);
 		if (product == null) {
 			return "redirect:/shop";
