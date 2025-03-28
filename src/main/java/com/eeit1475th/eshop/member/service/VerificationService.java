@@ -1,45 +1,59 @@
 package com.eeit1475th.eshop.member.service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class VerificationService {
-    private Map<String, VerificationData> verificationCodes = new HashMap<>();
 
-    private static class VerificationData {
-        String code;
-        LocalDateTime expireTime;
+    @Autowired
+    private EmailService emailService;
 
-        VerificationData(String code) {
-            this.code = code;
-            this.expireTime = LocalDateTime.now().plusMinutes(5); // 5分鐘有效期
-        }
+    private final Map<String, VerificationCode> verificationCodes = new ConcurrentHashMap<>();
+    private final Random random = new Random();
+
+    public void sendVerificationCode(String email) {
+        String code = generateVerificationCode();
+        verificationCodes.put(email, new VerificationCode(code, LocalDateTime.now().plusMinutes(5)));
+        emailService.sendVerificationEmail(email, code);
     }
 
-    public String generateCode(String contact) {
-        String code = String.format("%06d", new Random().nextInt(999999));
-        verificationCodes.put(contact, new VerificationData(code));
-        return code;
-    }
-
-    public boolean verifyCode(String contact, String code) {
-        VerificationData data = verificationCodes.get(contact);
-        if (data == null) {
+    public boolean verifyCode(String email, String code) {
+        VerificationCode verificationCode = verificationCodes.get(email);
+        if (verificationCode == null || verificationCode.isExpired()) {
             return false;
         }
-
-        boolean isValid = data.code.equals(code) &&
-                LocalDateTime.now().isBefore(data.expireTime);
-
+        boolean isValid = verificationCode.getCode().equals(code);
         if (isValid) {
-            verificationCodes.remove(contact); // 使用後刪除驗證碼
+            verificationCodes.remove(email);
+        }
+        return isValid;
+    }
+
+    private String generateVerificationCode() {
+        return String.format("%06d", random.nextInt(1000000));
+    }
+
+    private static class VerificationCode {
+        private final String code;
+        private final LocalDateTime expiryDate;
+
+        public VerificationCode(String code, LocalDateTime expiryDate) {
+            this.code = code;
+            this.expiryDate = expiryDate;
         }
 
-        return isValid;
+        public String getCode() {
+            return code;
+        }
+
+        public boolean isExpired() {
+            return LocalDateTime.now().isAfter(expiryDate);
+        }
     }
 }
