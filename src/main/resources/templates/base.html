@@ -100,31 +100,31 @@
                 class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
                 style="top: -5px; left: 15px; height: 20px; min-width: 20px" th:text="${cartCount}">0</span>
             </a>
-            <!-- <a href="#" class="my-auto">
-              <i class="fas fa-user fa-2x"></i>
-            </a> -->
             <!-- 用戶圖示和下拉選單 -->
             <div class="nav-item dropdown">
-              <a href="#" class="nav-link" data-bs-toggle="dropdown">
-                <i class="fas fa-user fa-2x"></i>
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <i class="fas fa-user"></i>
               </a>
               <div class="dropdown-menu m-0 bg-secondary rounded-0">
                 <!-- 未登入時顯示 -->
-                <div th:if="${session.user == null}">
+                <div id="guestMenu">
                   <a th:href="@{/login}" class="dropdown-item">登入</a>
                   <a th:href="@{/register}" class="dropdown-item">註冊</a>
                 </div>
                 <!-- 已登入時顯示 -->
-                <div th:if="${session.user != null}">
+                <div id="userMenu" style="display: none;">
                   <a th:href="@{/profile}" class="dropdown-item">個人資料</a>
                   <a th:href="@{/orders}" class="dropdown-item">訂單記錄</a>
                   <div class="dropdown-divider"></div>
-                  <a th:href="@{/logout}" class="dropdown-item">登出</a>
+                  <a class="dropdown-item" href="#" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i>登出
+                  </a>
+                  </li>
+                  </ul>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
       </nav>
     </div>
   </div>
@@ -278,6 +278,100 @@
   <script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
   <!-- Template Javascript -->
   <script th:src="@{/js/main.js}"></script>
+  <script>
+    // 檢查登入狀態並更新導覽列
+    function updateNavigation() {
+      const user = JSON.parse(sessionStorage.getItem('user') || 'null');
+      const token = sessionStorage.getItem('token');
+      const guestMenu = document.getElementById('guestMenu');
+      const userMenu = document.getElementById('userMenu');
+
+      console.log('=== 導覽列狀態更新 ===');
+      console.log('當前用戶狀態:', user && token ? '已登入' : '未登入');
+      console.log('用戶信息:', user);
+      console.log('Token:', token ? '存在' : '不存在');
+
+      // 如果沒有 token，清除所有用戶信息
+      if (!token) {
+        sessionStorage.clear();
+        console.log('清除所有用戶信息');
+      }
+
+      if (user && token) {
+        if (guestMenu) {
+          guestMenu.style.display = 'none';
+          console.log('隱藏訪客選單（登入/註冊）');
+        }
+        if (userMenu) {
+          userMenu.style.display = 'block';
+          console.log('顯示用戶選單（個人資料/訂單記錄/登出）');
+        }
+      } else {
+        if (guestMenu) {
+          guestMenu.style.display = 'block';
+          console.log('顯示訪客選單（登入/註冊）');
+        }
+        if (userMenu) {
+          userMenu.style.display = 'none';
+          console.log('隱藏用戶選單（個人資料/訂單記錄/登出）');
+        }
+      }
+      console.log('=== 導覽列更新完成 ===\n');
+    }
+
+    // 頁面載入時檢查登入狀態
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('=== 頁面載入 ===');
+      console.log('檢查登入狀態...');
+      updateNavigation();
+      console.log('=== 頁面載入完成 ===\n');
+    });
+
+    // 監聽 storage 變化
+    window.addEventListener('storage', () => {
+      console.log('=== Storage 變化 ===');
+      console.log('檢測到 storage 變化，更新導覽列...');
+      updateNavigation();
+      console.log('=== Storage 更新完成 ===\n');
+    });
+
+    // 監聽頁面可見性變化
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        console.log('=== 頁面可見性變化 ===');
+        console.log('頁面變為可見，檢查登入狀態...');
+        updateNavigation();
+        console.log('=== 頁面可見性更新完成 ===\n');
+      }
+    });
+
+    function logout() {
+      console.log('=== 登出 ===');
+      sessionStorage.clear(); // 清除所有用戶資訊
+      console.log('已清除 sessionStorage');
+      window.location.href = '/login'; // 導向至登入頁面
+    }
+  </script>
+  <script>
+    // 定義全域的 logout 函式
+    window.logout = function () {
+      console.log('=== 登出 ===');
+      sessionStorage.clear(); // 清除所有用戶資訊
+      console.log('已清除 sessionStorage');
+      window.location.href = '/login'; // 導向至登入頁面
+    };
+
+    // 確保登出按鈕綁定事件
+    document.addEventListener('DOMContentLoaded', () => {
+      const logoutButton = document.querySelector('a[href="#logout"]');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', (event) => {
+          event.preventDefault(); // 防止預設行為
+          logout();
+        });
+      }
+    });
+  </script>
 </body>
 
 </html>

@@ -12,6 +12,7 @@ public class UsersDTO {
     private String phone;
     private String address;
     private String userPhoto;
+    private String verificationCode;
 
     public Integer getMemberId() {
         return memberId;
@@ -75,5 +76,13 @@ public class UsersDTO {
 
     public void setUserPhoto(String userPhoto) {
         this.userPhoto = userPhoto;
+    }
+
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
     }
 }

@@ -14,30 +14,57 @@ spring:
     database-platform: org.hibernate.dialect.SQLServerDialect
     show-sql: true
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
       
   # Thymeleaf 設定
   thymeleaf:
     prefix: classpath:/templates
     suffix: .html
+    cache: false
 
+  # Session 設定
+  session:
+    store-dir: ./session-store
+    timeout: 30m
+    cookie:
+      http-only: true
+      secure: false
+      max-age: 1800
+      path: /
+
+  # 郵件配置
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: larry7753383@gmail.com
+    password: sctkhctofjgbrvem
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        transport:
+          protocol: smtp
+        debug: true
 
   # FileUpload 設定
   servlet:
     multipart:
-      max-file-size: 20MB
-      max-request-size: 100MB
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 # 綠界 URL 和 API 密鑰
-payment:
   gateway:
     url:  https://api.mock-payment.com
     apiKey: mock-api-key
 
+# JWT 配置（24小時 = 86400000毫秒）
 jwt:
-  secret: "BeJ68MaMmRKBn2pVu3AN8M0zkrNVRseV7MEKrrWL3fA="
-  expiration: 3600000
+  secret: VG9rZW5TZWNyZXRLZXlGb3JTaG9wcGluZ1dlYnNpdGUxMjM0NTY3ODkw
+  expiration: 86400000
 
+# Rasa API 配置
 rasa:
   api:
     url: http://localhost:5005/webhooks/rest/webhook
