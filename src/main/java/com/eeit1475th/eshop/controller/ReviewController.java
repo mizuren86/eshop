@@ -1,5 +1,6 @@
 package com.eeit1475th.eshop.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,11 +21,15 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.eeit1475th.eshop.product.entity.Products;
 import com.eeit1475th.eshop.review.dto.ReviewsDto;
 import com.eeit1475th.eshop.review.entity.Reviews;
 import com.eeit1475th.eshop.review.repository.ReviewsRepository;
 import com.eeit1475th.eshop.review.service.ReviewsService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,21 +101,52 @@ public class ReviewController {
         return "/pages/creatreviews";
     }
     
-    @PostMapping("/create")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> createReview(
-            @RequestBody Reviews review,
-            @RequestHeader("Authorization") String token) {
-        Map<String, Object> response = new HashMap<>();
+    @PostMapping("/create.do")
+    public String createReviewAndGoToHomePage(
+            @RequestParam("products.productId") Integer productId,
+            @RequestParam("rating") Integer rating,
+            @RequestParam(value = "comment", required = false) String comment,
+            @RequestParam(value = "photoFile", required = false) MultipartFile photoFile,
+            @RequestHeader(value = "Authorization", required = false) String token,
+            HttpServletRequest request,
+            Model model) {
+        
+        // 檢查登入狀態
+        if (token == null || token.isEmpty()) {
+            model.addAttribute("showLoginModal", true); // 新增標記
+            model.addAttribute("productId", productId);
+            //System.out.println("showLoginModal 被設定為 true"); // Debug 訊息
+            return "/pages/creatreviews"; // 返回商店首頁
+        }
+        
         try {
-            Reviews createdReview = reviewsService.createReview(review, token);
-            response.put("success", true);
-            response.put("review", createdReview);
-            return ResponseEntity.ok(response);
+            Reviews review = new Reviews();
+            Products product = new Products();
+            product.setProductId(productId);
+            review.setProducts(product);
+            review.setRating(rating);
+            review.setComment(comment);
+            
+            // 處理圖片上傳
+            if (photoFile != null && !photoFile.isEmpty()) {
+                if (photoFile.getSize() > 5 * 1024 * 1024) {
+                    model.addAttribute("error", "圖片大小不能超過5MB");
+                    return "/pages/creatreviews";
+                }
+                try {
+                    review.setPhoto(photoFile.getBytes());
+                } catch (IOException e) {
+                    logger.error("圖片讀取失敗", e);
+                    model.addAttribute("error", "圖片上傳失敗，請稍後再試");
+                    return "/pages/creatreviews";
+                }
+            }
+            
+            reviewsService.createReview(review, token);
+            return "redirect:/"; // 導回首頁
         } catch (RuntimeException e) {
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            model.addAttribute("error", e.getMessage());
+            return "/pages/creatreviews";
         }
     }
     
