@@ -90,7 +90,7 @@ public class UsersService {
     public String login(String email, String password) {
         // 查找用戶
         Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("用戶不存在"));
+                .orElseThrow(() -> new RuntimeException("郵箱不存在"));
 
         // 驗證密碼
         if (!passwordEncoder.matches(password, user.getPassword())) {

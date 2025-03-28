@@ -89,8 +89,8 @@ public class UserRestController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
         try {
-            String token = usersService.login(request.getUsername(), request.getPassword());
-            Users user = usersService.findByUsername(request.getUsername());
+            String token = usersService.login(request.getEmail(), request.getPassword());
+            Users user = usersService.getUserByEmail(request.getEmail());
 
             // 将用户信息存储在会话中
             session.setAttribute("user", user);

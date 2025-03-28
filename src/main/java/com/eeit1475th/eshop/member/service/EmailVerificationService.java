@@ -21,12 +21,6 @@ public class EmailVerificationService {
     @Autowired
     private EmailService emailService;
 
-    @Autowired
-    private Set<String> verifiedEmails;
-
-    @Autowired
-    private Map<String, String> verificationTokens;
-
     @Transactional
     public void saveVerificationToken(String email) {
         // 删除该邮箱的所有旧验证记录

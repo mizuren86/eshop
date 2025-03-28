@@ -106,7 +106,6 @@
                 aria-expanded="false">
                 <i class="fas fa-user"></i>
               </a>
-<<<<<<< HEAD
               <div class="dropdown-menu m-0 bg-secondary rounded-0">
                 <!-- 未登入時顯示 -->
                 <div id="guestMenu">
@@ -117,41 +116,15 @@
                 <div id="userMenu" style="display: none;">
                   <a th:href="@{/profile}" class="dropdown-item">個人資料</a>
                   <a th:href="@{/orders}" class="dropdown-item">訂單記錄</a>
-=======
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                <!-- 未登录状态 -->
-                <li th:if="${session.user == null}">
-                  <a class="dropdown-item" href="/login">
-                    <i class="fas fa-sign-in-alt me-2"></i>登入
-                  </a>
-                </li>
-                <li th:if="${session.user == null}">
-                  <a class="dropdown-item" href="/register">
-                    <i class="fas fa-user-plus me-2"></i>註冊
-                  </a>
-                </li>
-                <!-- 已登录状态 -->
-                <li th:if="${session.user != null}">
-                  <a class="dropdown-item" href="/profile">
-                    <i class="fas fa-user-circle me-2"></i>個人資料
-                  </a>
-                </li>
-                <li th:if="${session.user != null}">
-                  <a class="dropdown-item" href="/orders">
-                    <i class="fas fa-shopping-bag me-2"></i>訂單記錄
-                  </a>
-                </li>
-                <li th:if="${session.user != null}">
->>>>>>> f447786f764262bb7788a6076d7ac2e6536f6cac
                   <div class="dropdown-divider"></div>
                   <a class="dropdown-item" href="#" onclick="logout()">
                     <i class="fas fa-sign-out-alt me-2"></i>登出
                   </a>
-                </li>
-              </ul>
+                  </li>
+                  </ul>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
       </nav>
     </div>
   </div>
@@ -305,7 +278,6 @@
   <script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
   <!-- Template Javascript -->
   <script th:src="@{/js/main.js}"></script>
-<<<<<<< HEAD
   <script>
     // 檢查登入狀態並更新導覽列
     function updateNavigation() {
@@ -372,44 +344,33 @@
         console.log('=== 頁面可見性更新完成 ===\n');
       }
     });
-=======
-  <script th:src="@{/js/login.js}"></script>
 
-  <script>
-    // 登出功能
     function logout() {
-      console.log('開始登出流程...');
-      console.log('當前Token:', localStorage.getItem('token'));
-      console.log('當前Cookies:', document.cookie);
-
-      // 清除本地存储
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-
-      // 发送登出请求
-      fetch('/api/users/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      })
-        .then(response => {
-          console.log('登出響應狀態:', response.status);
-          return response.json();
-        })
-        .then(data => {
-          console.log('登出響應數據:', data);
-          // 无论服务器响应如何，都清除本地状态并重定向
-          window.location.href = '/';
-        })
-        .catch(error => {
-          console.error('登出過程發生錯誤:', error);
-          // 即使发生错误也重定向到首页
-          window.location.href = '/';
-        });
+      console.log('=== 登出 ===');
+      sessionStorage.clear(); // 清除所有用戶資訊
+      console.log('已清除 sessionStorage');
+      window.location.href = '/login'; // 導向至登入頁面
     }
->>>>>>> f447786f764262bb7788a6076d7ac2e6536f6cac
+  </script>
+  <script>
+    // 定義全域的 logout 函式
+    window.logout = function () {
+      console.log('=== 登出 ===');
+      sessionStorage.clear(); // 清除所有用戶資訊
+      console.log('已清除 sessionStorage');
+      window.location.href = '/login'; // 導向至登入頁面
+    };
+
+    // 確保登出按鈕綁定事件
+    document.addEventListener('DOMContentLoaded', () => {
+      const logoutButton = document.querySelector('a[href="#logout"]');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', (event) => {
+          event.preventDefault(); // 防止預設行為
+          logout();
+        });
+      }
+    });
   </script>
 </body>
 
