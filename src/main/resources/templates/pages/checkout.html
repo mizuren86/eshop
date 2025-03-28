@@ -51,7 +51,7 @@
 			padding-right: 2rem !important;
 		}
 
-		/* 針對 <select> 被 disabled 時的樣式 */
+		/* <select> 被 disabled 時的樣式 */
 		select:disabled {
 			background-color: #e0e0e0;
 			/* 背景顏色 */
@@ -61,6 +61,12 @@
 			/* 滑鼠指標顯示禁止符號 */
 			opacity: 0.8;
 			/* 文字透明度 */
+		}
+
+		/* 運費提示區塊設定 */
+		#cartShippingFeeAlert {
+			width: 300px;
+			min-height: 2rem;
 		}
 
 		/* placeholder 樣式 */
@@ -82,6 +88,13 @@
 
 		table tfoot td {
 			border: none;
+		}
+
+		.shipping-fee-placeholder {
+			background-color: #eaf8ff;
+			color: #0d6efd;
+			padding: 4px 8px;
+			border-radius: 4px;
 		}
 	</style>
 </head>
@@ -124,23 +137,36 @@
 							<tr>
 								<td colspan="3"></td>
 								<td class="text-end align-middle"><strong>小計：</strong></td>
-								<td id="subtotalAmount" class="text-center align-middle"><strong>$0</strong></td>
+								<td id="subtotalAmount" class="text-center align-middle" style="width:200px;">
+									<strong>$0</strong>
+								</td>
 							</tr>
-							<tr>
+							<tr id="cartShippingRow">
 								<td colspan="3"></td>
-								<td class="text-end align-middle"><strong>運費：</strong></td>
-								<td id="shippingFee" class="text-center align-middle"><strong>$0</strong></td>
+								<td class="text-end align-middle">
+									<strong>運費：</strong>
+								</td>
+								<td id="cartShippingFee" class="text-center align-middle" style="width:200px;">
+									<div id="cartShippingFeeAlert" class="alert alert-info mb-0" role="alert">
+										將於確認送貨地址後顯示運費
+									</div>
+								</td>
 							</tr>
+
 							<!-- 優惠券折扣列，預設隱藏，由 JS 控制顯示 -->
 							<tr id="couponDiscountRow" style="display: none;">
 								<td colspan="3"></td>
 								<td class="text-end align-middle"><strong>優惠券：</strong></td>
-								<td id="couponDiscount" class="text-center align-middle"><strong>-$0</strong></td>
+								<td id="couponDiscount" class="text-center align-middle" style="width:200px;">
+									<strong>-$0</strong>
+								</td>
 							</tr>
 							<tr>
 								<td colspan="3"></td>
 								<td class="text-end align-middle"><strong>合計：</strong></td>
-								<td id="grandTotal" class="text-center align-middle"><strong>$0</strong></td>
+								<td id="grandTotal" class="text-center align-middle" style="width:200px;">
+									<strong>$0</strong>
+								</td>
 							</tr>
 						</tfoot>
 					</table>
@@ -185,7 +211,7 @@
 							<div class="card p-3 mb-4">
 								<div class="d-flex justify-content-between align-items-center mb-3">
 									<h4 class="mb-0">送貨資料</h4>
-									<p id="shippingFeeText" class="mb-0">運費 NT$60</p>
+									<p class="shippingCardFeeText mb-0">$60</p>
 								</div>
 								<p class="mb-1">
 									已選擇的送貨方式: 7-11 取貨付款（寄出日系統會發電子郵件通知，
@@ -264,7 +290,7 @@
 									<div class="card p-3 mb-4">
 										<div class="d-flex justify-content-between align-items-center mb-3">
 											<h4 class="mb-0">送貨資料</h4>
-											<p id="shippingFeeText" class="mb-0">運費 NT$60</p>
+											<p class="shippingCardFeeText mb-0">$60</p>
 										</div>
 										<p class="mb-1">
 											已選擇的送貨方式: 7-11 取貨不付款（寄出日系統會發電子郵件通知，
@@ -338,7 +364,7 @@
 									<div class="card p-3 mb-4">
 										<div class="d-flex justify-content-between align-items-center mb-3">
 											<h4 class="mb-0">送貨資料</h4>
-											<p id="shippingFeeText" class="mb-0">運費 NT$60</p>
+											<p class="shippingCardFeeText mb-0">$60</p>
 										</div>
 										<p class="mb-1">
 											已選擇的送貨方式: 7-11 取貨不付款（寄出日系統會發電子郵件通知，
@@ -416,10 +442,9 @@
 								<!-- 右欄：送貨資料與付款資料 -->
 								<div class="col-md-6">
 									<div class="card p-3 mb-4">
-										<!-- 新竹貨運區塊中新增送貨地址 -->
 										<div class="d-flex justify-content-between align-items-center mb-3">
 											<h4 class="mb-0">送貨資料</h4>
-											<p id="shippingFeeText" class="mb-0">運費 NT$60</p>
+											<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
 										</div>
 										<p class="mb-1">
 											已選擇的送貨方式: 新竹貨運<br />
@@ -513,10 +538,9 @@
 								<!-- 右欄：送貨資料與付款資料 -->
 								<div class="col-md-6">
 									<div class="card p-3 mb-4">
-										<!-- 新增「送貨地址」欄位 -->
 										<div class="d-flex justify-content-between align-items-center mb-3">
 											<h4 class="mb-0">送貨資料</h4>
-											<p id="shippingFeeText" class="mb-0">運費 NT$60</p>
+											<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
 										</div>
 										<p class="mb-1">
 											已選擇的送貨方式: 新竹貨運<br />
@@ -618,16 +642,11 @@
 									<div class="card p-3 mb-4">
 										<div class="d-flex justify-content-between align-items-center mb-3">
 											<h4 class="mb-0">送貨資料</h4>
-											<p id="shippingFeeText" class="mb-0">運費 NT$60</p>
+											<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
 										</div>
 										<p class="mb-1">
-											已選擇的送貨方式: 外島郵寄（請填寫送貨地址）<br />
+											已選擇的送貨方式: 外島郵寄<br />
 										</p>
-										<div class="mb-3">
-											<label for="shippingAddress" class="form-label">送貨地址</label>
-											<input type="text" class="form-control" id="shippingAddress"
-												name="shippingAddress" placeholder="請輸入詳細送貨地址" />
-										</div>
 										<div class="mb-3 mt-2">
 											<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
 											<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
@@ -720,10 +739,10 @@
 										<!-- 新增「送貨地址」欄位 -->
 										<div class="d-flex justify-content-between align-items-center mb-3">
 											<h4 class="mb-0">送貨資料</h4>
-											<p id="shippingFeeText" class="mb-0">運費 NT$60</p>
+											<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
 										</div>
 										<p class="mb-1">
-											已選擇的送貨方式: 外島郵寄（請填寫送貨地址）<br />
+											已選擇的送貨方式: 外島郵寄<br />
 										</p>
 										<div class="mb-3">
 											<label for="shippingAddress" class="form-label">送貨地址</label>
@@ -804,67 +823,109 @@
 
 			<script th:inline="javascript">
 				/*<![CDATA[*/
-				var cartSubtotal = /*[[${totalAmount}]]*/ 0;
-
-				// 運費 60
+				// 運費預設值
 				var fixedShippingFee = 60;
-
-				// 全域變數：保存購物車小記
+				// 全域變數：保存購物車小計
 				let currentSubtotal = 0;
+				// 優惠券折扣（假設從 Session 拿到，若無則為 0）
+				var couponDiscountOverall = /*[[${couponDiscount != null ? couponDiscount : 0}]]*/ 0;
 
-				// 重新計算小記
+				// 根據 cartItems 陣列計算小計
 				function recalcSubtotal(cartItems) {
 					return cartItems.reduce((sum, item) => sum + item.subTotal, 0);
 				}
 
-				// 讀取 Session 中的 couponDiscount //
-				var sessionCouponDiscount = /*[[${couponDiscount != null ? couponDiscount : 0}]]*/ 0;
+				// 計算運費邏輯，回傳運費金額
+				function getShippingFee() {
+					// 運送方式是 7-11 取貨付款或7-11 取貨不付款，固定運費 60
+					if (shippingMethod === "711-cod" || shippingMethod === "711-no-cod") {
+						return fixedShippingFee;
+					}
 
-				// 全域變數
-				var couponDiscountOverall = sessionCouponDiscount;
+					const citySelect = document.getElementById("city");
+					const districtSelect = document.getElementById("district");
+					const selectedCity = citySelect.value;
+					const selectedDistrict = districtSelect.value;
+					if (!selectedDistrict) {
+						return 0;
+					}
+					let fee = 0;
+					if (shippingMethod === "outer-island") {
+						fee = 100;
+						if (selectedCity === "澎湖縣") {
+							fee = 120;
+						} else if (selectedCity === "金門縣" || selectedCity === "連江縣") {
+							fee = 150;
+						}
+					} else if (shippingMethod === "hct") {
+						fee = 80;
+						if (selectedCity === "臺東縣") {
+							fee = 85;
+						} else if (selectedCity === "花蓮縣") {
+							fee = 90;
+						}
+					} else {
+						fee = fixedShippingFee;
+					}
+					return fee;
+				}
 
-				document.addEventListener("DOMContentLoaded", () => {
-					initCountryOptions();
-					onCountryChange();
-					// 更新優惠券折扣和總計
-					updateGrandTotal();
-				});
+				// 更新送貨資料卡片中的運費顯示
+				function updateShippingCardFee() {
+					console.log("updateShippingCardFee: shippingMethod =", shippingMethod);
+					// 如果為固定運費方式，直接設定文字並回傳固定費用
+					if (shippingMethod === "711-cod" || shippingMethod === "711-no-cod") {
+						document.querySelectorAll(".shippingCardFeeText").forEach(el => {
+							el.textContent = "運費 NT$" + fixedShippingFee;
+						});
+						return fixedShippingFee;
+					}
+					// 否則依照下拉選單判斷
+					const districtSelect = document.getElementById("district");
+					const fee = getShippingFee();
+					const feeText = (districtSelect.value === "") ? "將於確認送貨地址後顯示運費" : "運費 NT$" + fee;
+					document.querySelectorAll(".shippingCardFeeText").forEach(el => {
+						el.textContent = feeText;
+					});
+					return fee;
+				}
 
-				// 更新總計 //
+				// 更新購物車表格中的運費列
+				function updateCartShippingFeeUI() {
+					if (shippingMethod === "711-cod" || shippingMethod === "711-no-cod") {
+						document.getElementById("cartShippingFeeAlert").textContent = "NT$" + fixedShippingFee;
+						return fixedShippingFee;
+					}
+
+					const districtSelect = document.getElementById("district");
+					if (districtSelect.value === "") {
+						document.getElementById("cartShippingFeeAlert").textContent = "將於確認送貨地址後顯示運費";
+						return 0;
+					} else {
+						const fee = getShippingFee();
+						document.getElementById("cartShippingFeeAlert").textContent = "NT$" + fee;
+						return fee;
+					}
+				}
+
+				// 更新合計金額：購物車小計 + 運費 - 優惠券折扣，同時控制優惠券行顯示
 				function updateGrandTotal() {
-					// 從小計欄位讀取當前小計
-					const currentSubtotal = parseInt(document.getElementById("subtotalAmount").textContent.replace("$", "")) || 0;
-					// 從送貨資訊抓取運費
-					const shippingFee = updateShippingFeeFromShippingInfo();
-					const grandTotalValue = currentSubtotal + shippingFee - couponDiscountOverall;
+					const subtotal = parseInt(document.getElementById("subtotalAmount").textContent.replace("$", "")) || 0;
+					const shippingFee = updateCartShippingFeeUI();
+					const grandTotalValue = subtotal + shippingFee - couponDiscountOverall;
 					document.getElementById("grandTotal").textContent = "$" + grandTotalValue;
 					document.getElementById("paymentGrandTotal").textContent = "$" + grandTotalValue;
-
-					// 控制優惠券行的顯示：當折扣大於 0 時顯示，否則隱藏
+					// 更新優惠券行：若優惠折扣大於 0，顯示該行；否則隱藏
 					const couponRow = document.getElementById("couponDiscountRow");
 					if (couponDiscountOverall > 0) {
-						couponRow.style.display = "table-row";  // 對於 <tr> 元素使用 table-row
+						couponRow.style.display = "table-row";
 						document.getElementById("couponDiscount").textContent = "-$" + couponDiscountOverall;
 					} else {
 						couponRow.style.display = "none";
 					}
 				}
 
-				// 重新載入購物車資料 //
-				document.addEventListener("DOMContentLoaded", fetchCartData);
-
-				function updateShippingFeeFromShippingInfo() {
-					// 讀取運費文字，例如 "運費 NT$60"
-					const feeText = document.getElementById("shippingFeeText").textContent;
-					// 用正則表達式找出數字部分
-					const match = feeText.match(/\d+/);
-					const feeValue = match ? parseInt(match[0], 10) : 0;
-					// 更新表尾中運費的內容
-					document.getElementById("shippingFee").textContent = "$" + feeValue;
-					// 回傳數字方便更新合計
-					return feeValue;
-				}
-
+				// 從 API 拿購物車資料並更新頁面
 				async function fetchCartData() {
 					try {
 						const response = await fetch("/api/cart");
@@ -873,9 +934,7 @@
 						currentSubtotal = recalcSubtotal(cartItems);
 						const cartItemsContainer = document.getElementById("cartItems");
 						cartItemsContainer.innerHTML = "";
-
 						cartItems.forEach((item) => {
-							// 從 sessionStorage 中讀取用戶在 cart 頁面選定的數量
 							const storedQuantity = sessionStorage.getItem("cartItem_" + item.cartItemId);
 							if (storedQuantity !== null) {
 								item.quantity = parseInt(storedQuantity);
@@ -883,21 +942,20 @@
 							}
 							const row = document.createElement("tr");
 							row.innerHTML = `
-				            	<td class="text-center align-middle">
-				                	<img src="${item.product.imageUrl}" alt="" class="img-fluid rounded-circle" style="width:80px; height:80px;">
-				                </td>
-				               	<td class="text-center align-middle">${item.product.productName}</td>
-				                <td class="text-center align-middle">$${item.price}</td>
-				                <td class="text-center align-middle">
-									<div class="d-flex justify-content-center align-items-center mx-auto" style="width:100px;">
-										<span id="quantity-${item.cartItemId}" class="text-center">${item.quantity}</span>
-									</div>
-								</td>
-				                <td class="text-center align-middle">$${item.subTotal}</td>
+				              <td class="text-center align-middle">
+				                <img src="${item.product.imageUrl}" alt="" class="img-fluid rounded-circle" style="width:80px; height:80px;">
+				              </td>
+				              <td class="text-center align-middle">${item.product.productName}</td>
+				              <td class="text-center align-middle">$${item.price}</td>
+				              <td class="text-center align-middle">
+				                <div class="d-flex justify-content-center align-items-center mx-auto" style="width:100px;">
+				                  <span id="quantity-${item.cartItemId}" class="text-center">${item.quantity}</span>
+				                </div>
+				              </td>
+				              <td class="text-center align-middle">$${item.subTotal}</td>
 				            `;
 							cartItemsContainer.appendChild(row);
 						});
-
 						document.getElementById("subtotalAmount").textContent = "$" + currentSubtotal;
 						updateGrandTotal();
 					} catch (error) {
@@ -905,10 +963,13 @@
 					}
 				}
 
-				// 地址下拉選單 //
+				// 假設 shippingMethod 由後端傳入，若無則預設為 "711-cod"
+				var shippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
+
+				// 地址下拉選單與運費更新邏輯
 				document.addEventListener("DOMContentLoaded", function () {
-					// 定義城市與地區的對應資料
-					var cityDistricts = {
+					// 定義城市與地區對應資料
+					var hctCityDistricts = {
 						"台北市": ["100中正區", "103大同區", "104中山區", "105松山區", "106大安區",
 							"108萬華區", "110信義區", "111士林區", "112北投區", "114內湖區",
 							"115南港區", "116文山區"],
@@ -986,13 +1047,23 @@
 							"963太麻里鄉", "964金峰鄉", "965大武鄉", "966達仁鄉"],
 						"花蓮縣": ["970花蓮市", "971新城鄉", "972秀林鄉", "973吉安鄉", "974壽豐鄉",
 							"975鳳林鎮", "976光復鄉", "977豐濱鄉", "978瑞穗鄉", "979萬榮鄉",
-							"981玉里鎮", "982卓溪鄉", "983富里鄉"],
+							"981玉里鎮", "982卓溪鄉", "983富里鄉"]
 					};
 
+					var outerIslandCityDistricts = {
+						"屏東縣": ["929琉球鄉"],
+						"台東縣": ["951綠島鄉", "952蘭嶼鄉"],
+						"澎湖縣": ["880馬公市", "881西嶼鄉", "882望安鄉", "883七美鄉", "884白沙鄉", "885湖西鄉"],
+						"金門縣": ["890金沙鎮", "891金湖鄉", "892金寧鄉", "893金城鄉", "894烈嶼鄉", "896烏坵鄉"],
+						"連江縣": ["209南竿鄉", "210北竿鄉", "211莒光鄉", "212東引鄉"]
+					};
+
+					// 根據 shippingMethod 選擇使用的地址資料
+					var addressOptions = (shippingMethod === "outer-island") ? outerIslandCityDistricts : hctCityDistricts;
 					var citySelect = document.getElementById("city");
 					var districtSelect = document.getElementById("district");
 
-					// citySelect 提示選項「城市/縣」
+					// 初始化城市下拉選單提示
 					citySelect.innerHTML = "";
 					var defaultCityOption = document.createElement("option");
 					defaultCityOption.value = "";
@@ -1001,7 +1072,7 @@
 					defaultCityOption.selected = true;
 					citySelect.appendChild(defaultCityOption);
 
-					// districtSelect 提示選項「地區」，預設禁用
+					// 初始化區下拉選單提示
 					districtSelect.innerHTML = "";
 					var defaultDistOption = document.createElement("option");
 					defaultDistOption.value = "";
@@ -1009,22 +1080,30 @@
 					defaultDistOption.disabled = true;
 					defaultDistOption.selected = true;
 					districtSelect.appendChild(defaultDistOption);
-					districtSelect.disabled = true; // 預設禁用
+					districtSelect.disabled = true;
 
-					// 動態填入城市/縣選項
-					for (var city in cityDistricts) {
+					// 填入城市選項
+					for (var city in addressOptions) {
 						var option = document.createElement("option");
 						option.value = city;
 						option.textContent = city;
 						citySelect.appendChild(option);
 					}
 
-					// 當城市選項改變時，更新地區選單
+					// 當城市選項改變時，更新區選單及重置運費提示
 					function updateDistrictOptions() {
-						var selectedCity = citySelect.value;
-						var districts = cityDistricts[selectedCity] || [];
+						// 如果為固定運費方式，直接更新並 return
+						if (shippingMethod === "711-cod" || shippingMethod === "711-no-cod") {
+							document.querySelectorAll(".shippingCardFeeText").forEach(el => {
+								el.textContent = "運費 NT$" + fixedShippingFee;
+							});
+							updateCartShippingFeeUI();
+							updateGrandTotal();
+							return;
+						}
 
-						// 若沒選城市，districtSelect 保持「地區」並禁用
+						var selectedCity = citySelect.value;
+						var districts = addressOptions[selectedCity] || [];
 						if (!selectedCity) {
 							districtSelect.innerHTML = "";
 							var defaultDist = document.createElement("option");
@@ -1036,10 +1115,8 @@
 							districtSelect.disabled = true;
 							return;
 						}
-
-						// 有選城市，重新生成地區選單
 						districtSelect.innerHTML = "";
-						districtSelect.disabled = false; // 啟用地區下拉
+						districtSelect.disabled = false;
 						var defaultDistOption = document.createElement("option");
 						defaultDistOption.value = "";
 						defaultDistOption.textContent = "地區";
@@ -1047,21 +1124,32 @@
 						defaultDistOption.selected = true;
 						districtSelect.appendChild(defaultDistOption);
 
-						// 生成對應的地區選項
 						districts.forEach(function (dist) {
 							var option = document.createElement("option");
 							option.value = dist;
 							option.textContent = dist;
 							districtSelect.appendChild(option);
 						});
+
+						// 更新運費顯示
+						updateShippingCardFee();
+						updateCartShippingFeeUI();
+						updateGrandTotal();
 					}
-
-					// 綁定事件
 					citySelect.addEventListener("change", updateDistrictOptions);
-
-					// 初始化時更新地區選單
+					districtSelect.addEventListener("change", function () {
+						// 更新送貨資料卡片運費
+						updateShippingCardFee();
+						// 更新購物車運費
+						updateCartShippingFeeUI();
+						updateGrandTotal();
+					});
 					updateDistrictOptions();
 				});
+
+				// 重新載入購物車資料
+				document.addEventListener("DOMContentLoaded", fetchCartData);
+
 				/*]]>*/
 			</script>
 
