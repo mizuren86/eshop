@@ -48,6 +48,9 @@ public class UsersService {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private EmailService emailService;
+
     // 創建用戶
     @Transactional
     public Users createUser(UsersDTO userDTO) {
@@ -292,5 +295,37 @@ public class UsersService {
 
     public void logout(String token) {
         // TODO: 實現登出邏輯，例如使 token 失效
+    }
+
+    // 發送重置密碼郵件
+    @Transactional
+    public void sendResetPasswordEmail(String email) {
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("找不到該郵箱對應的用戶"));
+
+        // 生成驗證碼
+        String verificationCode = emailVerificationService.generateVerificationCode();
+
+        // 保存驗證碼
+        emailVerificationService.saveVerificationToken(email);
+
+        // 發送重置密碼郵件
+        emailService.sendResetPasswordEmail(email, verificationCode);
+    }
+
+    // 重置密碼
+    @Transactional
+    public void resetPassword(String email, String verificationCode, String newPassword) {
+        // 驗證驗證碼
+        if (!emailVerificationService.verifyToken(email, verificationCode)) {
+            throw new RuntimeException("驗證碼無效或已過期");
+        }
+
+        // 更新密碼
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("找不到該郵箱對應的用戶"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

@@ -68,7 +68,7 @@ public class EmailVerificationService {
         return emailVerificationRepository.findByEmailAndIsVerifiedTrue(email).isPresent();
     }
 
-    private String generateVerificationCode() {
+    public String generateVerificationCode() {
         Random random = new Random();
         return String.format("%06d", random.nextInt(1000000));
     }
