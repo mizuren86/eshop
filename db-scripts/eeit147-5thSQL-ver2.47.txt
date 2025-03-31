@@ -240,7 +240,7 @@ VALUES
 -- 插入假資料到 users 表
 -- [password] 統一為'123'
 INSERT INTO users (username, [password], email, full_name, phone, user_photo, [address]) VALUES
-('alice123', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG.', 'alice@example.com', 'Alice Johnson', '0912345678', 'alice.jpg', '台北市信義區123號'),
+('alice123', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'alice@example.com', 'Alice Johnson', '0912345678', 'alice.jpg', '台北市信義區123號'),
 ('bob456', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'bob@example.com', 'Bob Smith', '0923456789', 'bob.jpg', '台中市南屯區456號'),
 ('charlie789', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'charlie@example.com', 'Charlie Brown', '0934567890', 'charlie.jpg', '高雄市三民區789號'),
 ('tomlee', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'tomlee@example.com', 'Tom Lee', '0911222333', 'tomlee.jpg', '台北市中正區100號'),
