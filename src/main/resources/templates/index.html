@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
   layout:decorate="~{/base}">
-
 <head>
   <meta charset="utf-8">
-
   <title>Home - Fruitables</title>
 </head>
 
@@ -62,6 +60,30 @@
     <div class="container">
       <h2>Welcome to Fruitables!</h2>
       <p>This is your homepage content.</p>
+      <!-- 此段是曾毓皓增加的 -->
+      <div id="adCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="img/pom1.jpg" class="img-fluid w-100 h-100 rounded" alt="Ad 1">
+        </div>
+        <div class="carousel-item">
+            <img src="img/吉娃娃1.jpg" class="img-fluid w-100 h-100 rounded" alt="Ad 2">
+        </div>
+        <div class="carousel-item">
+            <img src="img/貴賓1.jpg" class="img-fluid w-100 h-100 rounded" alt="Ad 3">
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#adCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#adCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+    </div>
+    
+    <h2>反應力測試</h2>
+    <button id="reactionBtn" style="padding: 10px 20px;">等候開始...</button>
+    <p id="result"></p>
     </div>
 
 
@@ -103,6 +125,36 @@
           window.location.href = '/login';
         });
     }
+    
+    
+    /*曾毓皓增加的*/
+    let startTime, endTime;
+    const btn = document.getElementById("reactionBtn");
+    
+    function startGame() {
+        btn.innerHTML = "準備...";
+        btn.style.backgroundColor = "red";
+        setTimeout(() => {
+            startTime = Date.now();
+            btn.innerHTML = "快點我！";
+            btn.style.backgroundColor = "green";
+        }, Math.random() * 3000 + 2000);
+    }
+
+    btn.addEventListener("click", function() {
+        if (btn.style.backgroundColor === "green") {
+            endTime = Date.now();
+            let reactionTime = (endTime - startTime) / 1000;
+            document.getElementById("result").innerHTML = `你的反應時間是：${reactionTime} 秒！`;
+            btn.innerHTML = "再試一次";
+            btn.style.backgroundColor = "";
+        } else {
+            document.getElementById("result").innerHTML = "太快了！等它變綠色再點！";
+        }
+    });
+
+    startGame();
+    /**/
     /*]]>*/
   </script>
 </body>

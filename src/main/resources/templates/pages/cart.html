@@ -241,7 +241,7 @@
 				        updateGrandTotal();
 				        return;
 				    }
-
+                    //try裡面增加了未達目標金額(data.targetAmount>currentSubtotal)的限制
 				    try {
 				        // 呼叫後端 API 驗證優惠券
 				        const response = await fetch(`/api/coupons/validate?couponCode=${encodeURIComponent(couponCode)}`);
@@ -254,7 +254,11 @@
 				            couponDiscountOverall = 0;
 							// 隱藏折扣區塊
 							document.getElementById("couponDiscountContainer").style.display = "none";
-				        } else {
+				        } else if(data.targetAmount>currentSubtotal){
+				        	alert("未能達到該優惠券的目標金額，目標金額："+data.targetAmount);
+				        	couponDiscountOverall = 0;
+				        }
+				        else {
 				            couponDiscountOverall = data.discountAmount;
 				            alert("折扣金額: " + couponDiscountOverall);
 							// 顯示折扣區塊
