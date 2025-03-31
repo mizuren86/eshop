@@ -10,7 +10,7 @@
 <body>
   <div layout:fragment="content">
     <!-- 登入提示標記 (隱藏) -->
-    <div th:if="${showLoginModal}" id="showLoginModalFlag" style="display:none;"></div>
+    <div th:if="${showLoginModal == true}" id="showLoginModalFlag" style="display:none;"></div>
     
     <!-- 錯誤訊息顯示 -->
     <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">

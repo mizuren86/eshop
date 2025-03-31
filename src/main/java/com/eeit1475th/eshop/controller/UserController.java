@@ -4,6 +4,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class UserController {
 
@@ -30,8 +35,20 @@ public class UserController {
     }
 
     @GetMapping("/logout")
-    public String logoutPage(Model model) {
+    public String logoutPage(Model model,HttpServletRequest request,HttpServletResponse response) {
         model.addAttribute("pageTitle", "登出");
-        return "pages/logout.html";
+     // 清除 Session
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate(); // 使當前 Session 失效
+        }
+        
+        // 清除瀏覽器的 JSESSIONID Cookie（可選但建議）
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setPath(request.getContextPath());
+        cookie.setMaxAge(0); // 立即過期
+        response.addCookie(cookie);
+        
+        return "redirect:/"; // 導回首頁
     }
 }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +23,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.eeit1475th.eshop.member.entity.Users;
+import com.eeit1475th.eshop.member.service.JwtService;
 import com.eeit1475th.eshop.product.entity.Products;
 import com.eeit1475th.eshop.review.dto.ReviewsDto;
 import com.eeit1475th.eshop.review.entity.Reviews;
@@ -30,10 +35,6 @@ import com.eeit1475th.eshop.review.repository.ReviewsRepository;
 import com.eeit1475th.eshop.review.service.ReviewsService;
 
 import jakarta.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -43,6 +44,7 @@ public class ReviewController {
 
     private final ReviewsService reviewsService;
     private final ReviewsRepository reviewsRepository;
+//    private final JwtService jwtService;
     
 
     @GetMapping("/product/{productId}")
@@ -95,9 +97,12 @@ public class ReviewController {
     }
     
     @GetMapping("/createreviews/{productId}")
-    public String createReviews(@PathVariable Integer productId, Model m) {
-    	logger.info("Attempting to load template: pages/creatreviews");
+    public String createReviews(@PathVariable Integer productId, Model m,@SessionAttribute(value = "user", required = false) Users user) {
+    	logger.info("Attempting to load template: pages/creatreviews");    	
         m.addAttribute("productId", productId);
+        if (user == null) {
+        	return "/404";
+        }
         return "/pages/creatreviews";
     }
     
@@ -107,18 +112,18 @@ public class ReviewController {
             @RequestParam("rating") Integer rating,
             @RequestParam(value = "comment", required = false) String comment,
             @RequestParam(value = "photoFile", required = false) MultipartFile photoFile,
-            @RequestHeader(value = "Authorization", required = false) String token,
+            @SessionAttribute(value = "user", required = false) Users user,
             HttpServletRequest request,
             Model model) {
         
         // 檢查登入狀態
-        if (token == null || token.isEmpty()) {
-            model.addAttribute("showLoginModal", true); // 新增標記
+        if (user == null) {
+            model.addAttribute("showLoginModal", true);
             model.addAttribute("productId", productId);
-            //System.out.println("showLoginModal 被設定為 true"); // Debug 訊息
-            return "/pages/creatreviews"; // 返回商店首頁
+            System.out.println("showLoginModal 被設定為 true"); // Debug 訊息
+            return "/pages/creatreviews";
         }
-        
+        System.out.println("使用者ID為:"+user.getUserId());
         try {
             Reviews review = new Reviews();
             Products product = new Products();
@@ -142,7 +147,8 @@ public class ReviewController {
                 }
             }
             
-            reviewsService.createReview(review, token);
+            // 使用 userId 建立評論
+            reviewsService.createReview(review, user.getUserId());
             return "redirect:/"; // 導回首頁
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
