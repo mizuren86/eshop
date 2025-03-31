@@ -5,6 +5,13 @@
 <head>
 	<meta charset="utf-8">
 	<title>Shop Detail - Fruitables</title>
+	<style>
+		.product-image {
+			width: 100%;
+			max-height: 400px;
+			object-fit: cover;
+		}
+	</style>
 </head>
 
 <body>
@@ -30,15 +37,15 @@
 							<div class="col-lg-6">
 								<div class="border rounded">
 									<a href="#">
-										<img th:src="@{/img/hero-img-1.png}" class="img-fluid rounded"
+										<img th:src="@{${product.imageUrl}}" class="img-fluid rounded product-image"
 											alt="Product Image">
 									</a>
 								</div>
 							</div>
 							<div class="col-lg-6">
 								<h4 class="fw-bold mb-3" th:text="${product.productName}">Product Name</h4>
-								<p class="mb-3">Category: Vegetables</p>
-								<h5 class="fw-bold mb-3">3,35 $</h5>
+								<p class="mb-3">Fruite</p>
+								<h5 class="fw-bold mb-3" th:text="'$' + ${product.unitPrice}">Price</h5>
 								<div class="d-flex mb-4">
 									<i class="fa fa-star text-secondary"></i>
 									<i class="fa fa-star text-secondary"></i>
@@ -70,15 +77,8 @@
 										</button>
 									</div>
 								</div>
-								
-						<!--	
-								<a th:href="@{/cart}"
-									class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary">
-									<i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
-								</a>
-						-->
-						
-						
+
+
 								<!-- 年測試 -->
 								<button class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"
 									th:onclick="'addToCart(' + ${product.productId} + ')'">

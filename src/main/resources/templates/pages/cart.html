@@ -1,313 +1,364 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{/base}">
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{/base}"
+>
+    <head>
+        <meta charset="utf-8" />
+        <title>Cart - Fruitables</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        />
+        <style>
+            /* 下拉選單移除預設箭頭 */
+            .select-wrapper select {
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+            }
 
-<head>
-	<meta charset="utf-8" />
-	<title>Cart - Fruitables</title>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-	<style>
-		/* 下拉選單移除預設箭頭 */
-		.select-wrapper select {
-			-webkit-appearance: none;
-			-moz-appearance: none;
-			appearance: none;
-		}
+            /* position-relative 供箭頭絕對定位 */
+            .select-wrapper {
+                position: relative;
+                display: inline-block;
+                width: 100%;
+            }
 
-		/* position-relative 供箭頭絕對定位 */
-		.select-wrapper {
-			position: relative;
-			display: inline-block;
-			width: 100%;
-		}
+            /* 讓箭頭不攔截滑鼠事件 */
+            .select-wrapper .fa-caret-down {
+                pointer-events: none;
+            }
 
-		/* 讓箭頭不攔截滑鼠事件 */
-		.select-wrapper .fa-caret-down {
-			pointer-events: none;
-		}
+            /* 讓 select 右側預留空間給箭頭 */
+            .pe-arrow {
+                padding-right: 2rem !important;
+            }
 
-		/* 讓 select 右側預留空間給箭頭 */
-		.pe-arrow {
-			padding-right: 2rem !important;
-		}
+            /* 下拉選單專用的 class */
+            .form-control-select {
+                line-height: 2rem !important;
+                height: 2rem !important;
+                padding: 0.375rem 2rem 0.375rem 0.75rem !important;
+                box-sizing: border-box;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
-		/* 下拉選單專用的 class */
-		.form-control-select {
-			line-height: 2rem !important;
-			height: 2rem !important;
-			padding: 0.375rem 2rem 0.375rem 0.75rem !important;
-			box-sizing: border-box;
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-		}
+            /* 隱藏區塊 */
+            .hidden {
+                display: none !important;
+            }
 
-		/* 隱藏區塊 */
-		.hidden {
-			display: none !important;
-		}
+            /* 調整空購物車提示內部間距 */
+            #emptyCartMessage img {
+                max-width: 200px;
+                margin-bottom: 0.5rem;
+            }
 
-		/* 調整空購物車提示內部間距 */
-		#emptyCartMessage img {
-			max-width: 200px;
-			margin-bottom: 0.5rem;
-		}
+            #emptyCartMessage h5 {
+                margin-bottom: 0.5rem;
+            }
 
-		#emptyCartMessage h5 {
-			margin-bottom: 0.5rem;
-		}
+            #emptyCartMessage p {
+                margin-top: 1.5rem;
+                margin-bottom: 3rem;
+            }
+        </style>
+    </head>
 
-		#emptyCartMessage p {
-			margin-top: 1.5rem;
-			margin-bottom: 3rem;
-		}
-	</style>
-</head>
+    <body>
+        <div layout:fragment="content">
+            <!-- 頁首 -->
+            <header class="container-fluid page-header py-5">
+                <h1 class="text-center text-white display-6">Cart</h1>
+                <nav aria-label="breadcrumb" class="breadcrumb justify-content-center">
+                    <a th:href="@{/index}" class="breadcrumb-item">Home</a>
+                    <span class="breadcrumb-item active text-white">Cart</span>
+                </nav>
+            </header>
 
-<body>
-	<div layout:fragment="content">
-		<!-- 頁首 -->
-		<header class="container-fluid page-header py-5">
-			<h1 class="text-center text-white display-6">Cart</h1>
-			<nav aria-label="breadcrumb" class="breadcrumb justify-content-center">
-				<a th:href="@{/index}" class="breadcrumb-item">Home</a>
-				<span class="breadcrumb-item active text-white">Cart</span>
-			</nav>
-		</header>
+            <!-- 購物車內容 -->
+            <main class="container py-5">
+                <!-- 購物車清單 -->
+                <section class="cart-table-section card p-4 mb-4" id="cartSection">
+                    <h4 class="mb-3">購物車</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th class="text-center"></th>
+                                    <th class="text-center">品名</th>
+                                    <th class="text-center">價格</th>
+                                    <th class="text-center">數量</th>
+                                    <th class="text-center">小計</th>
+                                    <th class="text-center"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cartItems">
+                                <!-- 由 fetchCartData() 動態生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
 
-		<!-- 購物車內容 -->
-		<main class="container py-5">
-			<!-- 購物車清單 -->
-			<section class="cart-table-section card p-4 mb-4" id="cartSection">
-				<h4 class="mb-3">購物車</h4>
-				<div class="table-responsive">
-					<table class="table">
-						<thead>
-							<tr>
-								<th class="text-center"></th>
-								<th class="text-center">品名</th>
-								<th class="text-center">價格</th>
-								<th class="text-center">數量</th>
-								<th class="text-center">小計</th>
-								<th class="text-center"></th>
-							</tr>
-						</thead>
-						<tbody id="cartItems">
-							<!-- 由 fetchCartData() 動態生成 -->
-						</tbody>
-					</table>
-				</div>
-			</section>
+                <!-- 空購物車提示 (預設隱藏) -->
+                <div id="emptyCartMessage" class="text-center d-none">
+                    <img src="img/cart.png" alt="Empty Cart" style="max-width: 200px; margin-bottom: 1rem" />
+                    <h5 class="mb-3">你的購物車是空的</h5>
+                    <p class="text-muted">記得加入商品到你的購物車</p>
+                    <button
+                        class="btn btn-primary"
+                        style="width: 200px"
+                        onclick="window.location.href='/shop'"
+                    >
+                        繼續購物
+                    </button>
+                </div>
 
-			<!-- 空購物車提示 (預設隱藏) -->
-			<div id="emptyCartMessage" class="text-center d-none">
-				<img src="img/cart.png" alt="Empty Cart" style="max-width: 200px; margin-bottom: 1rem;" />
-				<h5 class="mb-3">你的購物車是空的</h5>
-				<p class="text-muted">記得加入商品到你的購物車</p>
-				<button class="btn btn-primary" style="width: 200px;" onclick="window.location.href='/shop'">
-					繼續購物
-				</button>
-			</div>
+                <!-- 結帳流程主內容：購物車有商品時才會顯示 -->
+                <div id="fullCartContent">
+                    <!-- 左右分欄：左邊選擇送貨及付款方式，右邊訂單資訊 -->
+                    <div class="row">
+                        <!-- 左邊：選擇送貨及付款方式 -->
+                        <div class="col-lg-8 mb-4">
+                            <section class="shipping-payment card p-4">
+                                <h4 class="mb-3">選擇送貨及付款方式</h4>
 
-			<!-- 結帳流程主內容：購物車有商品時才會顯示 -->
-			<div id="fullCartContent">
-				<!-- 左右分欄：左邊選擇送貨及付款方式，右邊訂單資訊 -->
-				<div class="row">
-					<!-- 左邊：選擇送貨及付款方式 -->
-					<div class="col-lg-8 mb-4">
-						<section class="shipping-payment card p-4">
-							<h4 class="mb-3">選擇送貨及付款方式</h4>
+                                <!-- 送貨地點 -->
+                                <div class="form-group mb-3 select-wrapper">
+                                    <label for="deliveryCountry" class="form-label">送貨地點</label>
+                                    <select id="deliveryCountry" class="form-control pe-arrow">
+                                        <!-- 動態生成國家選項 -->
+                                    </select>
+                                    <i
+                                        class="fa fa-caret-down position-absolute"
+                                        style="top: 2.7rem; right: 1rem"
+                                    ></i>
+                                </div>
 
-							<!-- 送貨地點 -->
-							<div class="form-group mb-3 select-wrapper">
-								<label for="deliveryCountry" class="form-label">送貨地點</label>
-								<select id="deliveryCountry" class="form-control pe-arrow">
-									<!-- 動態生成國家選項 -->
-								</select>
-								<i class="fa fa-caret-down position-absolute" style="top: 2.7rem; right: 1rem"></i>
-							</div>
+                                <!-- 送貨方式 -->
+                                <div class="form-group mb-3 select-wrapper">
+                                    <label for="deliveryMethod" class="form-label">送貨方式</label>
+                                    <select id="deliveryMethod" class="form-control pe-arrow">
+                                        <!-- 動態生成送貨方式選項 -->
+                                    </select>
+                                    <i
+                                        class="fa fa-caret-down position-absolute"
+                                        style="top: 2.7rem; right: 1rem"
+                                    ></i>
+                                    <small
+                                        id="deliveryNote"
+                                        class="text-muted d-block mt-2"
+                                        style="font-size: 0.9rem"
+                                    ></small>
+                                </div>
 
-							<!-- 送貨方式 -->
-							<div class="form-group mb-3 select-wrapper">
-								<label for="deliveryMethod" class="form-label">送貨方式</label>
-								<select id="deliveryMethod" class="form-control pe-arrow">
-									<!-- 動態生成送貨方式選項 -->
-								</select>
-								<i class="fa fa-caret-down position-absolute" style="top: 2.7rem; right: 1rem"></i>
-								<small id="deliveryNote" class="text-muted d-block mt-2"
-									style="font-size: 0.9rem"></small>
-							</div>
+                                <!-- 付款方式 -->
+                                <div class="form-group mb-3 select-wrapper">
+                                    <label for="paymentMethod" class="form-label">付款方式</label>
+                                    <select id="paymentMethod" class="form-control pe-arrow">
+                                        <!-- 動態生成付款方式選項 -->
+                                    </select>
+                                    <i
+                                        class="fa fa-caret-down position-absolute"
+                                        style="top: 2.7rem; right: 1rem"
+                                    ></i>
+                                    <div
+                                        id="paymentMessage"
+                                        class="mt-2"
+                                        style="color: #ff9900; font-size: 0.9rem"
+                                    ></div>
+                                </div>
+                            </section>
+                        </div>
 
-							<!-- 付款方式 -->
-							<div class="form-group mb-3 select-wrapper">
-								<label for="paymentMethod" class="form-label">付款方式</label>
-								<select id="paymentMethod" class="form-control pe-arrow">
-									<!-- 動態生成付款方式選項 -->
-								</select>
-								<i class="fa fa-caret-down position-absolute" style="top: 2.7rem; right: 1rem"></i>
-								<div id="paymentMessage" class="mt-2" style="color: #ff9900; font-size: 0.9rem"></div>
-							</div>
-						</section>
-					</div>
+                        <!-- 右邊：訂單資訊 -->
+                        <div class="col-lg-4">
+                            <aside class="order-summary card p-4">
+                                <h4 class="mb-3">訂單資訊</h4>
+                                <!-- 小計 -->
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span>小計：</span>
+                                    <span id="subtotalAmount">$0</span>
+                                </div>
+                                <!-- 運費 -->
+                                <div id="shippingFeeRow" class="d-flex justify-content-between mb-3">
+                                    <span>運費：</span>
+                                    <span id="shippingFee">$0</span>
+                                </div>
+                                <!-- 優惠代碼 -->
+                                <div class="coupon-section mb-3">
+                                    <a
+                                        href="#"
+                                        id="showCouponLink"
+                                        class="text-primary"
+                                        style="text-decoration: underline"
+                                    >
+                                        使用優惠代碼
+                                    </a>
+                                    <!-- input + button，預設隱藏 -->
+                                    <div id="couponForm" style="display: none; margin-top: 1rem">
+                                        <label for="couponInput" class="form-label"
+                                            >優惠代碼(一筆訂單限用一組優惠碼)</label
+                                        >
+                                        <div class="input-group">
+                                            <input
+                                                type="text"
+                                                id="couponInput"
+                                                class="form-control rounded-1"
+                                                placeholder="輸入優惠代碼"
+                                            />
+                                            <button
+                                                id="applyCouponBtn"
+                                                class="btn btn-outline-secondary rounded-1 text-primary ms-2"
+                                                type="button"
+                                            >
+                                                套用
+                                            </button>
+                                        </div>
+                                        <!-- 優惠券折扣，預設隱藏 -->
+                                        <div
+                                            id="couponDiscountContainer"
+                                            class="justify-content-between mb-3 mt-3"
+                                            style="display: none"
+                                        >
+                                            <span>折扣</span>
+                                            <span id="couponDiscount">-$0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <!-- 運費提示訊息，預設隱藏 d-none -->
+                                <div id="shippingFeeNote" class="alert alert-info d-none">
+                                    運費將於填寫送貨地址後，於結帳頁顯示。
+                                </div>
+                                <!-- 結帳金額 -->
+                                <div id="grandTotalRow" class="d-flex justify-content-between mb-3">
+                                    <span>合計：</span>
+                                    <span id="grandTotal">$0</span>
+                                </div>
+                                <!-- 前往結帳 -->
+                                <button
+                                    id="goToCheckout"
+                                    class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase"
+                                >
+                                    去買單
+                                </button>
+                            </aside>
+                        </div>
+                    </div>
+                </div>
+            </main>
 
-					<!-- 右邊：訂單資訊 -->
-					<div class="col-lg-4">
-						<aside class="order-summary card p-4">
-							<h4 class="mb-3">訂單資訊</h4>
-							<!-- 小計 -->
-							<div class="d-flex justify-content-between mb-3">
-								<span>小計：</span>
-								<span id="subtotalAmount">$0</span>
-							</div>
-							<!-- 運費 -->
-							<div id="shippingFeeRow" class="d-flex justify-content-between mb-3">
-								<span>運費：</span>
-								<span id="shippingFee">$0</span>
-							</div>
-							<!-- 優惠代碼 -->
-							<div class="coupon-section mb-3">
-								<a href="#" id="showCouponLink" class="text-primary" style="text-decoration: underline">
-									使用優惠代碼
-								</a>
-								<!-- input + button，預設隱藏 -->
-								<div id="couponForm" style="display: none; margin-top: 1rem">
-									<label for="couponInput" class="form-label">優惠代碼(一筆訂單限用一組優惠碼)</label>
-									<div class="input-group">
-										<input type="text" id="couponInput" class="form-control rounded-1"
-											placeholder="輸入優惠代碼" />
-										<button id="applyCouponBtn"
-											class="btn btn-outline-secondary rounded-1 text-primary ms-2" type="button">
-											套用
-										</button>
-									</div>
-									<!-- 優惠券折扣，預設隱藏 -->
-									<div id="couponDiscountContainer" class="justify-content-between mb-3 mt-3"
-										style="display: none;">
-										<span>折扣</span>
-										<span id="couponDiscount">-$0</span>
-									</div>
-								</div>
-							</div>
-							<hr />
-							<!-- 運費提示訊息，預設隱藏 d-none -->
-							<div id="shippingFeeNote" class="alert alert-info d-none">
-								運費將於填寫送貨地址後，於結帳頁顯示。
-							</div>
-							<!-- 結帳金額 -->
-							<div id="grandTotalRow" class="d-flex justify-content-between mb-3">
-								<span>合計：</span>
-								<span id="grandTotal">$0</span>
-							</div>
-							<!-- 前往結帳 -->
-							<button id="goToCheckout"
-								class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase">
-								去買單
-							</button>
-						</aside>
-					</div>
-				</div>
-			</div>
-		</main>
+            <!-- JavaScript 區塊 -->
+            <script th:inline="javascript">
+                /*<![CDATA[*/
+                // 全域變數：保存購物車小記 //
+                let currentSubtotal = 0;
 
-		<!-- JavaScript 區塊 -->
-		<script th:inline="javascript">
-			/*<![CDATA[*/
-			// 全域變數：保存購物車小記 //
-			let currentSubtotal = 0;
+                // 全域變數：保存優惠券折扣跟資料庫比對 //
+                let couponDiscountOverall = 0;
 
-			// 全域變數：保存優惠券折扣跟資料庫比對 //
-			let couponDiscountOverall = 0;
+                // 重新計算小記 //
+                function recalcSubtotal(cartItems) {
+                    return cartItems.reduce((sum, item) => sum + item.subTotal, 0);
+                }
 
-			// 重新計算小記 //
-			function recalcSubtotal(cartItems) {
-				return cartItems.reduce((sum, item) => sum + item.subTotal, 0);
-			}
+                // 發送 API 請求驗證使用者輸入的優惠券代碼：優惠券有效則更新 couponDiscountOverall，並重新計算結帳金額 //
+                document.getElementById("applyCouponBtn").addEventListener("click", async function () {
+                    const couponCode = document.getElementById("couponInput").value.trim();
+                    if (!couponCode) {
+                        alert("請輸入優惠碼");
+                        couponDiscountOverall = 0;
+                        updateGrandTotal();
+                        return;
+                    }
 
-			// 發送 API 請求驗證使用者輸入的優惠券代碼：優惠券有效則更新 couponDiscountOverall，並重新計算結帳金額 //
-			document.getElementById("applyCouponBtn").addEventListener("click", async function () {
-				const couponCode = document.getElementById("couponInput").value.trim();
-				if (!couponCode) {
-					alert("請輸入優惠碼");
-					couponDiscountOverall = 0;
-					updateGrandTotal();
-					return;
-				}
+                    //try裡面增加了未達目標金額(data.targetAmount>currentSubtotal)的限制
+                    try {
+                        // 呼叫後端 API 驗證優惠券
+                        const response = await fetch(
+                            `/api/coupons/validate?couponCode=${encodeURIComponent(couponCode)}`
+                        );
+                        if (!response.ok) throw new Error("無法驗證優惠券");
+                        const data = await response.json();
 
-				try {
-					// 呼叫後端 API 驗證優惠券
-					const response = await fetch(`/api/coupons/validate?couponCode=${encodeURIComponent(couponCode)}`);
-					if (!response.ok) throw new Error("無法驗證優惠券");
-					const data = await response.json();
+                        // 假設回傳的資料格式為 { discountAmount: 100, valid: true, message: "..." }
+                        if (!data.valid) {
+                            alert("優惠碼無效或已過期");
+                            couponDiscountOverall = 0;
+                            // 隱藏折扣區塊
+                            document.getElementById("couponDiscountContainer").style.display = "none";
+                        } else if (data.targetAmount > currentSubtotal) {
+                            alert("未能達到該優惠券的目標金額，目標金額：" + data.targetAmount);
+                            couponDiscountOverall = 0;
+                        } else {
+                            couponDiscountOverall = data.discountAmount;
+                            alert("折扣金額: " + couponDiscountOverall);
+                            // 顯示折扣區塊
+                            document.getElementById("couponDiscountContainer").style.display = "flex";
+                        }
+                    } catch (error) {
+                        console.error("Error applying coupon:", error);
+                        couponDiscountOverall = 0;
+                    }
+                    updateGrandTotal();
+                });
 
-					// 假設回傳的資料格式為 { discountAmount: 100, valid: true, message: "..." }
-					if (!data.valid) {
-						alert("優惠碼無效或已過期");
-						couponDiscountOverall = 0;
-						// 隱藏折扣區塊
-						document.getElementById("couponDiscountContainer").style.display = "none";
-					} else {
-						couponDiscountOverall = data.discountAmount;
-						alert("折扣金額: " + couponDiscountOverall);
-						// 顯示折扣區塊
-						document.getElementById("couponDiscountContainer").style.display = "flex";
-					}
-				} catch (error) {
-					console.error("Error applying coupon:", error);
-					couponDiscountOverall = 0;
-				}
-				updateGrandTotal();
-			});
+                // 更新結帳金額：合計 = 小記 + 運費 - 優惠券 //
+                function updateGrandTotal() {
+                    // 從全域變數取得優惠券折扣金額
+                    const couponDiscount = couponDiscountOverall;
 
-			// 更新結帳金額：合計 = 小記 + 運費 - 優惠券 //
-			function updateGrandTotal() {
-				// 從全域變數取得優惠券折扣金額
-				const couponDiscount = couponDiscountOverall;
+                    // 根據折扣數值動態控制折扣區塊的顯示
+                    const couponDiscountContainer = document.getElementById("couponDiscountContainer");
+                    if (couponDiscount > 0) {
+                        couponDiscountContainer.style.display = "flex";
+                    } else {
+                        couponDiscountContainer.style.display = "none";
+                    }
 
-				// 根據折扣數值動態控制折扣區塊的顯示
-				const couponDiscountContainer = document.getElementById("couponDiscountContainer");
-				if (couponDiscount > 0) {
-					couponDiscountContainer.style.display = "flex";
-				} else {
-					couponDiscountContainer.style.display = "none";
-				}
+                    // 更新前端優惠券折扣顯示
+                    document.getElementById("couponDiscount").textContent = "-$" + couponDiscount;
 
-				// 更新前端優惠券折扣顯示
-				document.getElementById("couponDiscount").textContent = "-$" + couponDiscount;
+                    // 取得運費並計算合計
+                    const shippingFee =
+                        parseInt(document.getElementById("shippingFee").textContent.replace("$", "")) || 0;
+                    const grandTotalValue = currentSubtotal + shippingFee - couponDiscount;
+                    document.getElementById("grandTotal").textContent = "$" + grandTotalValue;
+                }
 
-				// 取得運費並計算合計
-				const shippingFee =
-					parseInt(document.getElementById("shippingFee").textContent.replace("$", "")) || 0;
-				const grandTotalValue = currentSubtotal + shippingFee - couponDiscount;
-				document.getElementById("grandTotal").textContent = "$" + grandTotalValue;
-			}
+                // 載入購物車資料 //
+                async function fetchCartData() {
+                    try {
+                        const response = await fetch("/api/cart");
+                        if (!response.ok) throw new Error("Network response was not ok");
+                        const { cartItems, totalAmount } = await response.json();
 
-			// 載入購物車資料 //
-			async function fetchCartData() {
-				try {
-					const response = await fetch("/api/cart");
-					if (!response.ok) throw new Error("Network response was not ok");
-					const {cartItems, totalAmount} = await response.json();
+                        // 若購物車為空，隱藏購物車區塊和結帳內容，顯示空購物車提示
+                        if (cartItems.length === 0) {
+                            document.getElementById("cartSection").classList.add("d-none");
+                            document.getElementById("fullCartContent").classList.add("d-none");
+                            document.getElementById("emptyCartMessage").classList.remove("d-none");
+                            return;
+                        } else {
+                            // 若有商品，確保顯示購物車和結帳內容，隱藏空購物車提示
+                            document.getElementById("cartSection").classList.remove("d-none");
+                            document.getElementById("fullCartContent").classList.remove("d-none");
+                            document.getElementById("emptyCartMessage").classList.add("d-none");
+                        }
 
-					// 若購物車為空，隱藏購物車區塊和結帳內容，顯示空購物車提示
-					if (cartItems.length === 0) {
-						document.getElementById("cartSection").classList.add("d-none");
-						document.getElementById("fullCartContent").classList.add("d-none");
-						document.getElementById("emptyCartMessage").classList.remove("d-none");
-						return;
-					} else {
-						// 若有商品，確保顯示購物車和結帳內容，隱藏空購物車提示
-						document.getElementById("cartSection").classList.remove("d-none");
-						document.getElementById("fullCartContent").classList.remove("d-none");
-						document.getElementById("emptyCartMessage").classList.add("d-none");
-					}
+                        currentSubtotal = recalcSubtotal(cartItems);
+                        const cartItemsContainer = document.getElementById("cartItems");
+                        cartItemsContainer.innerHTML = "";
 
-					currentSubtotal = recalcSubtotal(cartItems);
-					const cartItemsContainer = document.getElementById("cartItems");
-					cartItemsContainer.innerHTML = "";
-
-					cartItems.forEach((item) => {
-						const row = document.createElement("tr");
-						row.innerHTML = `
+                        cartItems.forEach((item) => {
+                            const row = document.createElement("tr");
+                            row.innerHTML = `
                                             <td class="text-center align-middle">
                                                 <img src="${item.product.imageUrl}" alt="" class="img-fluid rounded-circle" style="width:80px; height:80px;">
                                             </td>
@@ -329,102 +380,102 @@
                                                 <button class="btn btn-danger" onclick="removeCartItem(${item.cartItemId})"><i class="fa fa-trash"></i></button>
                                             </td>
                                             `;
-						cartItemsContainer.appendChild(row);
-					});
+                            cartItemsContainer.appendChild(row);
+                        });
 
-					// 更新小計、結帳金額
-					document.getElementById("subtotalAmount").textContent = "$" + currentSubtotal;
-					updateGrandTotal();
-				} catch (error) {
-					console.error("Error fetching cart data:", error);
-					// 如果錯誤是由於未登录導致的，可以直接顯示空購物車提示
-					document.getElementById("cartSection").classList.add("d-none");
-					document.getElementById("fullCartContent").classList.add("d-none");
-					document.getElementById("emptyCartMessage").classList.remove("d-none");
-				}
-			}
+                        // 更新小計、結帳金額
+                        document.getElementById("subtotalAmount").textContent = "$" + currentSubtotal;
+                        updateGrandTotal();
+                    } catch (error) {
+                        console.error("Error fetching cart data:", error);
+                        // 如果錯誤是由於未登录導致的，可以直接顯示空購物車提示
+                        document.getElementById("cartSection").classList.add("d-none");
+                        document.getElementById("fullCartContent").classList.add("d-none");
+                        document.getElementById("emptyCartMessage").classList.remove("d-none");
+                    }
+                }
 
-			// "數量"輸入框即時更新數量 //
-			async function updateQuantityFromInput(cartItemId, newVal) {
-				let newQuantity = parseInt(newVal);
-				if (isNaN(newQuantity) || newQuantity < 1) {
-					newQuantity = 1;
-				}
-				try {
-					const response = await fetch(
-						`/api/cart/update?cartItemId=${cartItemId}&quantity=${newQuantity}`,
-						{method: "POST"}
-					);
-					if (!response.ok) throw new Error("Error updating quantity");
-					fetchCartData(); // 重新載入購物車資料
-				} catch (error) {
-					console.error("Error updating quantity from input:", error);
-				}
-			}
+                // "數量"輸入框即時更新數量 //
+                async function updateQuantityFromInput(cartItemId, newVal) {
+                    let newQuantity = parseInt(newVal);
+                    if (isNaN(newQuantity) || newQuantity < 1) {
+                        newQuantity = 1;
+                    }
+                    try {
+                        const response = await fetch(
+                            `/api/cart/update?cartItemId=${cartItemId}&quantity=${newQuantity}`,
+                            { method: "POST" }
+                        );
+                        if (!response.ok) throw new Error("Error updating quantity");
+                        fetchCartData(); // 重新載入購物車資料
+                    } catch (error) {
+                        console.error("Error updating quantity from input:", error);
+                    }
+                }
 
-			// 移除購物車項目 //
-			async function removeCartItem(cartItemId) {
-				try {
-					const response = await fetch(`/api/cart/remove?cartItemId=${cartItemId}`, {
-						method: "POST",
-						credentials: "same-origin"
-					});
-					if (!response.ok) throw new Error("Error removing cart item");
-					fetchCartData(); // 重新載入購物車資料
-					updateCartCount(); // 更新購物車圖示的數量
-				} catch (error) {
-					console.error("Error removing cart item:", error);
-				}
-			}
+                // 移除購物車項目 //
+                async function removeCartItem(cartItemId) {
+                    try {
+                        const response = await fetch(`/api/cart/remove?cartItemId=${cartItemId}`, {
+                            method: "POST",
+                            credentials: "same-origin",
+                        });
+                        if (!response.ok) throw new Error("Error removing cart item");
+                        fetchCartData(); // 重新載入購物車資料
+                        updateCartCount(); // 更新購物車圖示的數量
+                    } catch (error) {
+                        console.error("Error removing cart item:", error);
+                    }
+                }
 
-			// 更新購物車項目數量 //
-			async function updateQuantity(cartItemId, delta) {
-				try {
-					const quantityInput = document.getElementById(`quantity-${cartItemId}`);
-					let currentQuantity = parseInt(quantityInput.value);
-					let newQuantity = currentQuantity + delta;
-					if (newQuantity < 1) newQuantity = 1;
-					const response = await fetch(
-						`/api/cart/update?cartItemId=${cartItemId}&quantity=${newQuantity}`,
-						{method: "POST"}
-					);
-					if (!response.ok) throw new Error("Error updating quantity");
-					sessionStorage.setItem("cartItem_" + cartItemId, newQuantity);
-					fetchCartData(); // 重新載入購物車資料
-				} catch (error) {
-					console.error("Error updating cart item quantity:", error);
-				}
-			}
+                // 更新購物車項目數量 //
+                async function updateQuantity(cartItemId, delta) {
+                    try {
+                        const quantityInput = document.getElementById(`quantity-${cartItemId}`);
+                        let currentQuantity = parseInt(quantityInput.value);
+                        let newQuantity = currentQuantity + delta;
+                        if (newQuantity < 1) newQuantity = 1;
+                        const response = await fetch(
+                            `/api/cart/update?cartItemId=${cartItemId}&quantity=${newQuantity}`,
+                            { method: "POST" }
+                        );
+                        if (!response.ok) throw new Error("Error updating quantity");
+                        sessionStorage.setItem("cartItem_" + cartItemId, newQuantity);
+                        fetchCartData(); // 重新載入購物車資料
+                    } catch (error) {
+                        console.error("Error updating cart item quantity:", error);
+                    }
+                }
 
-			// 載入購物車資料 //
-			document.addEventListener("DOMContentLoaded", fetchCartData);
+                // 載入購物車資料 //
+                document.addEventListener("DOMContentLoaded", fetchCartData);
 
-			// 選擇送貨及付款方式 //
-			const shippingData = {
-				TW: {
-					label: "台灣",
-					shippingMethods: {
-						"711-cod": {
-							label: "7-11 取貨付款（寄出日系統會發電子郵件通知，一般寄出日+2日會抵達門市）",
-							shippingNote: "",
-							paymentOptions: {
-								"711-cod-only": {
-									label: "7-11 取貨付款（包裹抵達指定門市後，付現取貨）",
-									message: "",
-								},
-							},
-						},
-						"711-no-cod": {
-							label: "7-11 取貨不付款（寄出日系統會發電子郵件通知，一般寄出日+2日會抵達門市）",
-							shippingNote: "",
-							paymentOptions: {
-								linepay: {
-									label: "LINE Pay",
-									message: `★ 若您選擇 LINE PAY，於付款程序中，不小心跳離或是關閉頁面，請重新下單即可。`,
-								},
-								credit: {
-									label: "信用卡",
-									message: `
+                // 選擇送貨及付款方式 //
+                const shippingData = {
+                    TW: {
+                        label: "台灣",
+                        shippingMethods: {
+                            "711-cod": {
+                                label: "7-11 取貨付款（寄出日系統會發電子郵件通知，一般寄出日+2日會抵達門市）",
+                                shippingNote: "",
+                                paymentOptions: {
+                                    "711-cod-only": {
+                                        label: "7-11 取貨付款（包裹抵達指定門市後，付現取貨）",
+                                        message: "",
+                                    },
+                                },
+                            },
+                            "711-no-cod": {
+                                label: "7-11 取貨不付款（寄出日系統會發電子郵件通知，一般寄出日+2日會抵達門市）",
+                                shippingNote: "",
+                                paymentOptions: {
+                                    linepay: {
+                                        label: "LINE Pay",
+                                        message: `★ 若您選擇 LINE PAY，於付款程序中，不小心跳離或是關閉頁面，請重新下單即可。`,
+                                    },
+                                    credit: {
+                                        label: "信用卡",
+                                        message: `
                                                 <p style="margin: 0;">
                                                     <strong>2025/1/1-2025/3/31</strong><br>
                                                     刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
@@ -435,12 +486,12 @@
                                                     活動詳情請參閱星展銀行官網公告
                                                 </p>
                                                 `,
-								},
-							},
-						},
-						hct: {
-							label: "新竹貨運",
-							shippingNote: `
+                                    },
+                                },
+                            },
+                            hct: {
+                                label: "新竹貨運",
+                                shippingNote: `
                                             <ol style="margin-left: 1em;">
                                                 <li>寄出後約需1-2個工作天，預計到達時間僅供參考。</li>
                                                 <li>週日及國定假日不配送，遇到特定節日或特殊狀況可能需要更長的工作天數。</li>
@@ -449,14 +500,14 @@
                                                 <li>收件地址請詳細填寫，若縣市內有XX區、XX鎮，例：中正區、後龍鎮等，請勿省略。</li>
                                             </ol>
                                             `,
-							paymentOptions: {
-								linepay: {
-									label: "LINE Pay",
-									message: `★ 若您選擇 LINE PAY，於付款程序中不小心關閉頁面，請重新下單即可。`,
-								},
-								credit: {
-									label: "信用卡",
-									message: `
+                                paymentOptions: {
+                                    linepay: {
+                                        label: "LINE Pay",
+                                        message: `★ 若您選擇 LINE PAY，於付款程序中不小心關閉頁面，請重新下單即可。`,
+                                    },
+                                    credit: {
+                                        label: "信用卡",
+                                        message: `
                                                 <p style="margin: 0;">
                                                     <strong>2025/1/1-2025/3/31</strong><br>
                                                     刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
@@ -467,20 +518,20 @@
                                                     活動詳情請參閱星展銀行官網公告
                                                 </p>
                                                 `,
-								},
-							},
-						},
-						"outer-island": {
-							label: "外島郵寄",
-							shippingNote: "",
-							paymentOptions: {
-								linepay: {
-									label: "LINE Pay",
-									message: `★ 若您選擇 LINE PAY，於付款程序中不小心跳離頁面，請重新下單即可。`,
-								},
-								credit: {
-									label: "信用卡",
-									message: `
+                                    },
+                                },
+                            },
+                            "outer-island": {
+                                label: "外島郵寄",
+                                shippingNote: "",
+                                paymentOptions: {
+                                    linepay: {
+                                        label: "LINE Pay",
+                                        message: `★ 若您選擇 LINE PAY，於付款程序中不小心跳離頁面，請重新下單即可。`,
+                                    },
+                                    credit: {
+                                        label: "信用卡",
+                                        message: `
                                                 <p style="margin: 0;">
                                                     <strong>2025/1/1-2025/3/31</strong><br>
                                                     刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
@@ -491,189 +542,186 @@
                                                     活動詳情請參閱星展銀行官網公告
                                                 </p>
                                                 `,
-								},
-							},
-						},
-					},
-				},
-				// 其他國家 (US, JP...)
-			};
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    // 其他國家 (US, JP...)
+                };
 
+                // 選擇送貨及付款方式中"送貨地點"、"送貨方式、"付款方式"下拉選單 //
+                const countrySelect = document.getElementById("deliveryCountry");
+                const methodSelect = document.getElementById("deliveryMethod");
+                const paymentSelect = document.getElementById("paymentMethod");
+                const deliveryNote = document.getElementById("deliveryNote");
+                const paymentMessage = document.getElementById("paymentMessage");
 
-			// 選擇送貨及付款方式中"送貨地點"、"送貨方式、"付款方式"下拉選單 //
-			const countrySelect = document.getElementById("deliveryCountry");
-			const methodSelect = document.getElementById("deliveryMethod");
-			const paymentSelect = document.getElementById("paymentMethod");
-			const deliveryNote = document.getElementById("deliveryNote");
-			const paymentMessage = document.getElementById("paymentMessage");
+                function initCountryOptions() {
+                    countrySelect.innerHTML = "";
+                    for (const countryCode in shippingData) {
+                        const opt = document.createElement("option");
+                        opt.value = countryCode;
+                        opt.textContent = shippingData[countryCode].label;
+                        countrySelect.appendChild(opt);
+                    }
+                }
 
-			function initCountryOptions() {
-				countrySelect.innerHTML = "";
-				for (const countryCode in shippingData) {
-					const opt = document.createElement("option");
-					opt.value = countryCode;
-					opt.textContent = shippingData[countryCode].label;
-					countrySelect.appendChild(opt);
-				}
-			}
+                function onCountryChange() {
+                    const selectedCountry = countrySelect.value;
+                    const countryInfo = shippingData[selectedCountry];
+                    if (!countryInfo || !countryInfo.shippingMethods) {
+                        methodSelect.innerHTML = "";
+                        paymentSelect.innerHTML = "";
+                        deliveryNote.textContent = "";
+                        paymentMessage.textContent = "";
+                        return;
+                    }
+                    methodSelect.innerHTML = "";
+                    for (const methodKey in countryInfo.shippingMethods) {
+                        const methodData = countryInfo.shippingMethods[methodKey];
+                        const opt = document.createElement("option");
+                        opt.value = methodKey;
+                        opt.textContent = methodData.label;
+                        methodSelect.appendChild(opt);
+                    }
+                    methodSelect.selectedIndex = 0;
+                    onMethodChange();
+                }
 
-			function onCountryChange() {
-				const selectedCountry = countrySelect.value;
-				const countryInfo = shippingData[selectedCountry];
-				if (!countryInfo || !countryInfo.shippingMethods) {
-					methodSelect.innerHTML = "";
-					paymentSelect.innerHTML = "";
-					deliveryNote.textContent = "";
-					paymentMessage.textContent = "";
-					return;
-				}
-				methodSelect.innerHTML = "";
-				for (const methodKey in countryInfo.shippingMethods) {
-					const methodData = countryInfo.shippingMethods[methodKey];
-					const opt = document.createElement("option");
-					opt.value = methodKey;
-					opt.textContent = methodData.label;
-					methodSelect.appendChild(opt);
-				}
-				methodSelect.selectedIndex = 0;
-				onMethodChange();
-			}
+                function onMethodChange() {
+                    const selectedCountry = countrySelect.value;
+                    const selectedMethodKey = methodSelect.value;
+                    const countryInfo = shippingData[selectedCountry];
+                    if (!countryInfo || !countryInfo.shippingMethods) return;
+                    const methodData = countryInfo.shippingMethods[selectedMethodKey];
+                    if (!methodData) return;
 
-			function onMethodChange() {
-				const selectedCountry = countrySelect.value;
-				const selectedMethodKey = methodSelect.value;
-				const countryInfo = shippingData[selectedCountry];
-				if (!countryInfo || !countryInfo.shippingMethods) return;
-				const methodData = countryInfo.shippingMethods[selectedMethodKey];
-				if (!methodData) return;
+                    // 顯示送貨方式的提醒/說明
+                    deliveryNote.innerHTML = methodData.shippingNote || "";
 
-				// 顯示送貨方式的提醒/說明
-				deliveryNote.innerHTML = methodData.shippingNote || "";
+                    // 更新付款方式
+                    paymentSelect.innerHTML = "";
+                    for (const payKey in methodData.paymentOptions) {
+                        const payData = methodData.paymentOptions[payKey];
+                        const opt = document.createElement("option");
+                        opt.value = payKey;
+                        opt.textContent = payData.label;
+                        paymentSelect.appendChild(opt);
+                    }
+                    paymentSelect.selectedIndex = 0;
+                    onPaymentChange();
 
-				// 更新付款方式
-				paymentSelect.innerHTML = "";
-				for (const payKey in methodData.paymentOptions) {
-					const payData = methodData.paymentOptions[payKey];
-					const opt = document.createElement("option");
-					opt.value = payKey;
-					opt.textContent = payData.label;
-					paymentSelect.appendChild(opt);
-				}
-				paymentSelect.selectedIndex = 0;
-				onPaymentChange();
+                    // 判斷送貨方式，更新運費或提示訊息
+                    const shippingFeeRow = document.getElementById("shippingFeeRow");
+                    const shippingFee = document.getElementById("shippingFee");
+                    const grandTotalRow = document.getElementById("grandTotalRow");
+                    const shippingFeeNote = document.getElementById("shippingFeeNote");
 
-				// 判斷送貨方式，更新運費或提示訊息
-				const shippingFeeRow = document.getElementById("shippingFeeRow");
-				const shippingFee = document.getElementById("shippingFee");
-				const grandTotalRow = document.getElementById("grandTotalRow");
-				const shippingFeeNote = document.getElementById("shippingFeeNote");
+                    // 預設先隱藏提示，顯示運費欄位
+                    shippingFeeRow.classList.remove("d-none");
+                    grandTotalRow.classList.remove("d-none");
+                    shippingFeeNote.classList.add("d-none");
 
-				// 預設先隱藏提示，顯示運費欄位
-				shippingFeeRow.classList.remove("d-none");
-				grandTotalRow.classList.remove("d-none");
-				shippingFeeNote.classList.add("d-none");
+                    if (selectedMethodKey === "711-cod" || selectedMethodKey === "711-no-cod") {
+                        // 7-11 運費 60
+                        shippingFee.textContent = "$60";
+                        updateGrandTotal();
+                    } else if (selectedMethodKey === "hct" || selectedMethodKey === "outer-island") {
+                        // 新竹貨運 / 外島郵寄：隱藏運費和結帳金額欄位，顯示提示
+                        shippingFeeRow.classList.add("d-none");
+                        grandTotalRow.classList.add("d-none");
+                        shippingFeeNote.classList.remove("d-none");
+                    } else {
+                        // 其他狀況預設運費 0
+                        shippingFee.textContent = "$0";
+                        updateGrandTotal();
+                    }
+                }
 
-				if (selectedMethodKey === "711-cod" || selectedMethodKey === "711-no-cod") {
-					// 7-11 運費 60
-					shippingFee.textContent = "$60";
-					updateGrandTotal();
-				} else if (selectedMethodKey === "hct" || selectedMethodKey === "outer-island") {
-					// 新竹貨運 / 外島郵寄：隱藏運費和結帳金額欄位，顯示提示
-					shippingFeeRow.classList.add("d-none");
-					grandTotalRow.classList.add("d-none");
-					shippingFeeNote.classList.remove("d-none");
-				} else {
-					// 其他狀況預設運費 0
-					shippingFee.textContent = "$0";
-					updateGrandTotal();
-				}
-			}
+                function onPaymentChange() {
+                    const selectedCountry = countrySelect.value;
+                    const selectedMethodKey = methodSelect.value;
+                    const selectedPayKey = paymentSelect.value;
+                    const methodData = shippingData[selectedCountry].shippingMethods[selectedMethodKey];
+                    if (!methodData) return;
+                    const payData = methodData.paymentOptions[selectedPayKey];
+                    paymentMessage.innerHTML = payData ? payData.message : "";
+                }
 
-			function onPaymentChange() {
-				const selectedCountry = countrySelect.value;
-				const selectedMethodKey = methodSelect.value;
-				const selectedPayKey = paymentSelect.value;
-				const methodData = shippingData[selectedCountry].shippingMethods[selectedMethodKey];
-				if (!methodData) return;
-				const payData = methodData.paymentOptions[selectedPayKey];
-				paymentMessage.innerHTML = payData ? payData.message : "";
-			}
+                countrySelect.addEventListener("change", onCountryChange);
+                methodSelect.addEventListener("change", onMethodChange);
+                paymentSelect.addEventListener("change", onPaymentChange);
 
-			countrySelect.addEventListener("change", onCountryChange);
-			methodSelect.addEventListener("change", onMethodChange);
-			paymentSelect.addEventListener("change", onPaymentChange);
+                // 訂單資訊中"優惠代碼"區塊是否顯示 //
+                document.addEventListener("DOMContentLoaded", () => {
+                    initCountryOptions();
+                    onCountryChange();
+                    const showCouponLink = document.getElementById("showCouponLink");
+                    const couponForm = document.getElementById("couponForm");
+                    showCouponLink.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        couponForm.style.display = "block";
+                        showCouponLink.style.display = "none";
+                    });
+                });
 
+                // 存取送貨、付款方式後組成 url 傳到 checkout.html 中 //
+                document.addEventListener("DOMContentLoaded", function () {
+                    // 選單 id 為 "deliveryMethod" 與 "paymentMethod"
+                    document.getElementById("goToCheckout").addEventListener("click", function () {
+                        // 先檢查是否有登入資訊， token 是否存在
+                        const token = sessionStorage.getItem("token");
+                        if (!token) {
+                            // 未登入：導向登入頁面，並帶上 redirect 參數，讓登入後導回結帳頁面
+                            window.location.href = "/login?redirect=/checkout";
+                        } else {
+                            // 已登入，則組合 URL 跳轉至結帳頁面
+                            // 取得下拉選單的選取值
+                            const shippingMethod = document.getElementById("deliveryMethod").value;
+                            const paymentMethod = document.getElementById("paymentMethod").value;
+                            // 組合成 URL query string (encodeURIComponent)
+                            const url =
+                                "/checkout?shippingMethod=" +
+                                encodeURIComponent(shippingMethod) +
+                                "&paymentMethod=" +
+                                encodeURIComponent(paymentMethod);
+                            window.location.href = url;
+                        }
+                    });
+                });
 
-			// 訂單資訊中"優惠代碼"區塊是否顯示 //
-			document.addEventListener("DOMContentLoaded", () => {
-				initCountryOptions();
-				onCountryChange();
-				const showCouponLink = document.getElementById("showCouponLink");
-				const couponForm = document.getElementById("couponForm");
-				showCouponLink.addEventListener("click", function (e) {
-					e.preventDefault();
-					couponForm.style.display = "block";
-					showCouponLink.style.display = "none";
-				});
-			});
+                // 抓取 Session 中的"送貨方式"、"付款方式"、"優惠券折扣" //
+                var sessionShippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
+                var sessionPaymentMethod = /*[[${paymentMethod}]]*/ "711-cod-only";
+                var sessionCouponDiscount = /*[[${couponDiscount}]]*/ 0;
 
-			// 存取送貨、付款方式後組成 url 傳到 checkout.html 中 //
-			document.addEventListener("DOMContentLoaded", function () {
-				// 選單 id 為 "deliveryMethod" 與 "paymentMethod"
-				document.getElementById("goToCheckout").addEventListener("click", function () {
-					// 先檢查是否有登入資訊， token 是否存在
-					const token = sessionStorage.getItem("token");
-					if (!token) {
-						// 未登入：導向登入頁面，並帶上 redirect 參數，讓登入後導回結帳頁面
-						window.location.href = "/login?redirect=/checkout";
-					} else {
-						// 已登入，則組合 URL 跳轉至結帳頁面
-						// 取得下拉選單的選取值
-						const shippingMethod = document.getElementById("deliveryMethod").value;
-						const paymentMethod = document.getElementById("paymentMethod").value;
-						// 組合成 URL query string (encodeURIComponent)
-						const url =
-							"/checkout?shippingMethod=" +
-							encodeURIComponent(shippingMethod) +
-							"&paymentMethod=" +
-							encodeURIComponent(paymentMethod);
-						window.location.href = url;
-					}
-				});
-			});
+                document.addEventListener("DOMContentLoaded", () => {
+                    initCountryOptions();
+                    onCountryChange();
+                    // 設定送貨方式下拉選單的值
+                    if (sessionShippingMethod) {
+                        methodSelect.value = sessionShippingMethod;
+                        onMethodChange();
+                    }
+                    // 設定付款方式下拉選單的值
+                    if (sessionPaymentMethod) {
+                        paymentSelect.value = sessionPaymentMethod;
+                        onPaymentChange();
+                    }
+                    // 載入 session 優惠券折扣
+                    couponDiscountOverall = sessionCouponDiscount;
+                    // 如果有優惠券折扣，就直接展開優惠碼區塊
+                    if (couponDiscountOverall > 0) {
+                        document.getElementById("couponForm").style.display = "block";
+                        document.getElementById("showCouponLink").style.display = "none";
+                        document.getElementById("couponDiscountContainer").style.display = "flex";
+                    }
+                    updateGrandTotal();
+                });
 
-			// 抓取 Session 中的"送貨方式"、"付款方式"、"優惠券折扣" //
-			var sessionShippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
-			var sessionPaymentMethod = /*[[${paymentMethod}]]*/ "711-cod-only";
-			var sessionCouponDiscount = /*[[${couponDiscount}]]*/ 0;
-
-			document.addEventListener("DOMContentLoaded", () => {
-				initCountryOptions();
-				onCountryChange();
-				// 設定送貨方式下拉選單的值
-				if (sessionShippingMethod) {
-					methodSelect.value = sessionShippingMethod;
-					onMethodChange();
-				}
-				// 設定付款方式下拉選單的值
-				if (sessionPaymentMethod) {
-					paymentSelect.value = sessionPaymentMethod;
-					onPaymentChange();
-				}
-				// 載入 session 優惠券折扣
-				couponDiscountOverall = sessionCouponDiscount;
-				// 如果有優惠券折扣，就直接展開優惠碼區塊
-				if (couponDiscountOverall > 0) {
-					document.getElementById("couponForm").style.display = "block";
-					document.getElementById("showCouponLink").style.display = "none";
-					document.getElementById("couponDiscountContainer").style.display = "flex";
-				}
-				updateGrandTotal();
-			});
-
-			/*]]>*/
-		</script>
-	</div>
-</body>
-
+                /*]]>*/
+            </script>
+        </div>
+    </body>
 </html>
