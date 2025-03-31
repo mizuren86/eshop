@@ -3,6 +3,11 @@ package com.eeit1475th.eshop.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.eeit1475th.eshop.cart.dto.CartItemsDTO;
 import com.eeit1475th.eshop.cart.service.ShoppingCartService;
@@ -70,12 +76,39 @@ public class UserRestController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<?> register(@RequestBody UsersDTO userDTO) {
+	public ResponseEntity<?> register(@RequestParam("username") String username,
+			@RequestParam("email") String email,
+			@RequestParam("password") String password,
+			@RequestParam("verificationCode") String verificationCode,
+			@RequestParam("phone") String phone,
+			@RequestParam("address") String address,
+			@RequestParam(value = "userPhoto", required = false) MultipartFile userPhoto) {
 		try {
 			// 先验证验证码
-			boolean verified = emailVerificationService.verifyToken(userDTO.getEmail(), userDTO.getVerificationCode());
+			boolean verified = emailVerificationService.verifyToken(email, verificationCode);
 			if (!verified) {
 				return ResponseEntity.badRequest().body(new ApiResponse(false, "驗證碼無效或已過期"));
+			}
+
+			// 创建用户DTO
+			UsersDTO userDTO = new UsersDTO();
+			userDTO.setUsername(username);
+			userDTO.setEmail(email);
+			userDTO.setPassword(password);
+			userDTO.setFullName(username);
+			userDTO.setPhone(phone);
+			userDTO.setAddress(address);
+
+			// 处理头像上传
+			if (userPhoto != null && !userPhoto.isEmpty()) {
+				String fileName = UUID.randomUUID().toString() + "_" + userPhoto.getOriginalFilename();
+				Path uploadDir = Paths.get("src/main/resources/static/uploads");
+				if (!Files.exists(uploadDir)) {
+					Files.createDirectories(uploadDir);
+				}
+				Path filePath = uploadDir.resolve(fileName);
+				Files.copy(userPhoto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+				userDTO.setUserPhoto("/uploads/" + fileName);
 			}
 
 			// 创建用户
@@ -103,7 +136,7 @@ public class UserRestController {
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session,
-			@RequestParam(value = "redirect", required = false) String redirect) {  // 年測試
+			@RequestParam(value = "redirect", required = false) String redirect) { // 年測試
 		try {
 			String token = usersService.login(request.getEmail(), request.getPassword());
 			Users user = usersService.getUserByEmail(request.getEmail());
@@ -113,7 +146,7 @@ public class UserRestController {
 
 			// 年測試 start //
 			session.setAttribute("token", token);
-			
+
 			session.setAttribute("userId", user.getUserId());
 			// 檢查是否存在未登入時暫存的購物車
 			@SuppressWarnings("unchecked")
@@ -132,7 +165,7 @@ public class UserRestController {
 			Map<String, Object> responseData = new HashMap<>();
 			responseData.put("token", token);
 			responseData.put("user", user);
-			
+
 			responseData.put("redirect", redirect != null ? redirect : "/"); // 年測試
 
 			return ResponseEntity.ok(new ApiResponse(true, "登入成功", responseData));
@@ -192,29 +225,16 @@ public class UserRestController {
 	}
 
 	@GetMapping("/current")
-	public ResponseEntity<?> getCurrentUser(HttpSession session) {
+	public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String token) {
 		try {
-			System.out.println("正在檢查當前用戶會話...");
-			System.out.println("Session ID: " + session.getId());
-			System.out.println("Session 創建時間: " + session.getCreationTime());
-			System.out.println("Session 最後訪問時間: " + session.getLastAccessedTime());
-
-			Users user = (Users) session.getAttribute("user");
+			Users user = usersService.getUserByToken(token);
 			if (user != null) {
-				System.out.println("找到用戶: " + user.getUsername());
-				Map<String, Object> userData = new HashMap<>();
-				userData.put("userId", user.getUserId());
-				userData.put("username", user.getUsername());
-				userData.put("email", user.getEmail());
-				return ResponseEntity.ok(userData);
+				return ResponseEntity.ok(new ApiResponse(true, "獲取成功", user));
 			} else {
-				System.out.println("未找到用戶信息");
-				return ResponseEntity.ok(new HashMap<>());
+				return ResponseEntity.badRequest().body(new ApiResponse(false, "用戶不存在"));
 			}
 		} catch (Exception e) {
-			System.out.println("檢查當前用戶時發生錯誤: " + e.getMessage());
-			e.printStackTrace();
-			return ResponseEntity.ok(new HashMap<>());
+			return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
 		}
 	}
 

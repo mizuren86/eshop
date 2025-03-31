@@ -261,10 +261,27 @@ public class UsersService {
     }
 
     public Users getUserByToken(String token) {
-        // 从 token 中获取用户 ID
-        Integer userId = jwtService.extractUserId(token);
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("用戶不存在"));
+        try {
+            // 从 token 中获取用户 ID
+            Integer userId = jwtService.extractUserId(token);
+            // 获取用户信息，包括VIP信息
+            Users user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("用戶不存在"));
+
+            // 确保加载VIP信息
+            if (user.getUserVip() != null) {
+                user.getUserVip().getVipLevel(); // 触发懒加载
+            }
+
+            // 确保加载VIP历史
+            if (user.getVipHistories() != null) {
+                user.getVipHistories().size(); // 触发懒加载
+            }
+
+            return user;
+        } catch (Exception e) {
+            throw new RuntimeException("無效的token或token已過期");
+        }
     }
 
     @Transactional

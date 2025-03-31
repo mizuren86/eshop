@@ -1,4 +1,4 @@
-package com.eeit1475th.eshop.member.controller;
+package com.eeit1475th.eshop.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
