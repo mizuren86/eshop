@@ -23,29 +23,17 @@ public class CheckoutController {
     private ShoppingCartService shoppingCartService;
 
     @GetMapping("/checkout")
-//    public String showCheckoutPage(Model model, HttpSession session) {
     public String showCheckoutPage(Model model, HttpSession session,
             @SessionAttribute(value = "user", required = false) Users user,
             @RequestParam(value="shippingMethod", required=false) String shippingMethod,
             @RequestParam(value="paymentMethod", required=false) String paymentMethod) {
     	
-//        // 假設使用者ID存在 session 中
-//        Integer userId = (Integer) session.getAttribute("userId");
-//        if (userId == null) {
-//            // 若無使用者資訊，轉導到登入頁面
-//            return "redirect:/login";
-//        }
+        // 假設使用者ID存在 session 中
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (user == null) {
+            return "redirect:/login?redirect=/checkout";
+        }
     	
-    	if (user == null || user.getUsername() == null) {
-    	    user = new Users();
-    	    user.setUserId(3);  // 測試用會員 ID
-    	    user.setUsername("測試使用者");
-    	    user.setEmail("test@example.com");
-    	    user.setPhone("0912345678");
-    	    session.setAttribute("user", user);
-    	}
-        Integer userId = user.getUserId();
-        
         // 取得該使用者購物車商品列表
         List<CartItemsDTO> cartItems = shoppingCartService.getCartItems(userId);
         model.addAttribute("cartItems", cartItems);
@@ -58,7 +46,6 @@ public class CheckoutController {
         }
         model.addAttribute("couponDiscount", couponDiscount);
 
-        
         // 計算購物車小計
         BigDecimal totalAmount = cartItems.stream()
                 .map(CartItemsDTO::getSubTotal)
