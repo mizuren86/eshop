@@ -101,7 +101,7 @@ public class ReviewController {
     	logger.info("Attempting to load template: pages/creatreviews");    	
         m.addAttribute("productId", productId);
         if (user == null) {
-        	return "/404";
+        	return "/512";
         }
         return "/pages/creatreviews";
     }
@@ -164,9 +164,9 @@ public class ReviewController {
             @RequestHeader("Authorization") String token) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Reviews updatedReview = reviewsService.updateReview(reviewId, reviewUpdate, token);
-            response.put("success", true);
-            response.put("review", updatedReview);
+//            Reviews updatedReview = reviewsService.updateReview(reviewId, reviewUpdate, token);
+//            response.put("success", true);
+//            response.put("review", updatedReview);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             response.put("success", false);
@@ -182,7 +182,7 @@ public class ReviewController {
             @RequestHeader("Authorization") String token) {
         Map<String, Object> response = new HashMap<>();
         try {
-            reviewsService.deleteReview(reviewId, token);
+  //          reviewsService.deleteReview(reviewId, token);
             response.put("success", true);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
