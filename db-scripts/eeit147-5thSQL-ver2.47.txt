@@ -221,15 +221,6 @@ CREATE TABLE [dbo].[coupon](
 );
 
 
--- 插入假資料到 users 表
-INSERT INTO users (username, [password], email, full_name, phone, user_photo, [address]) VALUES
-('alice123', 'password123', 'alice@example.com', 'Alice Johnson', '0912345678', 'alice.jpg', '台北市信義區123號'),
-('bob456', 'password456', 'bob@example.com', 'Bob Smith', '0923456789', 'bob.jpg', '台中市南屯區456號'),
-('charlie789', 'password789', 'charlie@example.com', 'Charlie Brown', '0934567890', 'charlie.jpg', '高雄市三民區789號'),
-('tomlee', 'securepass1', 'tomlee@example.com', 'Tom Lee', '0911222333', 'tomlee.jpg', '台北市中正區100號'),
-('janewang', 'securepass2', 'janewang@example.com', 'Jane Wang', '0922333444', 'janewang.jpg', '台南市東區200號');
-
-
 -- 插入商品分類資料
 INSERT INTO product_category (category_name)
 VALUES ('水果'), ('熱帶水果'), ('柑橘類水果');
@@ -238,59 +229,22 @@ VALUES ('水果'), ('熱帶水果'), ('柑橘類水果');
 -- 插入水果商品資料，圖片路徑指向本機專案的靜態資源
 INSERT INTO products (sku, product_name, [description], unit_price, image_url, unit_in_stock, category_id)
 VALUES 
-('FRU0001', '蘋果', '新鮮紅蘋果', 99.99, '/img/fruite-item-1.jpg', 100, 1),
-('FRU0002', '香蕉', '新鮮黃香蕉', 49.99, '/img/fruite-item-2.jpg', 150, 2),
-('FRU0003', '橙子', '新鮮橙子', 79.99, '/img/fruite-item-3.jpg', 120, 3),
-('FRU0004', '葡萄', '新鮮紫葡萄', 149.99, '/img/fruite-item-4.jpg', 80, 1),
-('FRU0005', '鳳梨', '新鮮甜鳳梨', 119.99, '/img/fruite-item-5.jpg', 90, 2),
-('FRU0006', '西瓜', '新鮮西瓜', 199.99, '/img/fruite-item-6.jpg', 60, 2),
-('FRU0007', '檸檬', '新鮮檸檬', 59.99, '/img/fruite-item-7.jpg', 110, 3);
+('FRU0001', '蘋果', '新鮮紅蘋果', 50, '/img/fruite-item-1.jpg', 100, 1),
+('FRU0002', '香蕉', '新鮮黃香蕉', 15, '/img/fruite-item-2.jpg', 150, 2),
+('FRU0003', '橙子', '新鮮橙子', 25, '/img/fruite-item-3.jpg', 120, 3),
+('FRU0004', '葡萄', '新鮮紫葡萄', 80, '/img/fruite-item-4.jpg', 80, 1),
+('FRU0005', '鳳梨', '新鮮甜鳳梨', 150, '/img/fruite-item-5.jpg', 90, 2),
+('FRU0006', '西瓜', '新鮮西瓜', 126, '/img/fruite-item-6.jpg', 60, 2),
+('FRU0007', '檸檬', '新鮮檸檬', 18, '/img/fruite-item-7.jpg', 110, 3);
 
--- 插入假資料到 shopping_cart 表
-INSERT INTO shopping_cart (user_id, added_at) VALUES
-(1, '2025-03-01 10:15:00'),
-(2, '2025-03-02 14:45:00'),
-(3, '2025-03-05 09:30:00'),
-(4, '2025-03-07 20:10:00'),
-(5, '2025-03-10 16:00:00');
-
--- 插入假資料到 cart_items 表
-INSERT INTO cart_items (cart_id, product_id, quantity, price) VALUES
-(1, 1, 2, 1999.99),
-(2, 2, 1, 599.50),
-(3, 3, 3, 899.00);
-
-
--- 插入假資料到 orders 表
-INSERT INTO orders (user_id, order_date, total_amount, payment_method, payment_status, shipping_address, shipping_status, ec_pay_trade_no) VALUES
-(1, '2025-03-01 11:30:00', 2999.99, 'Credit Card', 'Paid', '台北市中正區忠孝東路100號', 'Shipped', 'TNO202503010001'),
-(2, '2025-03-03 15:20:00', 1599.50, 'ATM Transfer', 'Pending', '新北市板橋區文化路200號', 'Processing', 'TNO202503030002'),
-(3, '2025-03-05 18:10:00', 899.00, 'Credit Card', 'Paid', '台中市西屯區福星路50號', 'Delivered', 'TNO202503050003'),
-(4, '2025-03-08 09:45:00', 4299.00, 'Mobile Payment', 'Paid', '高雄市三民區博愛一路80號', 'Shipped', 'TNO202503080004'),
-(5, '2025-03-10 20:30:00', 1299.00, 'Credit Card', 'Failed', '台南市東區東門路150號', 'Cancelled', NULL);
-
-
--- 插入假資料到 order_items 表
-INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
-(1, 1, 2, 1999.99),
-(2, 2, 1, 599.50),
-(3, 3, 3, 899.00);
-
-
--- 插入假資料到 payments 表
-INSERT INTO payments (order_id, user_id, payment_date, amount, payment_method, payment_status, ec_pay_trade_no) VALUES
-(1, 1, '2025-03-01 11:45:00', 2999.99, 'Credit Card', 'Paid', 'TNO202503010001'),
-(2, 2, '2025-03-03 16:00:00', 1599.50, 'ATM Transfer', 'Pending', 'TNO202503030002'),
-(3, 3, '2025-03-05 18:30:00', 899.00, 'Credit Card', 'Paid', 'TNO202503050003'),
-(4, 4, '2025-03-08 10:00:00', 4299.00, 'Mobile Payment', 'Paid', 'TNO202503080004'),
-(5, 5, '2025-03-10 21:00:00', 1299.00, 'Credit Card', 'Failed', NULL);
-
-
--- 插入假資料到 shipment 表
-INSERT INTO shipment (order_id, tracking_number, carrier, estimated_delivery, delivery_status) VALUES
-(1, 'TRACK123456', 'UPS', '2025-03-15 10:00:00', 'InTransit'),
-(2, 'TRACK987654', 'DHL', '2025-03-18 14:00:00', 'Pending'),
-(3, 'TRACK112233', 'FedEx', '2025-03-12 09:00:00', 'Delivered');
+-- 插入假資料到 users 表
+-- [password] 統一為'123'
+INSERT INTO users (username, [password], email, full_name, phone, user_photo, [address]) VALUES
+('alice123', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG.', 'alice@example.com', 'Alice Johnson', '0912345678', 'alice.jpg', '台北市信義區123號'),
+('bob456', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'bob@example.com', 'Bob Smith', '0923456789', 'bob.jpg', '台中市南屯區456號'),
+('charlie789', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'charlie@example.com', 'Charlie Brown', '0934567890', 'charlie.jpg', '高雄市三民區789號'),
+('tomlee', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'tomlee@example.com', 'Tom Lee', '0911222333', 'tomlee.jpg', '台北市中正區100號'),
+('janewang', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'janewang@example.com', 'Jane Wang', '0922333444', 'janewang.jpg', '台南市東區200號');
 
 
 INSERT INTO [dbo].[reviews] ([reviews_product_id], [reviews_user_id], [rating], [comment], [updated_at]) 
