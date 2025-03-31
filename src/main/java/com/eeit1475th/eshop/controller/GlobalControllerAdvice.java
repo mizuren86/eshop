@@ -29,4 +29,10 @@ public class GlobalControllerAdvice {
         }
         model.addAttribute("cartCount", cartCount);
     }
+    
+    @ModelAttribute
+    public void addUserToModel(HttpSession session, Model model) {
+        Object user = session.getAttribute("user");
+        model.addAttribute("user", user);
+    }
 }

@@ -48,6 +48,9 @@ public class UsersService {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private EmailService emailService;
+
     // 創建用戶
     @Transactional
     public Users createUser(UsersDTO userDTO) {
@@ -258,10 +261,27 @@ public class UsersService {
     }
 
     public Users getUserByToken(String token) {
-        // 从 token 中获取用户 ID
-        Integer userId = jwtService.extractUserId(token);
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("用戶不存在"));
+        try {
+            // 从 token 中获取用户 ID
+            Integer userId = jwtService.extractUserId(token);
+            // 获取用户信息，包括VIP信息
+            Users user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("用戶不存在"));
+
+            // 确保加载VIP信息
+            if (user.getUserVip() != null) {
+                user.getUserVip().getVipLevel(); // 触发懒加载
+            }
+
+            // 确保加载VIP历史
+            if (user.getVipHistories() != null) {
+                user.getVipHistories().size(); // 触发懒加载
+            }
+
+            return user;
+        } catch (Exception e) {
+            throw new RuntimeException("無效的token或token已過期");
+        }
     }
 
     @Transactional
@@ -292,5 +312,37 @@ public class UsersService {
 
     public void logout(String token) {
         // TODO: 實現登出邏輯，例如使 token 失效
+    }
+
+    // 發送重置密碼郵件
+    @Transactional
+    public void sendResetPasswordEmail(String email) {
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("找不到該郵箱對應的用戶"));
+
+        // 生成驗證碼
+        String verificationCode = emailVerificationService.generateVerificationCode();
+
+        // 保存驗證碼
+        emailVerificationService.saveVerificationToken(email);
+
+        // 發送重置密碼郵件
+        emailService.sendResetPasswordEmail(email, verificationCode);
+    }
+
+    // 重置密碼
+    @Transactional
+    public void resetPassword(String email, String verificationCode, String newPassword) {
+        // 驗證驗證碼
+        if (!emailVerificationService.verifyToken(email, verificationCode)) {
+            throw new RuntimeException("驗證碼無效或已過期");
+        }
+
+        // 更新密碼
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("找不到該郵箱對應的用戶"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

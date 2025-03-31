@@ -1,11 +1,17 @@
 package com.eeit1475th.eshop.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
+import com.eeit1475th.eshop.cart.dto.CartItemsDTO;
+import com.eeit1475th.eshop.cart.service.ShoppingCartService;
 import com.eeit1475th.eshop.member.entity.Users;
 
 import jakarta.servlet.http.HttpSession;
@@ -13,17 +19,28 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 @RequestMapping("/cart")
 public class ShoppingCartController {
+	
+	@Autowired
+	private ShoppingCartService shoppingCartService;
 
 	// 返回購物車頁面
+	@SuppressWarnings("unchecked")
 	@GetMapping
 	public String showCart(Model model, HttpSession session,
 			@SessionAttribute(value = "user", required = false) Users user) {
 		
-		if (user == null) {
-			user = new Users();
-			user.setUserId(3);
-			session.setAttribute("user", user);
-		}
+		if (user != null) {
+	        // 從資料庫讀取會員的購物車資料
+	        List<CartItemsDTO> cartItems = shoppingCartService.getCartItems(user.getUserId());
+	        model.addAttribute("cartItems", cartItems);
+	    } else {
+	        // 未登入狀態，從 session 讀取暫存購物車
+	        List<CartItemsDTO> tempCart = (List<CartItemsDTO>) session.getAttribute("tempCart");
+	        if (tempCart == null) {
+	            tempCart = new ArrayList<>();
+	        }
+	        model.addAttribute("cartItems", tempCart);
+	    }
 		
 		// 從 session 讀取用戶先前選擇的運送與付款方式
 	    String shippingMethod = (String) session.getAttribute("shippingMethod");

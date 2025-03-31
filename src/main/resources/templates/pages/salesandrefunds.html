@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/base}">
+
+<head>
+	<meta charset="utf-8" />
+	<title>Sales and Refunds - Fruitables</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<style>
+		.policy-section {
+			font-family: 'Open Sans', sans-serif;
+			color: #333;
+			line-height: 1.8;
+			margin-bottom: 2rem;
+		}
+
+		.policy-section h2 {
+			font-size: 2.5rem;
+			font-weight: 700;
+			margin-bottom: 1.5rem;
+			color: #222;
+		}
+
+		.policy-section h3 {
+			font-size: 1.75rem;
+			font-weight: 600;
+			margin-top: 2rem;
+			margin-bottom: 1rem;
+			color: #222;
+		}
+
+		.policy-section p {
+			font-size: 1rem;
+			margin-bottom: 1rem;
+		}
+
+		.policy-section ul {
+			margin-bottom: 1rem;
+			padding-left: 1.5rem;
+		}
+
+		.policy-section li {
+			margin-bottom: 0.5rem;
+		}
+
+		.policy-card {
+			background: #fff;
+			border: 1px solid #e0e0e0;
+			border-radius: 0.5rem;
+			padding: 2rem;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+	</style>
+</head>
+
+<body>
+	<div layout:fragment="content">
+		<!-- 頁首 -->
+		<header class="container-fluid page-header py-5">
+			<h1 class="text-center text-white display-6">Sales and Refunds</h1>
+			<nav aria-label="breadcrumb" class="breadcrumb justify-content-center">
+				<a th:href="@{/index}" class="breadcrumb-item">Home</a>
+				<span class="breadcrumb-item active text-white">Sales and Refunds</span>
+			</nav>
+		</header>
+
+		<!-- 退換貨政策內容開始 -->
+		<div class="container-fluid contact py-5">
+			<div class="container py-5">
+				<div class="p-5 bg-light rounded">
+					<div class="row g-4">
+						<div class="col-12">
+							<h1 class="text-primary text-center">退換貨政策</h1>
+							</br>
+							<p>親愛的顧客們～</p>
+							<p>
+								請於收到包裹 7 日內拆開確認，為維護彼此權益，拆開時請務必全程錄影<br />
+								若有與訂單不符、缺件、商品瑕疵等情況，請儘速與我們聯繫<br />
+								※ 缺件或商品瑕疵務必提供開箱時的影片，感謝!!
+							</p>
+
+							<h3>聯絡方式</h3>
+							<ol>
+								<li>店家系統通知信中可點選訂單連結進入訂單明細，畫面右下角的店家和顧客訂單通訊內可直接留言。</li>
+								<li>在官網任一畫面的右上角點選「聯絡我們」。</li>
+							</ol>
+
+							<h3>退換貨須知</h3>
+							<ol>
+								<li>保持商品乾淨完整、未使用或清潔過，在室內試穿時請避免衣物沾染彩妝。</li>
+								<li>需於 7 天鑑賞期（非試用期）內透過站內 EMAIL 、訊息或留言提出退換需求。</li>
+								<li>換貨不需附回發票，但辦理退貨時發票需要附回。</li>
+							</ol>
+							<p>
+								※ 鑑賞期基準計算：收到貨的次日起起算，例： 1/1 取貨簽收， 1/2~1/8 需提出退換需求， 1/9 起提出則已逾期無法辦理。
+							</p>
+							<p>
+								※ 若發生下列任一項狀況，恕無法為您辦理退換貨：
+							</p>
+							<ul style="margin-left: 2rem;">
+								<li>商品已使用或清潔過。</li>
+								<li>試穿時衣物沾染彩妝或汙損。</li>
+								<li>商品本體、附件、配件、紙本發票、贈品、保證書、內外包裝、原廠包裝及隨附文件或資料有所短缺。</li>
+								<li>內褲、襪子屬於個人衛生用品，恕不接受退換貨。</li>
+								<li>超過 7 天鑑賞期（非試用期）後才提出退換貨需求。</li>
+							</ul>
+
+							<h3>換貨方法</h3>
+							<ol>
+								<li>
+									確認商品乾淨完整，未使用與未洗滌過，包裹內容物完整，如同剛收到時一樣。
+								</li>
+								<li>
+									請拿一張紙寫下以下收件資料後<br />
+									<span style="color: red; font-weight: bold;">
+										訂單號碼<br />
+										收件姓名<br />
+										收件手機<br />
+										收件地址<br />
+										更換商品正確尺碼
+									</span>
+								</li>
+								<p>
+									連同換貨商品妥善包裝寄回以下收件資料（換貨無價差者不需要寄回發票）<br />
+									資展國際股份有限公司<br />
+									801 高雄市前金區中正四路 211 號 8 樓之 1<br />
+									(07) 9699-885 #6511<br />
+									※ 最外層請用任何其他袋子包裝，請不要直接裸包或在商品的包裝袋外黏貼膠帶，若商品包裝袋損壞將不受理更換或扣除必要費用。
+								</p>
+								<p>
+									也可使用 7-11 店到店寄回<br />
+									收件人：資展國際<br />
+									電話：0912345678<br />
+									門市：前金門市<br />
+									店號：261669
+								</p>
+								<li>
+									收到包裹檢查確認無誤後，現貨將於 1~2 個工作天寄出給您，預購商品需等到貨後寄出，工作人員會妥善登記請放心，謝謝!!
+								</li>
+							</ol>
+
+							<h3>退貨方法</h3>
+							<ol>
+								<li>
+									確認商品乾淨完整，未使用與未經過洗滌，內容物完整如同剛收到時一樣。
+								</li>
+								<li>
+									請拿一張紙寫下相關資料後，將退貨商品連同發票妥善包裝。<br />
+									<span style="color: red; font-weight: bold;">
+										訂單號碼<br />
+										訂購人姓名<br />
+										訂購人手機<br />
+										收退款銀行名稱（或郵局）及帳號<br />
+									</span>
+								</li>
+								<P>
+									※ 並留言給予收件資料，以便我們聯繫新竹貨運前往收取退貨包裹。
+								</P>
+								<P>
+									※ 最外層請用任何其他袋子包裝，請不要直接裸包或在商品的包裝袋外黏貼膠帶，若商品包裝袋損壞將扣除 NTD 20。
+								</P>
+								<P>
+									※ 使用信用卡付款者，將透過綠界金流服務，將由收單銀行向您的信用卡銀行進行後續退刷作業。退刷時間會因結帳週期不同，
+									而影響退刷款項完成時間，負項金額可能會落在下一期信用卡帳單，請留意近2期信用卡帳單，或向您的發卡銀行洽詢。</P>
+								<li>
+									因為貨運有時可能有訊息傳遞斷層，若在您留言給予資料後的一周內，新竹貨運都未前往收取的話，麻煩您不吝再次通知
+									工作人員會再次聯絡貨運，或請您協助改用 7-11 店到店寄回 ( 退款時會補上 7-11 店到店運費 NTD 60 )
+								</li>
+								<li>
+									收到包裹檢查確認無誤後，將於 1~2 個工作天內辦理退款給您，謝謝!!
+								</li>
+							</ol>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 退換貨政策內容結束 -->
+
+
+		<!-- JavaScript 區塊 -->
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+
+			/*]]>*/
+		</script>
+	</div>
+</body>
+
+</html>

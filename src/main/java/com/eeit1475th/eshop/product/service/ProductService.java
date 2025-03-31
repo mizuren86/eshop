@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.eeit1475th.eshop.product.dto.ProductDTO;
 import com.eeit1475th.eshop.product.entity.ProductCategory;
 import com.eeit1475th.eshop.product.entity.Products;
 import com.eeit1475th.eshop.product.repository.ProductCategoryRepository;
@@ -43,5 +44,22 @@ public class ProductService {
         Optional<Products> product = productsRepository.findById(productId);
         return product.orElse(null); 
     }
+    
+    
+    // 年測試 //
+    public ProductDTO getProductDTOById(Integer productId) {
+        Products product = getProductById(productId);
+        if (product == null) {
+            return null;
+        }
+        ProductDTO dto = new ProductDTO();
+        dto.setProductId(product.getProductId());
+        dto.setSku(product.getSku());
+        dto.setProductName(product.getProductName());
+        dto.setUnitPrice(product.getUnitPrice());
+        dto.setImageUrl(product.getImageUrl());
+        return dto;
+    }
+    // 年測試 //
     
 }

@@ -72,3 +72,9 @@ human:
   agent:
     ws:
       url: ws://localhost:8080/human-chat
+
+# Spring Boot 內建 Servlet - 年測試
+server:
+  servlet:
+    session:
+      timeout: 30m

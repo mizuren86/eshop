@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/base}">
+
+<head>
+	<meta charset="utf-8" />
+	<title>About Us - Fruitables</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<style>
+		.policy-section {
+			font-family: 'Open Sans', sans-serif;
+			color: #333;
+			line-height: 1.8;
+			margin-bottom: 2rem;
+		}
+
+		.policy-section h2 {
+			font-size: 2.5rem;
+			font-weight: 700;
+			margin-bottom: 1.5rem;
+			color: #222;
+		}
+
+		.policy-section h3 {
+			font-size: 1.75rem;
+			font-weight: 600;
+			margin-top: 2rem;
+			margin-bottom: 1rem;
+			color: #222;
+		}
+
+		.policy-section p {
+			font-size: 1rem;
+			margin-bottom: 1rem;
+		}
+
+		.policy-section ul {
+			margin-bottom: 1rem;
+			padding-left: 1.5rem;
+		}
+
+		.policy-section li {
+			margin-bottom: 0.5rem;
+		}
+
+		.policy-card {
+			background: #fff;
+			border: 1px solid #e0e0e0;
+			border-radius: 0.5rem;
+			padding: 2rem;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+	</style>
+</head>
+
+<body>
+	<div layout:fragment="content">
+		<!-- 頁首 -->
+		<header class="container-fluid page-header py-5">
+			<h1 class="text-center text-white display-6">About Us</h1>
+			<nav aria-label="breadcrumb" class="breadcrumb justify-content-center">
+				<a th:href="@{/index}" class="breadcrumb-item">Home</a>
+				<span class="breadcrumb-item active text-white">About Us</span>
+			</nav>
+		</header>
+
+		<!-- 關於我們內容開始 -->
+		<div class="container-fluid contact py-5">
+			<div class="container py-5">
+				<div class="p-5 bg-light rounded">
+					<div class="row g-4">
+						<div class="col-12">
+							<h1 class="text-primary text-center">關於我們</h1>
+							</br>
+							<div>
+								<p>
+									資展國際股份有限公司</br>
+									iSpan
+								</p>
+								<p>
+									統編：52556666 </br>
+									地址：801 高雄市前金區中正四路 211 號 8 樓之 1 </br>
+									電話：(07) 9699-885 #6511 </br>
+									Email：fruitablesservice@fruitables.net
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 關於我們內容結束 -->
+
+
+		<!-- JavaScript 區塊 -->
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+
+			/*]]>*/
+		</script>
+	</div>
+</body>
+
+</html>
