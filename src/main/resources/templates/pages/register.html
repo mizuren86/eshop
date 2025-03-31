@@ -61,6 +61,21 @@
               </div>
 
               <div class="mb-3">
+                <label for="verificationCode" class="form-label">驗證碼</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="verificationCode" name="verificationCode" required
+                    autocomplete="one-time-code">
+                  <button type="button" class="btn btn-outline-success" id="sendVerificationCodeBtn">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    發送驗證碼
+                  </button>
+                </div>
+                <div id="verificationMessage" class="form-text text-success d-none">
+                  <i class="fas fa-check-circle me-1"></i>驗證碼已發送到您的郵箱
+                </div>
+              </div>
+
+              <div class="mb-3">
                 <label for="password" class="form-label">密碼</label>
                 <input type="password" class="form-control" id="password" name="password" required
                   autocomplete="new-password">
@@ -104,6 +119,56 @@
       const loadingDiv = document.getElementById('loadingMessage');
       const successDiv = document.getElementById('successMessage');
       const spinner = button.querySelector('.spinner-border');
+      const sendVerificationBtn = document.getElementById('sendVerificationCodeBtn');
+      const verificationSpinner = sendVerificationBtn.querySelector('.spinner-border');
+      const verificationMessage = document.getElementById('verificationMessage');
+
+      // 發送驗證碼按鈕點擊事件
+      sendVerificationBtn.addEventListener('click', async function () {
+        const email = document.getElementById('email').value;
+        if (!email) {
+          errorDiv.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>請先輸入電子郵件';
+          errorDiv.classList.remove('d-none');
+          return;
+        }
+
+        try {
+          sendVerificationBtn.disabled = true;
+          verificationSpinner.classList.remove('d-none');
+
+          const response = await fetch('/api/users/send-verification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ email: email })
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            verificationMessage.classList.remove('d-none');
+            // 禁用發送按鈕60秒
+            let countdown = 60;
+            const timer = setInterval(() => {
+              sendVerificationBtn.textContent = `重新發送(${countdown}s)`;
+              countdown--;
+              if (countdown < 0) {
+                clearInterval(timer);
+                sendVerificationBtn.disabled = false;
+                sendVerificationBtn.textContent = '發送驗證碼';
+              }
+            }, 1000);
+          } else {
+            throw new Error(data.message || '發送驗證碼失敗');
+          }
+        } catch (error) {
+          errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${error.message || '發送驗證碼時發生錯誤'}`;
+          errorDiv.classList.remove('d-none');
+        } finally {
+          sendVerificationBtn.disabled = false;
+          verificationSpinner.classList.add('d-none');
+        }
+      });
 
       form.addEventListener('submit', async function (event) {
         event.preventDefault();
@@ -121,6 +186,7 @@
           const email = document.getElementById('email').value;
           const password = document.getElementById('password').value;
           const confirmPassword = document.getElementById('confirmPassword').value;
+          const verificationCode = document.getElementById('verificationCode').value;
 
           if (password !== confirmPassword) {
             throw new Error('兩次輸入的密碼不一致');
@@ -134,7 +200,8 @@
             body: JSON.stringify({
               username: username,
               email: email,
-              password: password
+              password: password,
+              verificationCode: verificationCode
             })
           });
 
