@@ -30,6 +30,7 @@
     <!-- <div th:if="${showLoginModal}" id="debugFlag">Show Login Modal is True</div> -->
 
     <div class="container my-5">
+    <h2 th:text="|為『${ProductName}』留下您寶貴的意見吧~|">產品名稱載入中...</h2>
       <form id="reviewForm" method="post" th:action="@{/reviews/create.do}" enctype="multipart/form-data">
         <input type="hidden" name="products.productId" th:value="${productId}">
         

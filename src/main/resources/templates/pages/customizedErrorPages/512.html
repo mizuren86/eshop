@@ -35,9 +35,11 @@
             <h1 class="mb-4">Please login first</h1>
             <p class="mb-4">
               If you are already a registered user, please log in before post a comment.<br>
-              Or go to our home page and browse our products.
+              Or return to the product page.
             </p>
-            <a class="btn border-secondary rounded-pill py-3 px-5" th:href="@{/index}">Go Back To Home</a>
+            <a class="btn border-secondary rounded-pill py-3 px-5" 
+   th:href="@{/shop-detail(productId=${productId})}">Back to Product Details</a>
+            <a class="btn border-secondary rounded-pill py-3 px-5" th:href="@{/login}">Go To Log In</a>
           </div>
         </div>
       </div>
