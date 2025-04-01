@@ -51,8 +51,28 @@
 
             <form id="registerForm">
               <div class="mb-3">
-                <label for="username" class="form-label">帳號</label>
+                <label for="userPhoto" class="form-label">頭像</label>
+                <input type="file" class="form-control" id="userPhoto" name="userPhoto" accept="image/*">
+                <div id="photoPreview" class="mt-2 d-none">
+                  <img src="" alt="預覽圖" style="max-width: 200px; max-height: 200px;">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="username" class="form-label">使用者</label>
                 <input type="text" class="form-control" id="username" name="username" required autocomplete="username">
+              </div>
+
+              <div class="mb-3">
+                <label for="password" class="form-label">密碼</label>
+                <input type="password" class="form-control" id="password" name="password" required
+                  autocomplete="new-password">
+              </div>
+
+              <div class="mb-3">
+                <label for="confirmPassword" class="form-label">確認密碼</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required
+                  autocomplete="new-password">
               </div>
 
               <div class="mb-3">
@@ -76,15 +96,14 @@
               </div>
 
               <div class="mb-3">
-                <label for="password" class="form-label">密碼</label>
-                <input type="password" class="form-control" id="password" name="password" required
-                  autocomplete="new-password">
+                <label for="phone" class="form-label">電話</label>
+                <input type="tel" class="form-control" id="phone" name="phone" required autocomplete="tel">
               </div>
 
               <div class="mb-3">
-                <label for="confirmPassword" class="form-label">確認密碼</label>
-                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required
-                  autocomplete="new-password">
+                <label for="address" class="form-label">地址</label>
+                <textarea class="form-control" id="address" name="address" rows="3" required
+                  autocomplete="street-address"></textarea>
               </div>
 
               <div class="d-grid gap-2">
@@ -122,6 +141,22 @@
       const sendVerificationBtn = document.getElementById('sendVerificationCodeBtn');
       const verificationSpinner = sendVerificationBtn.querySelector('.spinner-border');
       const verificationMessage = document.getElementById('verificationMessage');
+      const photoInput = document.getElementById('userPhoto');
+      const photoPreview = document.getElementById('photoPreview');
+      const previewImg = photoPreview.querySelector('img');
+
+      // 頭像預覽
+      photoInput.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            previewImg.src = e.target.result;
+            photoPreview.classList.remove('d-none');
+          }
+          reader.readAsDataURL(file);
+        }
+      });
 
       // 發送驗證碼按鈕點擊事件
       sendVerificationBtn.addEventListener('click', async function () {
@@ -187,22 +222,28 @@
           const password = document.getElementById('password').value;
           const confirmPassword = document.getElementById('confirmPassword').value;
           const verificationCode = document.getElementById('verificationCode').value;
+          const phone = document.getElementById('phone').value;
+          const address = document.getElementById('address').value;
+          const userPhoto = document.getElementById('userPhoto').files[0];
 
           if (password !== confirmPassword) {
             throw new Error('兩次輸入的密碼不一致');
           }
 
+          const formData = new FormData();
+          formData.append('username', username);
+          formData.append('email', email);
+          formData.append('password', password);
+          formData.append('verificationCode', verificationCode);
+          formData.append('phone', phone);
+          formData.append('address', address);
+          if (userPhoto) {
+            formData.append('userPhoto', userPhoto);
+          }
+
           const response = await fetch('/api/users/register', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              username: username,
-              email: email,
-              password: password,
-              verificationCode: verificationCode
-            })
+            body: formData
           });
 
           const data = await response.json();
