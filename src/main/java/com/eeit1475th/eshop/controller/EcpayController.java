@@ -2,6 +2,7 @@ package com.eeit1475th.eshop.controller;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -11,6 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class EcpayController {
+	
+	@Value("${public.base-url}")
+	private String publicBaseUrl;
 
     @GetMapping("/ecpay/expressMap")
     public void expressMap(HttpServletResponse response) throws IOException {
@@ -23,7 +27,8 @@ public class EcpayController {
         mapObj.setMerchantTradeNo("TestTradeNo001");
         mapObj.setLogisticsSubType("UNIMART");              // 必填，選項之一，例如 FAMI
         mapObj.setIsCollection("N");                     // 必填，通常設為 "N"
-        mapObj.setServerReplyURL("https://smooth-ends-cover.loca.lt/ecpay/callback");
+        mapObj.setServerReplyURL("https://6dde-59-125-142-166.ngrok-free.app/ecpay/callback");
+//        mapObj.setServerReplyURL("https://406f-59-125-142-166.ngrok-free.app/checkout");
 
         // 取得綠界電子地圖的 HTML 表單，該表單會自動提交
         String htmlForm = allInOne.expressMap(mapObj);
