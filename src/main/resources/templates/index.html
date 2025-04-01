@@ -1,189 +1,137 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{/base}">
+    layout:decorate="~{/base}">
 
 <head>
-	<meta charset="utf-8">
-
-	<title>Home - Fruitables</title>
+    <meta charset="utf-8" />
+    <title>Home - Fruitables</title>
 </head>
 
 <body>
+    <div layout:fragment="content">
+        <!-- Hero Section Start -->
+        <div class="container-fluid py-5 mb-5 hero-header">
+            <div class="container py-5">
+                <div class="row g-5 align-items-center">
+                    <div class="col-md-12 col-lg-7">
+                        <h4 class="mb-3 text-secondary">100% Organic Foods</h4>
+                        <h1 class="mb-5 display-3 text-primary">Organic Veggies &amp; Fruits Foods</h1>
+                        <div class="position-relative mx-auto">
+                            <input class="form-control border-2 border-secondary w-75 py-3 px-4 rounded-pill"
+                                type="number" placeholder="Search" />
+                            <button type="submit"
+                                class="btn btn-primary border-2 border-secondary py-3 px-4 position-absolute rounded-pill text-white h-100"
+                                style="top: 0; right: 25%">
+                                Submit Now
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-5">
+                        <div id="carouselId" class="carousel slide position-relative" data-bs-ride="carousel">
+                            <div class="carousel-inner" role="listbox">
+                                <div class="carousel-item active rounded">
+                                    <img th:src="@{/img/hero-img-1.png}"
+                                        class="img-fluid w-100 h-100 bg-secondary rounded" alt="First slide" />
+                                    <a th:href="@{/shop}" class="btn px-4 py-2 text-white rounded">Fruites</a>
+                                </div>
 
-
-
-	<div layout:fragment="content">
-		<!-- Hero Section Start -->
-
-
-		<div class="container-fluid py-5 mb-5 hero-header">
-			<div class="container py-5">
-				<div class="row g-5 align-items-center">
-					<div class="col-md-12 col-lg-7">
-						<h4 class="mb-3 text-secondary">100% Organic Foods</h4>
-						<h1 class="mb-5 display-3 text-primary">Organic Veggies &amp; Fruits Foods</h1>
-						<div class="position-relative mx-auto">
-							<input class="form-control border-2 border-secondary w-75 py-3 px-4 rounded-pill"
-								type="number" placeholder="Search">
-							<button type="submit"
-								class="btn btn-primary border-2 border-secondary py-3 px-4 position-absolute rounded-pill text-white h-100"
-								style="top: 0; right: 25%;">Submit Now</button>
-						</div>
-					</div>
-					<div class="col-md-12 col-lg-5">
-						<div id="carouselId" class="carousel slide position-relative" data-bs-ride="carousel">
-							<div class="carousel-inner" role="listbox">
-								<div class="carousel-item active rounded">
-									<img th:src="@{/img/hero-img-1.png}"
-										class="img-fluid w-100 h-100 bg-secondary rounded" alt="First slide">
-									<a th:href="@{/shop}" class="btn px-4 py-2 text-white rounded">Fruites</a>
-								</div>
-
-								<div class="carousel-item rounded">
-									<img th:src="@{/img/hero-img-2.jpg}" class="img-fluid w-100 h-100 rounded"
-										alt="Second slide">
-									<a href="#" class="btn px-4 py-2 text-white rounded">Vegetables</a>
-								</div>
-							</div>
-							<button class="carousel-control-prev" type="button" data-bs-target="#carouselId"
-								data-bs-slide="prev">
-								<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-								<span class="visually-hidden">Previous</span>
-							</button>
-							<button class="carousel-control-next" type="button" data-bs-target="#carouselId"
-								data-bs-slide="next">
-								<span class="carousel-control-next-icon" aria-hidden="true"></span>
-								<span class="visually-hidden">Next</span>
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<!-- Hero Section End -->
-
-    <!-- 其他首頁專屬內容 -->
-    <div class="container">
-      <h2>Welcome to Fruitables!</h2>
-      <p>This is your homepage content.</p>
-      <!-- 此段是曾毓皓增加的 -->
-      <div id="adCarousel" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <img src="img/pom1.jpg" class="img-fluid w-100 h-100 rounded" alt="Ad 1">
+                                <div class="carousel-item rounded">
+                                    <img th:src="@{/img/hero-img-2.jpg}" class="img-fluid w-100 h-100 rounded"
+                                        alt="Second slide" />
+                                    <a href="#" class="btn px-4 py-2 text-white rounded">Vegetables</a>
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselId"
+                                data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselId"
+                                data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="carousel-item">
-            <img src="img/吉娃娃1.jpg" class="img-fluid w-100 h-100 rounded" alt="Ad 2">
+        <!-- Hero Section End -->
+
+        <!-- 其他首頁專屬內容 -->
+
+        <!-- 此段是曾毓皓增加的 -->
+        <div id="adCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="img/ad01.jpg" class="img-fluid w-100 h-100 rounded" alt="Ad 1">
+                </div>
+                <div class="carousel-item">
+                    <img src="img/ad02.jpg" class="img-fluid w-100 h-100 rounded" alt="Ad 2">
+                </div>
+                <div class="carousel-item">
+                    <img src="img/ad03.jpg" class="img-fluid w-100 h-100 rounded" alt="Ad 3">
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#adCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#adCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
         </div>
-        <div class="carousel-item">
-            <img src="img/貴賓1.jpg" class="img-fluid w-100 h-100 rounded" alt="Ad 3">
+
+
+        <!-- YouTube 影片嵌入 -->
+        <div class="container my-5">
+            <div class="ratio ratio-16x9">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/Esusw-XIUag?si=LBfPTKgdgLqjDCxa"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
         </div>
+        <div class="container my-5">
+            <div class="ratio ratio-16x9">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/6H8h0u_M85o?si=BSDX0ai03PETqCOJ"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <!-- 客服 -->
+        <div th:replace="@{/fragments/chat-widget.html}"></div>
     </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#adCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon"></span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#adCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon"></span>
-    </button>
-    </div>
-    
-    <h2>反應力測試</h2>
-    <button id="reactionBtn" style="padding: 10px 20px;">等候開始...</button>
-    <p id="result"></p>
-    </div>
 
-			<!-- YouTube 影片嵌入 -->
-			<div class="container my-5">
-				<div class="ratio ratio-16x9">
-					<iframe width="560" height="315" src="https://www.youtube.com/embed/Esusw-XIUag?si=LBfPTKgdgLqjDCxa"
-						title="YouTube video player" frameborder="0"
-						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-						referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-				</div>
-			</div>
-			<div class="container my-5">
-				<div class="ratio ratio-16x9">
-					<iframe width="560" height="315" src="https://www.youtube.com/embed/6H8h0u_M85o?si=BSDX0ai03PETqCOJ"
-						title="YouTube video player" frameborder="0"
-						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-						referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-				</div>
-			</div>
-
-			<!-- 客服 -->
-			<div th:replace="@{/fragments/chat-widget.html}"></div>
-
-		</div>
-	</div>
+    <!-- 添加登入狀態檢查腳本 -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.onload = function () {
+            // 檢查登入狀態
+            fetch("/api/users/current")
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.userId) {
+                        console.log("User is logged in:", data.username);
+                        // 可以在這裡更新頁面上的用戶信息
+                    } else {
+                        console.log("User is not logged in");
+                        window.location.href = "/login";
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error checking login status:", error);
+                    window.location.href = "/login";
+                });
+        };
 
 
 
 
-    <div th:replace="@{/fragments/chat-widget.html}"></div>
-
-
-
-
-
-
-
-
-
-  </div>
-
-  <!-- 添加登入狀態檢查腳本 -->
-  <script th:inline="javascript">
-    /*<![CDATA[*/
-    window.onload = function () {
-      // 檢查登入狀態
-      fetch('/api/users/current')
-        .then(response => response.json())
-        .then(data => {
-          if (data.userId) {
-            console.log('User is logged in:', data.username);
-            // 可以在這裡更新頁面上的用戶信息
-          } else {
-            console.log('User is not logged in');
-            window.location.href = '/login';
-          }
-        })
-        .catch(error => {
-          console.error('Error checking login status:', error);
-          window.location.href = '/login';
-        });
-    }
-    
-    
-    /*曾毓皓增加的*/
-    let startTime, endTime;
-    const btn = document.getElementById("reactionBtn");
-    
-    function startGame() {
-        btn.innerHTML = "準備...";
-        btn.style.backgroundColor = "red";
-        setTimeout(() => {
-            startTime = Date.now();
-            btn.innerHTML = "快點我！";
-            btn.style.backgroundColor = "green";
-        }, Math.random() * 3000 + 2000);
-    }
-
-    btn.addEventListener("click", function() {
-        if (btn.style.backgroundColor === "green") {
-            endTime = Date.now();
-            let reactionTime = (endTime - startTime) / 1000;
-            document.getElementById("result").innerHTML = `你的反應時間是：${reactionTime} 秒！`;
-            btn.innerHTML = "再試一次";
-            btn.style.backgroundColor = "";
-        } else {
-            document.getElementById("result").innerHTML = "太快了！等它變綠色再點！";
-        }
-    });
-
-    startGame();
-    /**/
-    /*]]>*/
-  </script>
+        /**/
+        /*]]>*/
+    </script>
 </body>
 
 </html>

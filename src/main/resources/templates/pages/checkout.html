@@ -234,7 +234,14 @@
 									<input type="text" class="form-control" id="recipientPhone" name="recipientPhone"
 										placeholder="0912 345 678" />
 								</div>
-								<button type="button" class="btn btn-outline-secondary">選擇門市</button>
+								<button id="selectStoreBtn" type="button" class="btn btn-outline-secondary">選擇門市</button>
+								<div id="selectedStore">
+								    <h5>已選擇門市</h5>
+								    <p>門市編號：<span th:text="${selectedStore?.storeID}">StoreID</span></p>
+								    <p>門市名稱：<span th:text="${selectedStore?.storeName}">StoreName</span></p>
+								    <p>地址：<span th:text="${selectedStore?.storeAddress}">StoreAddress</span></p>
+								    <p>電話：<span th:text="${selectedStore?.storePhone}">StorePhone</span></p>
+								</div>
 							</div>
 							<div class="card p-3">
 								<div class="d-flex justify-content-between align-items-center mb-3">
@@ -912,6 +919,12 @@
 				function updateGrandTotal() {
 					const subtotal = parseInt(document.getElementById("subtotalAmount").textContent.replace("$", "")) || 0;
 					const shippingFee = updateCartShippingFeeUI();
+					// 取得優惠券要求的目標金額（如果後端有提供 targetAmount，否則預設為 0）
+					const targetAmount = /*[[${targetAmount != null ? targetAmount : 0}]]*/ 0;
+					// 若購物車小計低於目標金額，強制清除優惠券折扣
+					if (subtotal < targetAmount) {
+						couponDiscountOverall = 0;
+					}
 					const grandTotalValue = subtotal + shippingFee - couponDiscountOverall;
 					document.getElementById("grandTotal").textContent = "$" + grandTotalValue;
 					document.getElementById("paymentGrandTotal").textContent = "$" + grandTotalValue;
@@ -1149,6 +1162,38 @@
 
 				// 重新載入購物車資料
 				document.addEventListener("DOMContentLoaded", fetchCartData);
+				
+				/////////////////////////
+				async function fetchSelectedStore() {
+				        try {
+				            const response = await fetch("/api/selectedStore", {
+				                headers: {
+//				                    'ngrok-skip-browser-warning': 'any_value' // 若使用 ngrok，加入這個標頭
+				                    'bypass-tunnel-reminder': 'any_value' // 若使用 ngrok，加入這個標頭
+				                }
+				            });
+				            if (response.ok) {
+				                const store = await response.json();
+				                if (store) {
+				                    document.getElementById("selectedStore").innerHTML = `
+				                        <h5>已選擇門市</h5>
+				                        <p>門市編號：${store.storeID}</p>
+				                        <p>門市名稱：${store.storeName}</p>
+				                        <p>地址：${store.storeAddress}</p>
+				                        <p>電話：${store.storePhone}</p>
+				                    `;
+				                }
+				            } else {
+				                // 如果 API 回傳 404，也可以清空或顯示提示訊息
+				                document.getElementById("selectedStore").innerHTML = "<p>尚未選擇門市</p>";
+				            }
+				        } catch (error) {
+				            console.error("Error fetching selected store:", error);
+				        }
+				    }
+				    // 每隔 3 秒查詢一次
+				    setInterval(fetchSelectedStore, 3000);
+				/////////////////////////
 
 				/*]]>*/
 			</script>
@@ -1172,6 +1217,12 @@
 						}
 					});
 				});
+				
+				// 綠界地圖 API
+				document.getElementById("selectStoreBtn").addEventListener("click", function() {
+				    window.location.href = "/ecpay/expressMap";
+				});
+
 			</script>
 		</div>
 </body>

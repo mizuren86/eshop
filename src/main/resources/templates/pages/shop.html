@@ -84,11 +84,9 @@
                   </ul>
                 </div>
               </div>
-
-
             </div>
-
           </div>
+
           <!-- 商品清單區 -->
           <div class="col-lg-9">
             <div class="row g-4 justify-content-center" id="product-list">
@@ -123,15 +121,16 @@
                 </div>
 
               </div>
-              <div class="col-12">
-                <div class="pagination d-flex justify-content-center mt-5">
-                  <a href="#" class="rounded">&laquo;</a>
-                  <a href="#" class="active rounded">1</a>
-                  <a href="#" class="rounded">2</a>
-                  <a href="#" class="rounded">3</a>
-                  <a href="#" class="rounded">&raquo;</a>
-                </div>
+              <div class="pagination d-flex justify-content-center mt-5">
+                <a th:if="${currentPage > 0}" th:href="@{/shop(page=${currentPage - 1})}" class="rounded">&laquo;</a>
+
+                <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:href="@{/shop(page=${i})}"
+                  th:text="${i + 1}" th:classappend="${i == currentPage} ? 'active rounded' : 'rounded'"></a>
+
+                <a th:if="${currentPage < totalPages - 1}" th:href="@{/shop(page=${currentPage + 1})}"
+                  class="rounded">&raquo;</a>
               </div>
+
 
             </div>
           </div>

@@ -2,6 +2,7 @@ package com.eeit1475th.eshop.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,21 +24,32 @@ public class ProductController {
 
 	// Shop 頁面
 	@GetMapping("/shop")
-	public String shop(@RequestParam(value = "category", required = false) Integer categoryId, Model model) {
-		List<ProductCategory> categories = productService.getAllCategories();
-		model.addAttribute("categories", categories);
-		model.addAttribute("pageTitle", "Shop");
+	public String shop(@RequestParam(value = "page", defaultValue = "0") int page,
+	                   @RequestParam(value = "size", defaultValue = "5") int size,
+	                   @RequestParam(value = "category", required = false) Integer categoryId,
+	                   Model model) {
 
-		List<Products> products;
-		if (categoryId != null) {
-			products = productService.getProductsByCategory(categoryId);
-		} else {
-			products = productService.getAllProducts();
-		}
-		model.addAttribute("products", products);
+	    // 獲取所有分類
+	    List<ProductCategory> categories = productService.getAllCategories();
+	    model.addAttribute("categories", categories);
 
-		return "/pages/shop";
+	    // 取得產品清單 (考慮是否有分類篩選)
+	    Page<Products> productPage;
+	    if (categoryId != null) {
+	        productPage = productService.getProductsByCategoryAndPage(categoryId, page, size);
+	    } else {
+	        productPage = productService.getProductsByPage(page, size);
+	    }
+
+	    // 將產品資料與分頁資訊放入 Model
+	    model.addAttribute("products", productPage.getContent());
+	    model.addAttribute("currentPage", page);
+	    model.addAttribute("totalPages", productPage.getTotalPages());
+	    model.addAttribute("selectedCategory", categoryId); // 傳遞目前選擇的分類 (用於前端高亮)
+
+	    return "/pages/shop";
 	}
+
 
 	// Shop Detail 頁面
 	@GetMapping("/shop-detail")

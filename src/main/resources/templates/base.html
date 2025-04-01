@@ -75,25 +75,23 @@
 					<div class="navbar-nav mx-auto">
 						<a th:href="@{/index}" class="nav-item nav-link">Home</a>
 						<a th:href="@{/shop}" class="nav-item nav-link">Shop</a>
-
-
-						<!--
-           	<div class="nav-item dropdown">
-              <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
-              <div class="dropdown-menu m-0 bg-secondary rounded-0">
-				<a th:href="@{/cart}" class="dropdown-item">Cart</a>
-				<a th:href="@{/checkout}" class="dropdown-item">Checkout</a>
-                <a th:href="@{/testimonial}" class="dropdown-item">Testimonial</a>
-                <a th:href="@{/404}" class="dropdown-item">404 Page</a>
-				<a th:href="@{/checkout}" class="dropdown-item">Checkout</a>
-				<a th:href="@{/cart}" class="dropdown-item">Cart</a>
-				<a th:href="@{/shop-detail}" class="dropdown-item">Shop Detail</a>
-              </div>
-            </div>
-			-->
-
 						<a th:href="@{/contact}" class="nav-item nav-link">Contact</a>
+					<!--
+					<div class="nav-item dropdown">
+						<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
+						<div class="dropdown-menu m-0 bg-secondary rounded-0">
+							<a th:href="@{/cart}" class="dropdown-item">Cart</a>
+							<a th:href="@{/checkout}" class="dropdown-item">Checkout</a>
+							<a th:href="@{/testimonial}" class="dropdown-item">Testimonial</a>
+							<a th:href="@{/404}" class="dropdown-item">404 Page</a>
+							<a th:href="@{/checkout}" class="dropdown-item">Checkout</a>
+							<a th:href="@{/cart}" class="dropdown-item">Cart</a>
+							<a th:href="@{/shop-detail}" class="dropdown-item">Shop Detail</a>
+						</div>
 					</div>
+					-->	
+					</div>
+				</div>
 					<div class="d-flex m-3 me-0">
 						<button
 							class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"
@@ -341,14 +339,7 @@
 			}
 		});
 
-		//   function logout() {
-		//      console.log('=== 登出 ===');
-		//      sessionStorage.clear(); // 清除所有用戶資訊
-		//      console.log('已清除 sessionStorage');
-		//      window.location.href = '/login'; // 導向至登入頁面
-		//    }
-
-		// 年測試開始 //
+		// 登出 //
 		function logout() {
 			console.log('=== 登出 ===');
 			// 向後端發送登出請求
@@ -372,10 +363,6 @@
 				});
 		}
 		window.logout = logout;
-		// 年測試結束 //
-
-
-
 
 		// 購物車數量即時更新 //
 		function updateCartCount() {
@@ -440,27 +427,6 @@
 		// 頁面載入後啟動自動登出計時器
 		document.addEventListener('DOMContentLoaded', autoLogout);
 
-	</script>
-
-	<script>
-		//    // 定義全域的 logout 函式
-		//    window.logout = function () {
-		//      console.log('=== 登出 ===');
-		//      sessionStorage.clear(); // 清除所有用戶資訊
-		//      console.log('已清除 sessionStorage');
-		//      window.location.href = '/index'; // 導向至登入頁面
-		//    };
-		//
-		//    // 確保登出按鈕綁定事件
-		//    document.addEventListener('DOMContentLoaded', () => {
-		//      const logoutButton = document.querySelector('a[href="#logout"]');
-		//      if (logoutButton) {
-		//        logoutButton.addEventListener('click', (event) => {
-		//          event.preventDefault(); // 防止預設行為
-		//          logout();
-		//        });
-		//      }
-		//    });
 	</script>
 </body>
 
