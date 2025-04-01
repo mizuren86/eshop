@@ -223,19 +223,32 @@ CREATE TABLE [dbo].[coupon](
 
 -- 插入商品分類資料
 INSERT INTO product_category (category_name)
-VALUES ('水果'), ('熱帶水果'), ('柑橘類水果');
+VALUES ('水果'), ('蔬菜');
+
 
 
 -- 插入水果商品資料，圖片路徑指向本機專案的靜態資源
 INSERT INTO products (sku, product_name, [description], unit_price, image_url, unit_in_stock, category_id)
 VALUES 
-('FRU0001', '蘋果', '新鮮紅蘋果', 50, '/img/fruite-item-1.jpg', 100, 1),
-('FRU0002', '香蕉', '新鮮黃香蕉', 15, '/img/fruite-item-2.jpg', 150, 2),
-('FRU0003', '橙子', '新鮮橙子', 25, '/img/fruite-item-3.jpg', 120, 3),
-('FRU0004', '葡萄', '新鮮紫葡萄', 80, '/img/fruite-item-4.jpg', 80, 1),
-('FRU0005', '鳳梨', '新鮮甜鳳梨', 150, '/img/fruite-item-5.jpg', 90, 2),
-('FRU0006', '西瓜', '新鮮西瓜', 126, '/img/fruite-item-6.jpg', 60, 2),
-('FRU0007', '檸檬', '新鮮檸檬', 18, '/img/fruite-item-7.jpg', 110, 3);
+('FRU0001', '蘋果', '富士', 125, '/img/fruite-item-1.jpg', 100, 1),
+('FRU0002', '香蕉', '香蕉', 230, '/img/fruite-item-2.jpg', 150, 1),
+('FRU0003', '椪柑', '橘子', 112, '/img/fruite-item-3.jpg', 120, 1),
+('FRU0004', '葡萄', '巨峰', 323, '/img/fruite-item-4.jpg', 80, 1),
+('FRU0005', '蔓越莓', '蔓越莓', 369, '/img/fruite-item-5.jpg', 90, 1),
+('FRU0006', '柿子', '甜柿', 306, '/img/fruite-item-6.jpg', 60, 1),
+('FRU0007', '檸檬', '檸檬', 18, '/img/fruite-item-7.jpg', 110, 1),
+('FRU0008', '小番茄', '玉女', 141, '/img/fruite-item-8.jpg', 100, 1),
+('FRU0009', '草莓', '草莓', 275, '/img/fruite-item-9.jpg', 100, 1),
+('FRU00010', '蓮霧', '紅蓮霧', 289, '/img/fruite-item-10.jpg', 100, 1),
+('VGE0001', '小白菜', '土白菜', 27, '/img/vegetable-item-1.jpg', 100, 2),
+('VGE0002', '甘藍', '高麗菜', 13, '/img/vegetable-item-2.jpg', 100, 2),
+('VGE0003', '水蓮', '海菜', 342, '/img/vegetable-item-3.jpg', 100, 2),
+('VGE0004', '花椰菜', '白梗', 36, '/img/vegetable-item-4.jpg', 100, 2),
+('VGE0005', '蘿蔔', '矸仔', 14, '/img/vegetable-item-5.jpg', 100, 2),
+('VGE0006', '辣椒', '朝天椒', 110, '/img/vegetable-item-6.jpg', 100, 2),
+('VGE0007', '玉米', '玉米筍', 36, '/img/vegetable-item-7.jpg', 100, 2);
+
+
 
 -- 插入假資料到 users 表
 -- [password] 統一為'123'
