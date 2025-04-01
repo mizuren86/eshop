@@ -150,7 +150,7 @@
 					console.log('接收到的數據:', data);
 					console.log('用戶信息:', data.data.user);
 					console.log('Token:', data.data.token);
-					loadingDiv.innerHTML = `<i class="fas fa-check-circle me-2"></i>歡迎回來，${data.data.user.username}！正在跳轉...`;
+					loadingDiv.innerHTML = `<i class="fas fa-check-circle me-2"></i>歡迎回來，${data.data.user.username}！`;
 
 					// 保存用戶信息到 sessionStorage
 					if (data.data && data.data.user) {
@@ -180,7 +180,7 @@
 					console.log('準備跳轉到:', redirectUrl);
 					setTimeout(() => {
 						window.location.replace(redirectUrl);
-					}, 1500);
+					}, 500);
 
 				} catch (error) {
 					console.error('登入失敗:', error);

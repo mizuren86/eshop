@@ -32,53 +32,53 @@ import lombok.Setter;
 public class Users {
 
 	@Id
-	@Column(name ="user_id")
+	@Column(name = "user_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer userId;
-	
-	@Column(name ="username")
+
+	@Column(name = "username")
 	private String username;
-	
-	@Column(name ="password")
+
+	@Column(name = "password")
 	private String password;
-	
-	@Column(name ="email")
+
+	@Column(name = "email")
 	private String email;
-	
-	@Column(name ="full_name")
+
+	@Column(name = "full_name")
 	private String fullName;
-	
-	@Column(name ="phone")
+
+	@Column(name = "phone")
 	private String phone;
-	
-	@Column(name ="user_photo")
+
+	@Column(name = "user_photo")
 	private String userPhoto;
-	
-	@Column(name ="address")
+
+	@Column(name = "address")
 	private String address;
-	
+
 	@OneToOne(mappedBy = "users", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private ShoppingCart shoppingCart;
-	
+
 	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private List<Orders> orders = new ArrayList<>();
-	
-	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
-    private List<Payments> payments = new ArrayList<>();
-			
-	@JsonManagedReference
-    @OneToOne(mappedBy = "users", cascade = CascadeType.ALL)
-    private UserVip userVip;
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "users", fetch = FetchType.EAGER)
-    private List<UserVipHistory> vipHistories;
-    
-    @OneToMany(mappedBy = "users", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "user-reviews")
-    @JsonIgnore
-    private List<Reviews> userReviews;
-	
+	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
+	private List<Payments> payments = new ArrayList<>();
+
+	@JsonManagedReference
+	@OneToOne(mappedBy = "users", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private UserVip userVip;
+
+	@JsonManagedReference
+	@OneToMany(mappedBy = "users", fetch = FetchType.EAGER)
+	private List<UserVipHistory> vipHistories = new ArrayList<>();
+
+	@OneToMany(mappedBy = "users", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonManagedReference(value = "user-reviews")
+	@JsonIgnore
+	private List<Reviews> userReviews;
+
 }
