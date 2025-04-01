@@ -3,7 +3,6 @@ package com.eeit1475th.eshop.controller;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.eeit1475th.eshop.member.entity.Users;
-import com.eeit1475th.eshop.member.service.JwtService;
 import com.eeit1475th.eshop.product.entity.Products;
 import com.eeit1475th.eshop.product.repository.ProductsRepository;
 import com.eeit1475th.eshop.review.dto.ReviewsDto;
@@ -47,7 +45,6 @@ public class ReviewController {
 	private final ReviewsService reviewsService;
 	private final ReviewsRepository reviewsRepository;
 	private final ProductsRepository productsRepository;
-//    private final JwtService jwtService;
 
 	@GetMapping("/product/{productId}")
 	public String getReviewsByProductId(@PathVariable Integer productId, @RequestParam(defaultValue = "0") int page,
