@@ -7,7 +7,7 @@
 >
   <head>
     <meta charset="utf-8" />
-    <title>產品評論</title>
+    <title>我發表過的評論</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style scoped>
       /* 原有樣式保持不變 */
@@ -137,33 +137,22 @@
         <h1 class="text-center text-white display-6">Reviews</h1>
         <ol class="breadcrumb justify-content-center mb-0">
           <li class="breadcrumb-item"><a th:href="@{/index}">Home</a></li>
-          <li class="breadcrumb-item active text-white">Reviews</li>
+          <li class="breadcrumb-item active text-white">My Reviews</li>
         </ol>
       </div>
 
       <!-- 主要內容區 -->
       <div class="container">
         <div class="page-title">
-          <h2 th:text="|會員為『${ProductName}』留下的寶貴意見~|">產品名稱讀取中...</h2>
-          <div class="average-rating" id="averageRating"></div>
+          <h2>歷史評論:</h2>
         </div>
-        
-        <!-- 星級篩選按鈕 -->
-        <div class="rating-filter">
-          <button class="rating-filter-btn active" data-rating="0">全部評論</button>
-          <button class="rating-filter-btn" data-rating="5"><span class="star">★</span> 5星</button>
-          <button class="rating-filter-btn" data-rating="4"><span class="star">★</span> 4星</button>
-          <button class="rating-filter-btn" data-rating="3"><span class="star">★</span> 3星</button>
-          <button class="rating-filter-btn" data-rating="2"><span class="star">★</span> 2星</button>
-          <button class="rating-filter-btn" data-rating="1"><span class="star">★</span> 1星</button>
-        </div>
-        
+      
         <!-- 評論表格 -->
         <div id="reviewsContainer">
           <table id="reviewsTable" class="table">
             <thead>
               <tr>
-                <th>使用者名稱</th>
+                <th>產品名稱</th>
                 <th>評分</th>
                 <th>評論內容</th>
                 <th>評論照片</th>
@@ -190,61 +179,17 @@
         });
 
         function initReviews() {
-          const productId = /*[[${productId}]]*/ 1;
+          const userId = /*[[${userId}]]*/ 1;
           let currentPage = 0;
-          let currentRating = 0; // 0表示全部
-          const pageSize = 2; // 與後端 @PageableDefault(size = 1) 保持一致
-
-          // 載入平均評分（只載入一次）
-          loadAverageRating();
-          
+          const pageSize = 2; // 與後端 @PageableDefault(size = 2) 保持一致
+         
           // 初始載入評論
-          loadReviews(currentPage, currentRating);
+          loadReviews(currentPage);
           
-          // 設置星級篩選按鈕事件
-          document.querySelectorAll('.rating-filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-              const rating = parseInt(this.dataset.rating);
-              currentRating = rating;
-              currentPage = 0; // 篩選後重置到第一頁
-              
-              // 更新按鈕active狀態
-              document.querySelectorAll('.rating-filter-btn').forEach(b => {
-                b.classList.remove('active');
-              });
-              this.classList.add('active');
-              
-              // 重新載入評論
-              loadReviews(currentPage, currentRating);
-            });
-          });
-
-          // 載入平均評分函數
-          function loadAverageRating() {
-            axios.get(`/reviews/reviews/product/${productId}/average-rating`)
-              .then(response => {
-                const average = response.data.toFixed(1);
-                document.getElementById('averageRating').innerHTML = 
-                  `平均 ${average} 顆星`;
-              })
-              .catch(error => {
-                console.error("獲取平均分數失敗:", error);
-                document.getElementById('averageRating').innerHTML = 
-                  "暫無評分數據";
-              });
-          }
-
-          // 載入評論函數（新增rating參數）
+       // 載入評論函數（新增rating參數）
           function loadReviews(page, rating) {
-  let url;
-  if (rating === 0) {
-    // 全部評論
-    url = `/reviews/api/reviews/product/${productId}?page=${page}&size=${pageSize}`;
-  } else {
-    // 篩選評論 - 修改這裡的路徑
-    url = `/reviews/product/${productId}/filter?page=${page}&size=${pageSize}&rating=${rating}`;
-  }
-  
+          let url = `/reviews/api/reviews/user/${userId}?page=${page}&size=${pageSize}`;
+       
   axios.get(url)
     .then((response) => {
       renderReviews(response.data);
@@ -257,7 +202,8 @@
       alert(`載入評論失敗: ${error.response?.data?.message || error.message}`);
     });
 }
-
+          
+          
           // 渲染評論函數
           function renderReviews(data) {
             const tbody = document.querySelector("#reviewsTable tbody");
@@ -281,7 +227,7 @@
                 : "";
 
               tr.innerHTML = `
-                <td>${review.username}</td>
+                <td>${review.productName}</td>
                 <td>${createRatingStars(review.rating)}</td>
                 <td>${commentHtml}</td>
                 <td>
@@ -308,7 +254,7 @@
                 commentContent.style.maxHeight = "none"; // 暫時取消限制以測量高度
                 const lineHeight = parseFloat(getComputedStyle(commentText).lineHeight);
                 const contentHeight = commentText.offsetHeight;
-                const maxHeight = lineHeight * 9; // 3行高度
+                const maxHeight = lineHeight * 9; // 9行高度
 
                 if (contentHeight > maxHeight) {
                   commentContent.classList.add("collapsed");
@@ -407,13 +353,13 @@
             button.className = `page-btn ${pageNum === currentPage ? "activebutton" : ""}`;
             button.textContent = text;
             button.onclick = () => {
-              if (pageNum !== currentPage) {
-                currentPage = pageNum;
-                button.classList.add("loadingg");
-                loadReviews(pageNum, currentRating).finally(() => {
-                  button.classList.remove("loadingg");
-                });
-              }
+                if (pageNum !== currentPage) {
+                    currentPage = pageNum;
+                    button.classList.add("loadingg");
+                    loadReviews(pageNum).finally(() => {
+                        button.classList.remove("loadingg");
+                    });
+                }
             };
             return button;
           }
