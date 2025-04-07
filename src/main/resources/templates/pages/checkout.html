@@ -37,12 +37,31 @@
 			width: 100%;
 		}
 
+		/* 利用 ::after 產生一個空白區，保留錯誤訊息的空間 */
+		.select-wrapper::after {
+			content: "";
+			display: block;
+			height: 1.2em;
+		}
+
 		/* 箭頭位置設定 */
 		.select-wrapper .fa-caret-down {
 			position: absolute;
 			top: 50%;
 			right: 1rem;
 			transform: translateY(-50%);
+			pointer-events: none;
+		}
+
+		/* 將錯誤訊息以絕對定位，放在下拉選單下方 */
+		.select-wrapper .error-message {
+			position: absolute;
+			top: calc(100% - 1.2em);
+			left: 0;
+			width: 100%;
+			margin-top: 0.2em;
+			font-size: 0.8em;
+			color: red;
 			pointer-events: none;
 		}
 
@@ -96,6 +115,10 @@
 			padding: 4px 8px;
 			border-radius: 4px;
 		}
+
+		#selectStoreBtn {
+			margin-bottom: 15px;
+		}
 	</style>
 </head>
 
@@ -111,7 +134,7 @@
 			</ol>
 		</div>
 
-
+		<input type="hidden" id="couponCodeHidden" th:value="${couponCode}" />
 
 		<!-- Checkout Page -->
 		<div class="container py-5" id="checkoutPage">
@@ -138,7 +161,7 @@
 								<td colspan="3"></td>
 								<td class="text-end align-middle"><strong>小計：</strong></td>
 								<td id="subtotalAmount" class="text-center align-middle" style="width:200px;">
-									<strong>$0</strong>
+									<strong th:text="${totalAmount}">$0</strong>
 								</td>
 							</tr>
 							<tr id="cartShippingRow">
@@ -152,7 +175,6 @@
 									</div>
 								</td>
 							</tr>
-
 							<!-- 優惠券折扣列，預設隱藏，由 JS 控制顯示 -->
 							<tr id="couponDiscountRow" style="display: none;">
 								<td colspan="3"></td>
@@ -173,814 +195,901 @@
 				</div>
 			</section>
 
-			<div th:switch="${shippingMethod}">
-				<!-- 1) 7-11 取貨付款 (付現取貨) -->
-				<div th:case="'711-cod'">
-					<div class="row">
-						<!-- 左欄：顧客資料與訂單備註 -->
-						<div class="col-md-6">
-							<div class="card p-3 mb-4">
-								<h4 class="mb-3">顧客資料</h4>
-								<div class="mb-3">
-									<label for="customerName" class="form-label">顧客姓名</label>
-									<input type="text" class="form-control" id="customerName" name="customerName"
-										placeholder="" th:value="${users.username}" />
-								</div>
-								<div class="mb-3">
-									<label for="customerEmail" class="form-label">電子信箱</label>
-									<input type="email" class="form-control" id="customerEmail" name="customerEmail"
-										placeholder="" th:value="${users.email}" />
-									<div class="form-text mt-2">
-										請填入訂單通知Email (訂單資訊將以此E-mail通知您)
+			<form id="orderForm" action="/api/checkout/submitOrder" method="post">
+				<input type="hidden" name="shippingMethod" th:value="${shippingMethod}" />
+				<div th:switch="${shippingMethod}">
+					<!-- 1) 7-11 取貨付款 (付現取貨) -->
+					<div th:case="'711-cod'" class="branch" data-shipping="711-cod">
+						<!--	<div th:switch="${paymentMethod}">     -->
+						<!--		<div th:case="'711-cod-only'">     -->
+						<div class="row">
+							<!-- 左欄：顧客資料與訂單備註 -->
+							<div class="col-md-6">
+								<div class="card p-3 mb-4">
+									<h4 class="mb-3">顧客資料</h4>
+									<div class="mb-3">
+										<label for="customerName" class="form-label">顧客姓名</label>
+										<input type="text" class="form-control required-field" id="customerName"
+											name="customerName" data-required="true" placeholder=""
+											th:value="${users.username}" />
+									</div>
+									<div class="mb-3">
+										<label for="customerEmail" class="form-label">電子信箱</label>
+										<input type="email" class="form-control required-field" id="customerEmail"
+											name="customerEmail" data-required="true" placeholder=""
+											th:value="${users.email}" />
+										<div class="form-text mt-2">
+											請填入訂單通知Email (訂單資訊將以此E-mail通知您)
+										</div>
+									</div>
+									<div class="mb-3">
+										<label for="customerPhone" class="form-label">電話號碼</label>
+										<input type="text" class="form-control required-field" id="customerPhone"
+											name="customerPhone" data-required="true" placeholder="0912 345 678"
+											th:value="${users.phone}" />
 									</div>
 								</div>
-								<div class="mb-3">
-									<label for="customerPhone" class="form-label">電話號碼</label>
-									<input type="text" class="form-control" id="customerPhone" name="customerPhone"
-										placeholder="0912 345 678" th:value="${users.phone}" />
-								</div>
-							</div>
-							<div class="card p-3">
-								<h4 class="mb-3">訂單備註</h4>
-								<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
-									placeholder="有什麼想告訴賣家嗎"></textarea>
-							</div>
-						</div>
-						<!-- 右欄：送貨資料與付款資料 -->
-						<div class="col-md-6">
-							<div class="card p-3 mb-4">
-								<div class="d-flex justify-content-between align-items-center mb-3">
-									<h4 class="mb-0">送貨資料</h4>
-									<p class="shippingCardFeeText mb-0">$60</p>
-								</div>
-								<p class="mb-1">
-									已選擇的送貨方式: 7-11 取貨付款（寄出日系統會發電子郵件通知，
-									一般寄出日+2日會抵達門市）<br />
-								</p>
-								<div class="mb-3 mt-2">
-									<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
-									<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
-								</div>
-								<div class="mb-3 mt-3">
-									<label for="recipientName" class="form-label">收件人姓名</label>
-									<input type="text" class="form-control" id="recipientName" name="recipientName"
-										placeholder="" />
-									<div class="form-text mt-2">
-										請填入收件人真實姓名，以確保順利收件
-									</div>
-								</div>
-								<div class="mb-3">
-									<label for="recipientPhone" class="form-label">收件人電話號碼</label>
-									<input type="text" class="form-control" id="recipientPhone" name="recipientPhone"
-										placeholder="0912 345 678" />
-								</div>
-								<button id="selectStoreBtn" type="button" class="btn btn-outline-secondary">選擇門市</button>
-								<div id="selectedStore">
-								    <h5>已選擇門市</h5>
-								    <p>門市編號：<span th:text="${selectedStore?.storeID}">StoreID</span></p>
-								    <p>門市名稱：<span th:text="${selectedStore?.storeName}">StoreName</span></p>
-								    <p>地址：<span th:text="${selectedStore?.storeAddress}">StoreAddress</span></p>
-								    <p>電話：<span th:text="${selectedStore?.storePhone}">StorePhone</span></p>
+								<div class="card p-3">
+									<h4 class="mb-3">訂單備註</h4>
+									<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
+										placeholder="有什麼想告訴賣家嗎"></textarea>
 								</div>
 							</div>
-							<div class="card p-3">
-								<div class="d-flex justify-content-between align-items-center mb-3">
-									<h4 class="mb-0">付款資料</h4>
-									<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
+							<!-- 右欄：送貨資料與付款資料 -->
+							<div class="col-md-6">
+								<div class="card p-3 mb-4">
+									<div class="d-flex justify-content-between align-items-center mb-3">
+										<h4 class="mb-0">送貨資料</h4>
+										<p class="shippingCardFeeText mb-0">$60</p>
+									</div>
+									<p class="mb-1">
+										已選擇的送貨方式: 7-11 取貨付款（寄出日系統會發電子郵件通知，
+										一般寄出日+2日會抵達門市）<br />
+									</p>
+									<div class="mb-3 mt-2">
+										<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
+										<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
+									</div>
+									<div class="mb-3 mt-3">
+										<label for="recipientName" class="form-label">收件人姓名</label>
+										<input type="text" class="form-control required-field" id="recipientName"
+											name="recipientName" data-required="true" placeholder="" />
+										<div class="form-text mt-2">
+											請填入收件人真實姓名，以確保順利收件
+										</div>
+									</div>
+									<div class="mb-3">
+										<label for="recipientPhone" class="form-label">收件人電話號碼</label>
+										<input type="text" class="form-control required-field" id="recipientPhone"
+											name="recipientPhone" data-required="true" placeholder="0912 345 678" />
+									</div>
+									<hr>
+									<div style="display: flex; align-items: center; justify-content: left;">
+										<img src="img/711logo.png"
+											style="max-width: 35px; margin-right: 10px; margin-bottom: 1rem;"
+											alt="711 logo">
+										<span style="margin-bottom: 15px;">選擇門市</span>
+									</div>
+									<button id="selectStoreBtn" type="button" class="btn btn-outline-secondary">
+										搜尋門市
+									</button>
+									<div id="selectedStore">
+										<!-- 這裡將由 JavaScript 填入門市資訊 -->
+									</div>
+									<input type="hidden" id="temporaryStoreId" name="temporaryStoreId" value="" />
 								</div>
-								<p class="m-0">
-									已選擇的付款方式: 7-11 取貨付款（包裹抵達指定門市後，付現取貨）
-								</p>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- 2) 7-11 取貨不付款 -->
-				<div th:case="'711-no-cod'">
-					<div th:switch="${paymentMethod}">
-						<!-- 2-1) 7-11 取貨不付款 + LINE PAY -->
-						<div th:case="'linepay'">
-							<div class="row">
-								<!-- 左欄：顧客資料與訂單備註 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<h4 class="mb-3">顧客資料</h4>
-										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客姓名</label>
-											<input type="text" class="form-control" id="customerName"
-												name="customerName" placeholder="" th:value="${users.username}" />
-										</div>
-										<div class="mb-3">
-											<label for="customerEmail" class="form-label">電子信箱</label>
-											<input type="email" class="form-control" id="customerEmail"
-												name="customerEmail" placeholder="" th:value="${users.email}" />
-											<div class="form-text mt-2">
-												請填入訂單通知Email (訂單資訊將以此E-mail通知您)
-											</div>
-										</div>
-										<div class="mb-3">
-											<label for="customerPhone" class="form-label">電話號碼</label>
-											<input type="text" class="form-control" id="customerPhone"
-												name="customerPhone" placeholder="0912 345 678"
-												th:value="${users.phone}" />
-										</div>
+								<div class="card p-3">
+									<div class="d-flex justify-content-between align-items-center mb-3">
+										<h4 class="mb-0">付款資料</h4>
+										<p class="mb-0" id="paymentGrandTotal">合計: $0</p>
 									</div>
-									<div class="card p-3">
-										<h4 class="mb-3">訂單備註</h4>
-										<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
-											placeholder="有什麼想告訴賣家嗎"></textarea>
-									</div>
-								</div>
-								<!-- 右欄：送貨資料與付款資料 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">送貨資料</h4>
-											<p class="shippingCardFeeText mb-0">$60</p>
-										</div>
-										<p class="mb-1">
-											已選擇的送貨方式: 7-11 取貨不付款（寄出日系統會發電子郵件通知，
-											一般寄出日+2日會抵達門市）<br />
-										</p>
-										<div class="mb-3 mt-2">
-											<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
-											<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
-										</div>
-										<div class="mb-3 mt-3">
-											<label for="recipientName" class="form-label">收件人姓名</label>
-											<input type="text" class="form-control" id="recipientName"
-												name="recipientName" placeholder="" />
-											<div class="form-text mt-2">
-												請填入收件人真實姓名，以確保順利收件
-											</div>
-										</div>
-										<div class="mb-3">
-											<label for="recipientPhone" class="form-label">收件人電話號碼</label>
-											<input type="text" class="form-control" id="recipientPhone"
-												name="recipientPhone" placeholder="0912 345 678" />
-										</div>
-										<button type="button" class="btn btn-outline-secondary">選擇門市</button>
-									</div>
-									<div class="card p-3">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">付款資料</h4>
-											<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
-										</div>
-										<!-- 固定顯示 LINE Pay -->
-										<p class="m-0">已選擇的付款方式: LINE Pay</p>
-									</div>
+									<p class="m-0">
+										已選擇的付款方式: 7-11 取貨付款（包裹抵達指定門市後，付現取貨）
+									</p>
 								</div>
 							</div>
-						</div>
-						<!-- 2-2) 7-11 取貨不付款 + 信用卡 -->
-						<div th:case="'credit'">
-							<div class="row">
-								<!-- 左欄：顧客資料與訂單備註 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<h4 class="mb-3">顧客資料</h4>
-										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客姓名</label>
-											<input type="text" class="form-control" id="customerName"
-												name="customerName" placeholder="" th:value="${users.username}" />
-										</div>
-										<div class="mb-3">
-											<label for="customerEmail" class="form-label">電子信箱</label>
-											<input type="email" class="form-control" id="customerEmail"
-												name="customerEmail" placeholder="" th:value="${users.email}" />
-											<div class="form-text mt-2">
-												請填入訂單通知Email (訂單資訊將以此E-mail通知您)
-											</div>
-										</div>
-										<div class="mb-3">
-											<label for="customerPhone" class="form-label">電話號碼</label>
-											<input type="text" class="form-control" id="customerPhone"
-												name="customerPhone" placeholder="0912 345 678"
-												th:value="${users.phone}" />
-										</div>
-									</div>
-									<div class="card p-3">
-										<h4 class="mb-3">訂單備註</h4>
-										<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
-											placeholder="有什麼想告訴賣家嗎"></textarea>
-									</div>
-								</div>
-								<!-- 右欄：送貨資料與付款資料 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">送貨資料</h4>
-											<p class="shippingCardFeeText mb-0">$60</p>
-										</div>
-										<p class="mb-1">
-											已選擇的送貨方式: 7-11 取貨不付款（寄出日系統會發電子郵件通知，
-											一般寄出日+2日會抵達門市）<br />
-										</p>
-										<div class="mb-3 mt-2">
-											<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
-											<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
-										</div>
-										<div class="mb-3 mt-3">
-											<label for="recipientName" class="form-label">收件人姓名</label>
-											<input type="text" class="form-control" id="recipientName"
-												name="recipientName" placeholder="" />
-											<div class="form-text mt-2">
-												請填入收件人真實姓名，以確保順利收件
-											</div>
-										</div>
-										<div class="mb-3">
-											<label for="recipientPhone" class="form-label">收件人電話號碼</label>
-											<input type="text" class="form-control" id="recipientPhone"
-												name="recipientPhone" placeholder="0912 345 678" />
-										</div>
-										<button type="button" class="btn btn-outline-secondary">選擇門市</button>
-									</div>
-									<div class="card p-3">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">付款資料</h4>
-											<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
-										</div>
-										<!-- 固定顯示信用卡 -->
-										<p class="m-0">已選擇的付款方式: 信用卡</p>
-									</div>
-								</div>
-							</div>
-						</div>
-
-					</div>
-				</div>
-				<!-- 3) 新竹貨運 -->
-				<div th:case="'hct'">
-					<div th:switch="${paymentMethod}">
-						<!-- 3-1) 新竹貨運 + LINE PAY -->
-						<div th:case="'linepay'">
-							<div class="row">
-								<!-- 左欄：顧客資料與訂單備註 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<h4 class="mb-3">顧客資料</h4>
-										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客姓名</label>
-											<input type="text" class="form-control" id="customerName"
-												name="customerName" placeholder="" th:value="${users.username}" />
-										</div>
-										<div class="mb-3">
-											<label for="customerEmail" class="form-label">電子信箱</label>
-											<input type="email" class="form-control" id="customerEmail"
-												name="customerEmail" placeholder="" th:value="${users.email}" />
-											<div class="form-text mt-2">
-												請填入訂單通知Email (訂單資訊將以此E-mail通知您)
-											</div>
-										</div>
-										<div class="mb-3">
-											<label for="customerPhone" class="form-label">電話號碼</label>
-											<input type="text" class="form-control" id="customerPhone"
-												name="customerPhone" placeholder="0912 345 678"
-												th:value="${users.phone}" />
-										</div>
-									</div>
-									<div class="card p-3">
-										<h4 class="mb-3">訂單備註</h4>
-										<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
-											placeholder="有什麼想告訴賣家嗎"></textarea>
-									</div>
-								</div>
-								<!-- 右欄：送貨資料與付款資料 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">送貨資料</h4>
-											<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
-										</div>
-										<p class="mb-1">
-											已選擇的送貨方式: 新竹貨運<br />
-										</p>
-										<div class="mb-3 mt-2">
-											<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
-											<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
-										</div>
-										<div class="mb-3 mt-3">
-											<label for="recipientName" class="form-label">收件人姓名</label>
-											<input type="text" class="form-control" id="recipientName"
-												name="recipientName" placeholder="" />
-											<div class="form-text mt-2">
-												請填入收件人真實姓名，以確保順利收件
-											</div>
-										</div>
-										<div class="mb-3">
-											<label for="recipientPhone" class="form-label">收件人電話號碼</label>
-											<input type="text" class="form-control" id="recipientPhone"
-												name="recipientPhone" placeholder="0912 345 678" />
-										</div>
-										<hr />
-										<div class="mb-3 mt-3">
-											<label class="form-label">地址</label>
-											<div class="dropdown-container"
-												style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
-												<!-- 城市/縣下拉選單 -->
-												<div class="form-group select-wrapper">
-													<select id="city" class="form-control pe-arrow">
-														<!-- 動態生成城市/縣選項 -->
-													</select>
-													<i class="fa fa-caret-down position-absolute"
-														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
-												</div>
-												<!-- 地區下拉選單 -->
-												<div class="form-group select-wrapper">
-													<select id="district" class="form-control pe-arrow">
-														<!-- 動態生成地區選項 -->
-													</select>
-													<i class="fa fa-caret-down position-absolute"
-														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
-												</div>
-											</div>
-											<input type="text" class="form-control" id="shippingAddress"
-												name="shippingAddress" placeholder="地址" />
-										</div>
-									</div>
-									<div class="card p-3">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">付款資料</h4>
-											<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
-										</div>
-										<p class="m-0">已選擇的付款方式: LINE PAY</p>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- 3-2) 新竹貨運 + 信用卡 -->
-						<div th:case="'credit'">
-							<div class="row">
-								<!-- 左欄：顧客資料與訂單備註 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<h4 class="mb-3">顧客資料</h4>
-										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客姓名</label>
-											<input type="text" class="form-control" id="customerName"
-												name="customerName" placeholder="" th:value="${users.username}" />
-										</div>
-										<div class="mb-3">
-											<label for="customerEmail" class="form-label">電子信箱</label>
-											<input type="email" class="form-control" id="customerEmail"
-												name="customerEmail" placeholder="" th:value="${users.email}" />
-											<div class="form-text mt-2">
-												請填入訂單通知Email (訂單資訊將以此E-mail通知您)
-											</div>
-										</div>
-										<div class="mb-3">
-											<label for="customerPhone" class="form-label">電話號碼</label>
-											<input type="text" class="form-control" id="customerPhone"
-												name="customerPhone" placeholder="0912 345 678"
-												th:value="${users.phone}" />
-										</div>
-									</div>
-									<div class="card p-3">
-										<h4 class="mb-3">訂單備註</h4>
-										<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
-											placeholder="有什麼想告訴賣家嗎"></textarea>
-									</div>
-								</div>
-								<!-- 右欄：送貨資料與付款資料 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">送貨資料</h4>
-											<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
-										</div>
-										<p class="mb-1">
-											已選擇的送貨方式: 新竹貨運<br />
-										</p>
-										<div class="mb-3 mt-2">
-											<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
-											<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
-										</div>
-										<div class="mb-3 mt-3">
-											<label for="recipientName" class="form-label">收件人姓名</label>
-											<input type="text" class="form-control" id="recipientName"
-												name="recipientName" placeholder="" />
-											<div class="form-text mt-2">
-												請填入收件人真實姓名，以確保順利收件
-											</div>
-										</div>
-										<div class="mb-3">
-											<label for="recipientPhone" class="form-label">收件人電話號碼</label>
-											<input type="text" class="form-control" id="recipientPhone"
-												name="recipientPhone" placeholder="0912 345 678" />
-										</div>
-										<hr />
-										<div class="mb-3 mt-3">
-											<label class="form-label">地址</label>
-											<div class="dropdown-container"
-												style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
-												<!-- 城市/縣下拉選單 -->
-												<div class="form-group select-wrapper">
-													<select id="city" class="form-control pe-arrow">
-														<!-- 動態生成城市/縣選項 -->
-													</select>
-													<i class="fa fa-caret-down position-absolute"
-														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
-												</div>
-												<!-- 地區下拉選單 -->
-												<div class="form-group select-wrapper">
-													<select id="district" class="form-control pe-arrow">
-														<!-- 動態生成地區選項 -->
-													</select>
-													<i class="fa fa-caret-down position-absolute"
-														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
-												</div>
-											</div>
-											<input type="text" class="form-control" id="shippingAddress"
-												name="shippingAddress" placeholder="地址" />
-										</div>
-									</div>
-									<div class="card p-3">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">付款資料</h4>
-											<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
-										</div>
-										<p class="m-0">已選擇的付款方式: 信用卡</p>
-									</div>
-								</div>
-							</div>
+							<!--			</div>      -->
+							<!--		</div>          -->
 						</div>
 					</div>
-				</div>
-
-				<!-- outer-island 區塊 -->
-				<div th:case="'outer-island'">
-					<div th:switch="${paymentMethod}">
-						<!-- 外島郵寄 + LINE PAY -->
-						<div th:case="'linepay'">
-							<div class="row">
-								<!-- 左欄：顧客資料與訂單備註 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<h4 class="mb-3">顧客資料</h4>
-										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客姓名</label>
-											<input type="text" class="form-control" id="customerName"
-												name="customerName" placeholder="" th:value="${users.username}" />
-										</div>
-										<div class="mb-3">
-											<label for="customerEmail" class="form-label">電子信箱</label>
-											<input type="email" class="form-control" id="customerEmail"
-												name="customerEmail" placeholder="" th:value="${users.email}" />
-											<div class="form-text mt-2">
-												請填入訂單通知Email (訂單資訊將以此E-mail通知您)
+					<!-- 2) 7-11 取貨不付款 -->
+					<div th:case="'711-no-cod'" class="branch" data-shipping="711-no-cod">
+						<div th:switch="${paymentMethod}">
+							<!-- 2-1) 7-11 取貨不付款 + LINE PAY -->
+							<div th:case="'linepay'">
+								<div class="row">
+									<!-- 左欄：顧客資料與訂單備註 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<h4 class="mb-3">顧客資料</h4>
+											<div class="mb-3">
+												<label for="customerName" class="form-label">顧客姓名</label>
+												<input type="text" class="form-control required-field" id="customerName"
+													name="customerName" data-required="true" placeholder=""
+													th:value="${users.username}" />
 											</div>
-										</div>
-										<div class="mb-3">
-											<label for="customerPhone" class="form-label">電話號碼</label>
-											<input type="text" class="form-control" id="customerPhone"
-												name="customerPhone" placeholder="0912 345 678"
-												th:value="${users.phone}" />
-										</div>
-									</div>
-									<div class="card p-3">
-										<h4 class="mb-3">訂單備註</h4>
-										<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
-											placeholder="有什麼想告訴賣家嗎"></textarea>
-									</div>
-								</div>
-								<!-- 右欄：送貨資料與付款資料 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">送貨資料</h4>
-											<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
-										</div>
-										<p class="mb-1">
-											已選擇的送貨方式: 外島郵寄<br />
-										</p>
-										<div class="mb-3 mt-2">
-											<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
-											<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
-										</div>
-										<div class="mb-3 mt-3">
-											<label for="recipientName" class="form-label">收件人姓名</label>
-											<input type="text" class="form-control" id="recipientName"
-												name="recipientName" placeholder="" />
-											<div class="form-text mt-2">
-												請填入收件人真實姓名，以確保順利收件
-											</div>
-										</div>
-										<div class="mb-3">
-											<label for="recipientPhone" class="form-label">收件人電話號碼</label>
-											<input type="text" class="form-control" id="recipientPhone"
-												name="recipientPhone" placeholder="0912 345 678" />
-										</div>
-										<hr />
-										<div class="mb-3 mt-3">
-											<label class="form-label">地址</label>
-											<div class="dropdown-container"
-												style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
-												<!-- 城市/縣下拉選單 -->
-												<div class="form-group select-wrapper">
-													<select id="city" class="form-control pe-arrow">
-														<!-- 動態生成城市/縣選項 -->
-													</select>
-													<i class="fa fa-caret-down position-absolute"
-														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
-												</div>
-												<!-- 地區下拉選單 -->
-												<div class="form-group select-wrapper">
-													<select id="district" class="form-control pe-arrow">
-														<!-- 動態生成地區選項 -->
-													</select>
-													<i class="fa fa-caret-down position-absolute"
-														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+											<div class="mb-3">
+												<label for="customerEmail" class="form-label">電子信箱</label>
+												<input type="email" class="form-control required-field"
+													id="customerEmail" name="customerEmail" data-required="true"
+													placeholder="" th:value="${users.email}" />
+												<div class="form-text mt-2">
+													請填入訂單通知Email (訂單資訊將以此E-mail通知您)
 												</div>
 											</div>
-											<input type="text" class="form-control" id="shippingAddress"
-												name="shippingAddress" placeholder="地址" />
+											<div class="mb-3">
+												<label for="customerPhone" class="form-label">電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="customerPhone" name="customerPhone" data-required="true"
+													placeholder="0912 345 678" th:value="${users.phone}" />
+											</div>
+										</div>
+										<div class="card p-3">
+											<h4 class="mb-3">訂單備註</h4>
+											<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
+												placeholder="有什麼想告訴賣家嗎"></textarea>
 										</div>
 									</div>
-									<div class="card p-3">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">付款資料</h4>
-											<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
+									<!-- 右欄：送貨資料與付款資料 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">送貨資料</h4>
+												<p class="shippingCardFeeText mb-0">$60</p>
+											</div>
+											<p class="mb-1">
+												已選擇的送貨方式: 7-11 取貨不付款（寄出日系統會發電子郵件通知，
+												一般寄出日+2日會抵達門市）<br />
+											</p>
+											<div class="mb-3 mt-2">
+												<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
+												<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
+											</div>
+											<div class="mb-3 mt-3">
+												<label for="recipientName" class="form-label">收件人姓名</label>
+												<input type="text" class="form-control required-field"
+													id="recipientName" name="recipientName" data-required="true"
+													placeholder="" />
+												<div class="form-text mt-2">
+													請填入收件人真實姓名，以確保順利收件
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="recipientPhone" class="form-label">收件人電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="recipientPhone" name="recipientPhone" data-required="true"
+													placeholder="0912 345 678" />
+											</div>
+											<hr>
+											<div style="display: flex; align-items: center; justify-content: left;">
+												<img src="img/711logo.png"
+													style="max-width: 35px; margin-right: 10px; margin-bottom: 1rem;"
+													alt="711 logo">
+												<span style="margin-bottom: 15px;">選擇門市</span>
+											</div>
+											<button id="selectStoreBtn" type="button" class="btn btn-outline-secondary">
+												搜尋門市
+											</button>
+											<div id="selectedStore">
+												<!-- 這裡將由 JavaScript 填入門市資訊 -->
+											</div>
+											<input type="hidden" id="temporaryStoreId" name="temporaryStoreId"
+												value="" />
 										</div>
-										<p class="m-0">已選擇的付款方式: LINE PAY</p>
+										<div class="card p-3">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">付款資料</h4>
+												<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
+											</div>
+											<!-- 固定顯示 LINE Pay -->
+											<p class="m-0">已選擇的付款方式: LINE Pay</p>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-						<!-- 外島郵寄 + 信用卡 -->
-						<div th:case="'credit'">
-							<div class="row">
-								<!-- 左欄：顧客資料與訂單備註 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<h4 class="mb-3">顧客資料</h4>
-										<div class="mb-3">
-											<label for="customerName" class="form-label">顧客姓名</label>
-											<input type="text" class="form-control" id="customerName"
-												name="customerName" placeholder="" th:value="${users.username}" />
-										</div>
-										<div class="mb-3">
-											<label for="customerEmail" class="form-label">電子信箱</label>
-											<input type="email" class="form-control" id="customerEmail"
-												name="customerEmail" placeholder="" th:value="${users.email}" />
-											<div class="form-text mt-2">
-												請填入訂單通知Email (訂單資訊將以此E-mail通知您)
+							<!-- 2-2) 7-11 取貨不付款 + 信用卡 -->
+							<div th:case="'credit'">
+								<div class="row">
+									<!-- 左欄：顧客資料與訂單備註 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<h4 class="mb-3">顧客資料</h4>
+											<div class="mb-3">
+												<label for="customerName" class="form-label">顧客姓名</label>
+												<input type="text" class="form-control required-field" id="customerName"
+													name="customerName" data-required="true" placeholder=""
+													th:value="${users.username}" />
+											</div>
+											<div class="mb-3">
+												<label for="customerEmail" class="form-label">電子信箱</label>
+												<input type="email" class="form-control required-field"
+													id="customerEmail" name="customerEmail" data-required="true"
+													placeholder="" th:value="${users.email}" />
+												<div class="form-text mt-2">
+													請填入訂單通知Email (訂單資訊將以此E-mail通知您)
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="customerPhone" class="form-label">電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="customerPhone" name="customerPhone" data-required="true"
+													placeholder="0912 345 678" th:value="${users.phone}" />
 											</div>
 										</div>
-										<div class="mb-3">
-											<label for="customerPhone" class="form-label">電話號碼</label>
-											<input type="text" class="form-control" id="customerPhone"
-												name="customerPhone" placeholder="0912 345 678"
-												th:value="${users.phone}" />
+										<div class="card p-3">
+											<h4 class="mb-3">訂單備註</h4>
+											<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
+												placeholder="有什麼想告訴賣家嗎"></textarea>
 										</div>
 									</div>
-									<div class="card p-3">
-										<h4 class="mb-3">訂單備註</h4>
-										<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
-											placeholder="有什麼想告訴賣家嗎"></textarea>
+									<!-- 右欄：送貨資料與付款資料 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">送貨資料</h4>
+												<p class="shippingCardFeeText mb-0">$60</p>
+											</div>
+											<p class="mb-1">
+												已選擇的送貨方式: 7-11 取貨不付款（寄出日系統會發電子郵件通知，
+												一般寄出日+2日會抵達門市）<br />
+											</p>
+											<div class="mb-3 mt-2">
+												<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
+												<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
+											</div>
+											<div class="mb-3 mt-3">
+												<label for="recipientName" class="form-label">收件人姓名</label>
+												<input type="text" class="form-control required-field"
+													id="recipientName" name="recipientName" data-required="true"
+													placeholder="" />
+												<div class="form-text mt-2">
+													請填入收件人真實姓名，以確保順利收件
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="recipientPhone" class="form-label">收件人電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="recipientPhone" name="recipientPhone" data-required="true"
+													placeholder="0912 345 678" />
+											</div>
+											<hr>
+											<div style="display: flex; align-items: center; justify-content: left;">
+												<img src="img/711logo.png"
+													style="max-width: 35px; margin-right: 10px; margin-bottom: 1rem;"
+													alt="711 logo">
+												<span style="margin-bottom: 15px;">選擇門市</span>
+											</div>
+											<button id="selectStoreBtn" type="button" class="btn btn-outline-secondary">
+												搜尋門市
+											</button>
+											<div id="selectedStore">
+												<!-- 這裡將由 JavaScript 填入門市資訊 -->
+											</div>
+											<input type="hidden" id="temporaryStoreId" name="temporaryStoreId"
+												value="" />
+										</div>
+										<div class="card p-3">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">付款資料</h4>
+												<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
+											</div>
+											<!-- 固定顯示信用卡 -->
+											<p class="m-0">已選擇的付款方式: 信用卡</p>
+										</div>
 									</div>
 								</div>
-								<!-- 右欄：送貨資料與付款資料 -->
-								<div class="col-md-6">
-									<div class="card p-3 mb-4">
-										<!-- 新增「送貨地址」欄位 -->
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">送貨資料</h4>
-											<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
-										</div>
-										<p class="mb-1">
-											已選擇的送貨方式: 外島郵寄<br />
-										</p>
-										<div class="mb-3">
-											<label for="shippingAddress" class="form-label">送貨地址</label>
-											<input type="text" class="form-control" id="shippingAddress"
-												name="shippingAddress" placeholder="請輸入詳細送貨地址" />
-										</div>
-										<div class="mb-3 mt-2">
-											<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
-											<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
-										</div>
-										<div class="mb-3 mt-3">
-											<label for="recipientName" class="form-label">收件人姓名</label>
-											<input type="text" class="form-control" id="recipientName"
-												name="recipientName" placeholder="" />
-											<div class="form-text mt-2">
-												請填入收件人真實姓名，以確保順利收件
+							</div>
+
+						</div>
+					</div>
+					<!-- 3) 新竹貨運 -->
+					<div th:case="'hct'" class="branch" data-shipping="hct">
+						<div th:switch="${paymentMethod}">
+							<!-- 3-1) 新竹貨運 + LINE PAY -->
+							<div th:case="'linepay'">
+								<div class="row">
+									<!-- 左欄：顧客資料與訂單備註 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<h4 class="mb-3">顧客資料</h4>
+											<div class="mb-3">
+												<label for="customerName" class="form-label">顧客姓名</label>
+												<input type="text" class="form-control required-field" id="customerName"
+													name="customerName" data-required="true" placeholder=""
+													th:value="${users.username}" />
 											</div>
-										</div>
-										<div class="mb-3">
-											<label for="recipientPhone" class="form-label">收件人電話號碼</label>
-											<input type="text" class="form-control" id="recipientPhone"
-												name="recipientPhone" placeholder="0912 345 678" />
-										</div>
-										<hr />
-										<div class="mb-3 mt-3">
-											<label class="form-label">地址</label>
-											<div class="dropdown-container"
-												style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
-												<!-- 城市/縣下拉選單 -->
-												<div class="form-group select-wrapper">
-													<select id="city" class="form-control pe-arrow">
-														<!-- 動態生成城市/縣選項 -->
-													</select>
-													<i class="fa fa-caret-down position-absolute"
-														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
-												</div>
-												<!-- 地區下拉選單 -->
-												<div class="form-group select-wrapper">
-													<select id="district" class="form-control pe-arrow">
-														<!-- 動態生成地區選項 -->
-													</select>
-													<i class="fa fa-caret-down position-absolute"
-														style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+											<div class="mb-3">
+												<label for="customerEmail" class="form-label">電子信箱</label>
+												<input type="email" class="form-control required-field"
+													id="customerEmail" name="customerEmail" data-required="true"
+													placeholder="" th:value="${users.email}" />
+												<div class="form-text mt-2">
+													請填入訂單通知Email (訂單資訊將以此E-mail通知您)
 												</div>
 											</div>
-											<input type="text" class="form-control" id="shippingAddress"
-												name="shippingAddress" placeholder="地址" />
+											<div class="mb-3">
+												<label for="customerPhone" class="form-label">電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="customerPhone" name="customerPhone" data-required="true"
+													placeholder="0912 345 678" th:value="${users.phone}" />
+											</div>
+										</div>
+										<div class="card p-3">
+											<h4 class="mb-3">訂單備註</h4>
+											<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
+												placeholder="有什麼想告訴賣家嗎"></textarea>
 										</div>
 									</div>
-									<div class="card p-3">
-										<div class="d-flex justify-content-between align-items-center mb-3">
-											<h4 class="mb-0">付款資料</h4>
-											<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
+									<!-- 右欄：送貨資料與付款資料 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">送貨資料</h4>
+												<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
+											</div>
+											<p class="mb-1">
+												已選擇的送貨方式: 新竹貨運<br />
+											</p>
+											<div class="mb-3 mt-2">
+												<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
+												<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
+											</div>
+											<div class="mb-3 mt-3">
+												<label for="recipientName" class="form-label">收件人姓名</label>
+												<input type="text" class="form-control required-field"
+													id="recipientName" name="recipientName" data-required="true"
+													placeholder="" />
+												<div class="form-text mt-2">
+													請填入收件人真實姓名，以確保順利收件
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="recipientPhone" class="form-label">收件人電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="recipientPhone" name="recipientPhone" data-required="true"
+													placeholder="0912 345 678" />
+											</div>
+											<hr />
+											<div class="mb-3 mt-3">
+												<label class="form-label">地址</label>
+												<div class="dropdown-container"
+													style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+													<!-- 城市/縣下拉選單 -->
+													<div class="form-group select-wrapper city">
+														<select id="city" class="form-control pe-arrow required-field"
+															data-required="true">
+															<!-- 動態生成城市/縣選項 -->
+														</select>
+														<i class="fa fa-caret-down position-absolute"
+															style="top: 50%; right: 1rem; transform: translateY(-100%);"></i>
+													</div>
+													<!-- 地區下拉選單 -->
+													<div class="form-group select-wrapper district">
+														<select id="district"
+															class="form-control pe-arrow required-field"
+															data-required="true">
+															<!-- 動態生成地區選項 -->
+														</select>
+														<i class="fa fa-caret-down position-absolute"
+															style="top: 50%; right: 1rem; transform: translateY(-100%);"></i>
+													</div>
+												</div>
+												<input type="text" class="form-control required-field"
+													id="shippingAddress" name="shippingAddress" data-required="true"
+													placeholder="地址" />
+											</div>
 										</div>
-										<p class="m-0">已選擇的付款方式: 信用卡</p>
+										<div class="card p-3">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">付款資料</h4>
+												<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
+											</div>
+											<p class="m-0">已選擇的付款方式: LINE PAY</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- 3-2) 新竹貨運 + 信用卡 -->
+							<div th:case="'credit'">
+								<div class="row">
+									<!-- 左欄：顧客資料與訂單備註 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<h4 class="mb-3">顧客資料</h4>
+											<div class="mb-3">
+												<label for="customerName" class="form-label">顧客姓名</label>
+												<input type="text" class="form-control required-field" id="customerName"
+													name="customerName" data-required="true" placeholder=""
+													th:value="${users.username}" />
+											</div>
+											<div class="mb-3">
+												<label for="customerEmail" class="form-label">電子信箱</label>
+												<input type="email" class="form-control required-field"
+													id="customerEmail" name="customerEmail" data-required="true"
+													placeholder="" th:value="${users.email}" />
+												<div class="form-text mt-2">
+													請填入訂單通知Email (訂單資訊將以此E-mail通知您)
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="customerPhone" class="form-label">電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="customerPhone" name="customerPhone" data-required="true"
+													placeholder="0912 345 678" th:value="${users.phone}" />
+											</div>
+										</div>
+										<div class="card p-3">
+											<h4 class="mb-3">訂單備註</h4>
+											<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
+												placeholder="有什麼想告訴賣家嗎"></textarea>
+										</div>
+									</div>
+									<!-- 右欄：送貨資料與付款資料 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">送貨資料</h4>
+												<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
+											</div>
+											<p class="mb-1">
+												已選擇的送貨方式: 新竹貨運<br />
+											</p>
+											<div class="mb-3 mt-2">
+												<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
+												<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
+											</div>
+											<div class="mb-3 mt-3">
+												<label for="recipientName" class="form-label">收件人姓名</label>
+												<input type="text" class="form-control required-field"
+													id="recipientName" name="recipientName" data-required="true"
+													placeholder="" />
+												<div class="form-text mt-2">
+													請填入收件人真實姓名，以確保順利收件
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="recipientPhone" class="form-label">收件人電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="recipientPhone" name="recipientPhone" data-required="true"
+													placeholder="0912 345 678" />
+											</div>
+											<hr />
+											<div class="mb-3 mt-3">
+												<label class="form-label">地址</label>
+												<div class="dropdown-container"
+													style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+													<!-- 城市/縣下拉選單 -->
+													<div class="form-group select-wrapper city">
+														<select id="city" class="form-control pe-arrow required-field"
+															data-required="true">
+															<!-- 動態生成城市/縣選項 -->
+														</select>
+														<i class="fa fa-caret-down position-absolute"
+															style="top: 50%; right: 1rem; transform: translateY(-100%);"></i>
+													</div>
+													<!-- 地區下拉選單 -->
+													<div class="form-group select-wrapper district">
+														<select id="district"
+															class="form-control pe-arrow required-field"
+															data-required="true">
+															<!-- 動態生成地區選項 -->
+														</select>
+														<i class="fa fa-caret-down position-absolute"
+															style="top: 50%; right: 1rem; transform: translateY(-100%);"></i>
+													</div>
+												</div>
+												<input type="text" class="form-control required-field"
+													id="shippingAddress" name="shippingAddress" data-required="true"
+													placeholder="地址" />
+											</div>
+										</div>
+										<div class="card p-3">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">付款資料</h4>
+												<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
+											</div>
+											<p class="m-0">已選擇的付款方式: 信用卡</p>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-
+					<!-- 4) 外島郵寄 -->
+					<div th:case="'outer-island'" class="branch" data-shipping="outer-island">
+						<div th:switch="${paymentMethod}">
+							<!-- 外島郵寄 + LINE PAY -->
+							<div th:case="'linepay'">
+								<div class="row">
+									<!-- 左欄：顧客資料與訂單備註 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<h4 class="mb-3">顧客資料</h4>
+											<div class="mb-3">
+												<label for="customerName" class="form-label">顧客姓名</label>
+												<input type="text" class="form-control required-field" id="customerName"
+													name="customerName" data-required="true" placeholder=""
+													th:value="${users.username}" />
+											</div>
+											<div class="mb-3">
+												<label for="customerEmail" class="form-label">電子信箱</label>
+												<input type="email" class="form-control required-field"
+													id="customerEmail" name="customerEmail" data-required="true"
+													placeholder="" th:value="${users.email}" />
+												<div class="form-text mt-2">
+													請填入訂單通知Email (訂單資訊將以此E-mail通知您)
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="customerPhone" class="form-label">電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="customerPhone" name="customerPhone" data-required="true"
+													placeholder="0912 345 678" th:value="${users.phone}" />
+											</div>
+										</div>
+										<div class="card p-3">
+											<h4 class="mb-3">訂單備註</h4>
+											<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
+												placeholder="有什麼想告訴賣家嗎"></textarea>
+										</div>
+									</div>
+									<!-- 右欄：送貨資料與付款資料 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">送貨資料</h4>
+												<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
+											</div>
+											<p class="mb-1">
+												已選擇的送貨方式: 外島郵寄<br />
+											</p>
+											<div class="mb-3 mt-2">
+												<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
+												<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
+											</div>
+											<div class="mb-3 mt-3">
+												<label for="recipientName" class="form-label">收件人姓名</label>
+												<input type="text" class="form-control required-field"
+													id="recipientName" name="recipientName" data-required="true"
+													placeholder="" />
+												<div class="form-text mt-2">
+													請填入收件人真實姓名，以確保順利收件
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="recipientPhone" class="form-label">收件人電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="recipientPhone" name="recipientPhone" data-required="true"
+													placeholder="0912 345 678" />
+											</div>
+											<hr />
+											<div class="mb-3 mt-3">
+												<label class="form-label">地址</label>
+												<div class="dropdown-container"
+													style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+													<!-- 城市/縣下拉選單 -->
+													<div class="form-group select-wrapper city">
+														<select id="city" class="form-control pe-arrow required-field"
+															data-required="true">
+															<!-- 動態生成城市/縣選項 -->
+														</select>
+														<i class="fa fa-caret-down position-absolute"
+															style="top: 50%; right: 1rem; transform: translateY(-100%);"></i>
+													</div>
+													<!-- 地區下拉選單 -->
+													<div class="form-group select-wrapper district">
+														<select id="district"
+															class="form-control pe-arrow required-field"
+															data-required="true">
+															<!-- 動態生成地區選項 -->
+														</select>
+														<i class="fa fa-caret-down position-absolute"
+															style="top: 50%; right: 1rem; transform: translateY(-100%);"></i>
+													</div>
+												</div>
+												<input type="text" class="form-control required-field"
+													id="shippingAddress" name="shippingAddress" data-required="true"
+													placeholder="地址" />
+											</div>
+										</div>
+										<div class="card p-3">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">付款資料</h4>
+												<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
+											</div>
+											<p class="m-0">已選擇的付款方式: LINE PAY</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- 外島郵寄 + 信用卡 -->
+							<div th:case="'credit'">
+								<div class="row">
+									<!-- 左欄：顧客資料與訂單備註 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<h4 class="mb-3">顧客資料</h4>
+											<div class="mb-3">
+												<label for="customerName" class="form-label">顧客姓名</label>
+												<input type="text" class="form-control required-field" id="customerName"
+													name="customerName" data-required="true" placeholder=""
+													th:value="${users.username}" />
+											</div>
+											<div class="mb-3">
+												<label for="customerEmail" class="form-label">電子信箱</label>
+												<input type="email" class="form-control required-field"
+													id="customerEmail" name="customerEmail" data-required="true"
+													placeholder="" th:value="${users.email}" />
+												<div class="form-text mt-2">
+													請填入訂單通知Email (訂單資訊將以此E-mail通知您)
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="customerPhone" class="form-label">電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="customerPhone" name="customerPhone" data-required="true"
+													placeholder="0912 345 678" th:value="${users.phone}" />
+											</div>
+										</div>
+										<div class="card p-3">
+											<h4 class="mb-3">訂單備註</h4>
+											<textarea id="orderRemark" name="orderRemark" class="form-control" rows="3"
+												placeholder="有什麼想告訴賣家嗎"></textarea>
+										</div>
+									</div>
+									<!-- 右欄：送貨資料與付款資料 -->
+									<div class="col-md-6">
+										<div class="card p-3 mb-4">
+											<!-- 新增「送貨地址」欄位 -->
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">送貨資料</h4>
+												<p class="shippingCardFeeText mb-0">將於確認送貨地址後顯示運費</p>
+											</div>
+											<p class="mb-1">
+												已選擇的送貨方式: 外島郵寄<br />
+											</p>
+											<div class="mb-3 mt-2">
+												<input type="checkbox" id="sameAsCustomer" name="sameAsCustomer" />
+												<label for="sameAsCustomer">收件人資料與顧客資料相同</label>
+											</div>
+											<div class="mb-3 mt-3">
+												<label for="recipientName" class="form-label">收件人姓名</label>
+												<input type="text" class="form-control required-field"
+													id="recipientName" name="recipientName" data-required="true"
+													placeholder="" />
+												<div class="form-text mt-2">
+													請填入收件人真實姓名，以確保順利收件
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="recipientPhone" class="form-label">收件人電話號碼</label>
+												<input type="text" class="form-control required-field"
+													id="recipientPhone" name="recipientPhone" data-required="true"
+													placeholder="0912 345 678" />
+											</div>
+											<hr />
+											<div class="mb-3 mt-3">
+												<label class="form-label">地址</label>
+												<div class="dropdown-container"
+													style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+													<!-- 城市/縣下拉選單 -->
+													<div class="form-group select-wrapper city">
+														<select id="city" class="form-control pe-arrow required-field"
+															data-required="true">
+															<!-- 動態生成城市/縣選項 -->
+														</select>
+														<i class="fa fa-caret-down position-absolute"
+															style="top: 50%; right: 1rem; transform: translateY(-100%);"></i>
+													</div>
+													<!-- 地區下拉選單 -->
+													<div class="form-group select-wrapper district">
+														<select id="district"
+															class="form-control pe-arrow required-field"
+															data-required="true">
+															<!-- 動態生成地區選項 -->
+														</select>
+														<i class="fa fa-caret-down position-absolute"
+															style="top: 50%; right: 1rem; transform: translateY(-100%);"></i>
+													</div>
+												</div>
+												<input type="text" class="form-control required-field"
+													id="shippingAddress" name="shippingAddress" data-required="true"
+													placeholder="地址" />
+											</div>
+										</div>
+										<div class="card p-3">
+											<div class="d-flex justify-content-between align-items-center mb-3">
+												<h4 class="mb-0">付款資料</h4>
+												<p class="mb-0">合計: <span id="paymentGrandTotal">$0</span></p>
+											</div>
+											<p class="m-0">已選擇的付款方式: 信用卡</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
-
-
 				<!-- 下方按鈕 -->
 				<div style="display: flex; justify-content: space-between" class="mt-4">
-					<button id="backToCart"
+					<button id="backToCart" type="button"
 						class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase">
 						返回購物車
 					</button>
-					<button id="submitOrder"
+					<button id="submitOrder" type="submit"
 						class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase">
 						提交訂單
 					</button>
+					<!-- 訂單建立後，將 orderId 傳到結帳頁面 -->
+					<input type="hidden" id="orderId" name="orderId" th:value="${order != null ? order.orderId : ''}" />
 				</div>
-			</div>
+
+			</form>
 			<!-- Checkout Page End -->
 
 			<script th:inline="javascript">
 				/*<![CDATA[*/
-				// 運費預設值
-				var fixedShippingFee = 60;
 				// 全域變數：保存購物車小計
 				let currentSubtotal = 0;
 				// 優惠券折扣（假設從 Session 拿到，若無則為 0）
 				var couponDiscountOverall = /*[[${couponDiscount != null ? couponDiscount : 0}]]*/ 0;
+				// 假設 shippingMethod 由後端傳入，若無則預設為 "711-cod"
+				var shippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
 
-				// 根據 cartItems 陣列計算小計
-				function recalcSubtotal(cartItems) {
-					return cartItems.reduce((sum, item) => sum + item.subTotal, 0);
-				}
-
-				// 計算運費邏輯，回傳運費金額
-				function getShippingFee() {
-					// 運送方式是 7-11 取貨付款或7-11 取貨不付款，固定運費 60
-					if (shippingMethod === "711-cod" || shippingMethod === "711-no-cod") {
-						return fixedShippingFee;
-					}
-
-					const citySelect = document.getElementById("city");
-					const districtSelect = document.getElementById("district");
-					const selectedCity = citySelect.value;
-					const selectedDistrict = districtSelect.value;
-					if (!selectedDistrict) {
-						return 0;
-					}
-					let fee = 0;
-					if (shippingMethod === "outer-island") {
-						fee = 100;
-						if (selectedCity === "澎湖縣") {
-							fee = 120;
-						} else if (selectedCity === "金門縣" || selectedCity === "連江縣") {
-							fee = 150;
+				// 取得現在結帳分支
+				function getActiveBranch() {
+					const orderForm = document.getElementById("orderForm");
+					let activeBranch = null;
+					const branches = orderForm.querySelectorAll(".branch");
+					branches.forEach(branch => {
+						if (branch.dataset.shipping === shippingMethod) {
+							activeBranch = branch;
 						}
-					} else if (shippingMethod === "hct") {
-						fee = 80;
-						if (selectedCity === "臺東縣") {
-							fee = 85;
-						} else if (selectedCity === "花蓮縣") {
-							fee = 90;
-						}
-					} else {
-						fee = fixedShippingFee;
-					}
-					return fee;
-				}
-
-				// 更新送貨資料卡片中的運費顯示
-				function updateShippingCardFee() {
-					console.log("updateShippingCardFee: shippingMethod =", shippingMethod);
-					// 如果為固定運費方式，直接設定文字並回傳固定費用
-					if (shippingMethod === "711-cod" || shippingMethod === "711-no-cod") {
-						document.querySelectorAll(".shippingCardFeeText").forEach(el => {
-							el.textContent = "運費 NT$" + fixedShippingFee;
-						});
-						return fixedShippingFee;
-					}
-					// 否則依照下拉選單判斷
-					const districtSelect = document.getElementById("district");
-					const fee = getShippingFee();
-					const feeText = (districtSelect.value === "") ? "將於確認送貨地址後顯示運費" : "運費 NT$" + fee;
-					document.querySelectorAll(".shippingCardFeeText").forEach(el => {
-						el.textContent = feeText;
 					});
-					return fee;
+					return activeBranch || orderForm;
 				}
 
-				// 更新購物車表格中的運費列
-				function updateCartShippingFeeUI() {
-					if (shippingMethod === "711-cod" || shippingMethod === "711-no-cod") {
-						document.getElementById("cartShippingFeeAlert").textContent = "NT$" + fixedShippingFee;
-						return fixedShippingFee;
+				// 更新訂單摘要：呼叫後端 API /api/orderSummary 並更新畫面
+				function updateOrderSummary() {
+					// 取得目前 active branch
+					const activeBranch = getActiveBranch();
+
+					// 預設值
+					let selectedCity = "";
+					let selectedDistrict = "";
+
+					// 嘗試取得下拉選單元素，如果存在就取值
+					const citySelectEl = activeBranch.querySelector(".city select");
+					if (citySelectEl) {
+						selectedCity = citySelectEl.value;
+					}
+					const districtSelectEl = activeBranch.querySelector(".district select");
+					if (districtSelectEl) {
+						selectedDistrict = districtSelectEl.value;
 					}
 
-					const districtSelect = document.getElementById("district");
-					if (districtSelect.value === "") {
-						document.getElementById("cartShippingFeeAlert").textContent = "將於確認送貨地址後顯示運費";
-						return 0;
+					let couponCode = "";
+					const couponCodeHidden = document.getElementById("couponCodeHidden");
+					if (couponCodeHidden && couponCodeHidden.value.trim() !== "") {
+						couponCode = couponCodeHidden.value.trim();
 					} else {
-						const fee = getShippingFee();
-						document.getElementById("cartShippingFeeAlert").textContent = "NT$" + fee;
-						return fee;
+						// 若無隱藏欄位，則從 URL 查詢參數取得
+						const params = new URLSearchParams(window.location.search);
+						couponCode = params.get("couponCode") || "";
 					}
+
+					// 檢查 userId 是否存在
+					var userId = /*[[${user.userId}]]*/ 0;
+					if (!userId || userId === "null") {
+						console.error("UserId not provided.");
+						return;
+					}
+
+					// 呼叫後端 API 取得訂單摘要
+					fetch("/api/orderSummary?userId=" + userId
+						+ "&shippingMethod=" + encodeURIComponent(shippingMethod)
+						+ "&selectedCity=" + encodeURIComponent(selectedCity)
+						+ "&selectedDistrict=" + encodeURIComponent(selectedDistrict)
+						+ "&couponCode=" + encodeURIComponent(couponCode))
+						.then(response => response.json())
+						.then(data => {
+							// 更新小計
+							document.getElementById("subtotalAmount").innerText = "$" + data.subtotal;
+
+							// 若 shippingMethod 為 "hct" 或 "outer-island" 且尚未選擇城市，
+							// 則顯示提示文字；否則顯示從後端取得的運費金額
+							if ((shippingMethod === "hct" || shippingMethod === "outer-island") && (selectedCity === "" || selectedDistrict === "")) {
+								document.getElementById("cartShippingFeeAlert").innerText = "將於確認送貨地址後顯示運費";
+								document.querySelectorAll(".shippingCardFeeText").forEach(el => {
+									el.textContent = "將於確認送貨地址後顯示運費";
+								});
+							} else {
+								document.getElementById("cartShippingFeeAlert").innerText = "NT$" + data.shippingFee;
+								document.querySelectorAll(".shippingCardFeeText").forEach(el => {
+									el.textContent = "運費 NT$" + data.shippingFee;
+								});
+							}
+
+							// 更新優惠券折扣顯示
+							if (data.couponDiscount > 0) {
+								document.getElementById("couponDiscountRow").style.display = "table-row";
+								document.getElementById("couponDiscount").innerText = "-$" + data.couponDiscount;
+							} else {
+								document.getElementById("couponDiscountRow").style.display = "none";
+							}
+
+							// 更新合計
+							document.getElementById("grandTotal").innerText = "$" + data.grandTotal;
+							document.getElementById("paymentGrandTotal").innerText = "$" + data.grandTotal;
+							currentSubtotal = data.subtotal;
+						})
+						.catch(error => console.error("Error updating order summary:", error));
 				}
 
-				// 更新合計金額：購物車小計 + 運費 - 優惠券折扣，同時控制優惠券行顯示
-				function updateGrandTotal() {
-					const subtotal = parseInt(document.getElementById("subtotalAmount").textContent.replace("$", "")) || 0;
-					const shippingFee = updateCartShippingFeeUI();
-					// 取得優惠券要求的目標金額（如果後端有提供 targetAmount，否則預設為 0）
-					const targetAmount = /*[[${targetAmount != null ? targetAmount : 0}]]*/ 0;
-					// 若購物車小計低於目標金額，強制清除優惠券折扣
-					if (subtotal < targetAmount) {
-						couponDiscountOverall = 0;
-					}
-					const grandTotalValue = subtotal + shippingFee - couponDiscountOverall;
-					document.getElementById("grandTotal").textContent = "$" + grandTotalValue;
-					document.getElementById("paymentGrandTotal").textContent = "$" + grandTotalValue;
-					// 更新優惠券行：若優惠折扣大於 0，顯示該行；否則隱藏
-					const couponRow = document.getElementById("couponDiscountRow");
-					if (couponDiscountOverall > 0) {
-						couponRow.style.display = "table-row";
-						document.getElementById("couponDiscount").textContent = "-$" + couponDiscountOverall;
-					} else {
-						couponRow.style.display = "none";
-					}
-				}
-
-				// 從 API 拿購物車資料並更新頁面
+				// 載入購物車資料（與 cart.html 類似，這邊顯示訂單摘要部分保持不變）
 				async function fetchCartData() {
 					try {
 						const response = await fetch("/api/cart");
 						if (!response.ok) throw new Error("Network response was not ok");
 						const {cartItems, totalAmount} = await response.json();
-						currentSubtotal = recalcSubtotal(cartItems);
+
+						if (cartItems.length === 0) {
+							const cartSection = document.getElementById("cartSection");
+							if (cartSection) {
+								cartSection.classList.add("d-none");
+							}
+							return;
+						}
+
+						currentSubtotal = 0;
 						const cartItemsContainer = document.getElementById("cartItems");
 						cartItemsContainer.innerHTML = "";
+
 						cartItems.forEach((item) => {
-							const storedQuantity = sessionStorage.getItem("cartItem_" + item.cartItemId);
-							if (storedQuantity !== null) {
-								item.quantity = parseInt(storedQuantity);
-								item.subTotal = item.price * item.quantity;
-							}
+							currentSubtotal += item.subTotal;
 							const row = document.createElement("tr");
 							row.innerHTML = `
-				              <td class="text-center align-middle">
-				                <img src="${item.product.imageUrl}" alt="" class="img-fluid rounded-circle" style="width:80px; height:80px;">
-				              </td>
-				              <td class="text-center align-middle">${item.product.productName}</td>
-				              <td class="text-center align-middle">$${item.price}</td>
-				              <td class="text-center align-middle">
-				                <div class="d-flex justify-content-center align-items-center mx-auto" style="width:100px;">
+				                <td class="text-center align-middle">
+				                  <img src="${item.product.imageUrl}" alt="" class="img-fluid rounded-circle" style="width:80px; height:80px;">
+				                </td>
+				                <td class="text-center align-middle">${item.product.productName}</td>
+				                <td class="text-center align-middle">$${item.price}</td>
+				                <td class="text-center align-middle">
 				                  <span id="quantity-${item.cartItemId}" class="text-center">${item.quantity}</span>
-				                </div>
-				              </td>
-				              <td class="text-center align-middle">$${item.subTotal}</td>
-				            `;
+				                </td>
+				                <td class="text-center align-middle">$${item.subTotal}</td>
+				              `;
 							cartItemsContainer.appendChild(row);
 						});
 						document.getElementById("subtotalAmount").textContent = "$" + currentSubtotal;
-						updateGrandTotal();
+						updateOrderSummary();
 					} catch (error) {
 						console.error("Error fetching cart data:", error);
 					}
 				}
 
-				// 假設 shippingMethod 由後端傳入，若無則預設為 "711-cod"
-				var shippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
+				// 頁面加載後載入購物車資料
+				document.addEventListener("DOMContentLoaded", fetchCartData);
 
 				// 地址下拉選單與運費更新邏輯
 				document.addEventListener("DOMContentLoaded", function () {
+					// 取得目前 active branch
+					const activeBranch = getActiveBranch();
+					// 嘗試取得 .city select 元素
+					const citySelect = activeBranch.querySelector(".city select");
+					// 如果找不到，代表這個分支不需要選擇城市，直接跳過更新
+					if (!citySelect) {
+						updateOrderSummary();
+						return;
+					}
+					// 嘗試取得 .district select 元素
+					const districtSelect = activeBranch.querySelector(".district select");
+					// 如果找不到，則同樣跳過
+					if (!districtSelect) {
+						updateOrderSummary();
+						return;
+					}
+
 					// 定義城市與地區對應資料
 					var hctCityDistricts = {
 						"台北市": ["100中正區", "103大同區", "104中山區", "105松山區", "106大安區",
@@ -1073,8 +1182,6 @@
 
 					// 根據 shippingMethod 選擇使用的地址資料
 					var addressOptions = (shippingMethod === "outer-island") ? outerIslandCityDistricts : hctCityDistricts;
-					var citySelect = document.getElementById("city");
-					var districtSelect = document.getElementById("district");
 
 					// 初始化城市下拉選單提示
 					citySelect.innerHTML = "";
@@ -1105,13 +1212,28 @@
 
 					// 當城市選項改變時，更新區選單及重置運費提示
 					function updateDistrictOptions() {
-						// 如果為固定運費方式，直接更新並 return
+						// 先取得當前的 activeBranch
+						const activeBranch = getActiveBranch();
+						// 嘗試取得 .city select 元素
+						const citySelect = activeBranch.querySelector(".city select");
+						// 如果找不到，代表這個分支不需要選擇城市，直接跳過更新
+						if (!citySelect) {
+							updateOrderSummary();
+							return;
+						}
+						// 嘗試取得 .district select 元素
+						const districtSelect = activeBranch.querySelector(".district select");
+						// 如果找不到，則同樣跳過
+						if (!districtSelect) {
+							updateOrderSummary();
+							return;
+						}
+
 						if (shippingMethod === "711-cod" || shippingMethod === "711-no-cod") {
 							document.querySelectorAll(".shippingCardFeeText").forEach(el => {
-								el.textContent = "運費 NT$" + fixedShippingFee;
+								el.textContent = "運費 NT$" + 60;
 							});
-							updateCartShippingFeeUI();
-							updateGrandTotal();
+							updateOrderSummary();
 							return;
 						}
 
@@ -1144,22 +1266,14 @@
 							districtSelect.appendChild(option);
 						});
 
-						// 更新運費顯示
-						updateShippingCardFee();
-						updateCartShippingFeeUI();
-						updateGrandTotal();
+						updateOrderSummary();
 					}
 					citySelect.addEventListener("change", updateDistrictOptions);
-					districtSelect.addEventListener("change", function () {
-						// 更新送貨資料卡片運費
-						updateShippingCardFee();
-						// 更新購物車運費
-						updateCartShippingFeeUI();
-						updateGrandTotal();
-					});
+					districtSelect.addEventListener("change", updateOrderSummary);
 					updateDistrictOptions();
 				});
 
+<<<<<<< HEAD
 				// 重新載入購物車資料
 				document.addEventListener("DOMContentLoaded", fetchCartData);
 				
@@ -1193,35 +1307,229 @@
 				    // 每隔 3 秒查詢一次
 				    setInterval(fetchSelectedStore, 3000);
 				/////////////////////////
+=======
+				// 用來移除錯誤訊息的函式
+				function removeError(inputElement) {
+					const errorElem = inputElement.parentElement.querySelector(".error-message");
+					if (errorElem) {
+						errorElem.remove();
+					}
+				}
+>>>>>>> dev
 
-				/*]]>*/
-			</script>
-
-			<!-- 返回購物車、收件人資料複製 -->
-			<script>
+				// 返回購物車、收件人資料複製
 				document.addEventListener("DOMContentLoaded", function () {
 					document.getElementById("backToCart").addEventListener("click", function () {
 						window.location.href = "/cart";
 					});
 					const sameCheckbox = document.getElementById("sameAsCustomer");
 					sameCheckbox.addEventListener("change", function () {
+						console.log("同顧客資料複製勾選狀態:", this.checked);
+						const recipientName = document.getElementById("recipientName");
+						const recipientPhone = document.getElementById("recipientPhone");
+						const customerName = document.getElementById("customerName");
+						const customerPhone = document.getElementById("customerPhone");
 						if (this.checked) {
-							document.getElementById("recipientName").value =
-								document.getElementById("customerName").value;
-							document.getElementById("recipientPhone").value =
-								document.getElementById("customerPhone").value;
+							// 複製資料
+							recipientName.value = document.getElementById("customerName").value;
+							recipientPhone.value = document.getElementById("customerPhone").value;
+							// 清除對應的錯誤訊息
+							removeError(recipientName);
+							removeError(recipientPhone);
+							// 如果有自動驗證，也可觸發 input 事件
+							recipientName.dispatchEvent(new Event("input", {bubbles: true}));
+							recipientPhone.dispatchEvent(new Event("input", {bubbles: true}));
 						} else {
-							document.getElementById("recipientName").value = "";
-							document.getElementById("recipientPhone").value = "";
+							// 清空欄位
+							recipientName.value = "";
+							recipientPhone.value = "";
 						}
 					});
 				});
-				
+
 				// 綠界地圖 API
-				document.getElementById("selectStoreBtn").addEventListener("click", function() {
-				    window.location.href = "/ecpay/expressMap";
+				const selectStoreBtn = document.getElementById("selectStoreBtn");
+				if (selectStoreBtn) {
+					selectStoreBtn.addEventListener("click", function () {
+						window.location.href = "/ecpay/expressMap";
+					});
+				}
+
+				// 解析 URL 查詢參數並取得 temporaryStoreId（用於門市選擇）
+				function getQueryParams() {
+					const params = {};
+					const queryString = window.location.search.substring(1);
+					queryString.split("&").forEach(function (param) {
+						const pair = param.split("=");
+						params[pair[0]] = decodeURIComponent(pair[1]);
+					});
+					return params;
+				}
+
+				// 當頁面載入時，從 URL 取得 temporaryStoreId 並呼叫 API
+				document.addEventListener("DOMContentLoaded", function () {
+					const params = getQueryParams();
+
+					// 檢查隱藏欄位 temporaryStoreId 是否存在
+					const tempStoreInput = document.getElementById("temporaryStoreId");
+					if (tempStoreInput && params.temporaryStoreId) {
+						tempStoreInput.value = params.temporaryStoreId;
+						fetchSelectedStore(params.temporaryStoreId);
+					}
+
+					// 檢查 selectedStore 元素是否存在，若存在且 temporaryStoreId 沒有，則顯示預設訊息
+					const selectedStoreEl = document.getElementById("selectedStore");
+					if (selectedStoreEl) {
+						if (!params.temporaryStoreId) {
+							selectedStoreEl.innerHTML = "<p>尚未選擇門市</p>";
+						}
+					}
 				});
 
+				// 根據 temporaryStoreId 從 API 取得門市資料
+				async function fetchSelectedStore(storeId) {
+					try {
+						const response = await fetch(`/api/temporaryStore/${storeId}`);
+						if (response.ok) {
+							const selectedStore = await response.json();
+							console.log("API 回傳的 SelectedStore:", selectedStore);
+							if (selectedStore) {
+								document.getElementById("selectedStore").innerHTML = `
+									<h5>已選擇門市</h5>
+									<p>門市店號：${selectedStore.cvsstoreId}</p>
+									<p>門市名稱：${selectedStore.cvsstoreName}</p>
+									<p>門市地址：${selectedStore.cvsaddress}</p>
+									`;
+							}
+						} else {
+							document.getElementById("selectedStore").innerHTML = "<p>尚未選擇門市</p>";
+						}
+					} catch (error) {
+						console.error("Error fetching selected store:", error);
+					}
+				}
+
+				document.addEventListener("DOMContentLoaded", fetchCartData);
+
+				console.log("Checkout page script loaded");
+
+				// 提交訂單前表單驗證
+				document.addEventListener("DOMContentLoaded", function () {
+					const orderForm = document.getElementById("orderForm");
+
+					// 檢查 shippingMethod 是否正確
+					console.log("shippingMethod:", shippingMethod);
+
+					// 用 data‑shipping 屬性找出目前 active 的 branch
+					let activeBranch = null;
+					const branches = orderForm.querySelectorAll('.branch');
+					branches.forEach(branch => {
+						if (branch.dataset.shipping === shippingMethod) {
+							activeBranch = branch;
+						}
+					});
+					// 若找不到，則預設以整個表單作驗證
+					if (!activeBranch) {
+						console.warn("找不到 active branch，將以整個 form 驗證");
+						activeBranch = orderForm;
+					}
+					console.log("activeBranch:", activeBranch);
+
+					// 當表單送出時，僅檢查 activeBranch 中的必填欄位
+					orderForm.addEventListener("submit", function (e) {
+						// 只從 active branch 取得必填欄位
+						const requiredFields = activeBranch.querySelectorAll("[data-required='true']");
+						let valid = true;
+
+						// 清除所有先前的錯誤訊息
+						requiredFields.forEach(field => {
+							clearError(field);
+						});
+
+						// 檢查每個必填欄位，但只處理可見的欄位
+						requiredFields.forEach(field => {
+							if (field.value.trim() === "") {
+								valid = false;
+								showError(field, "此欄位必填");
+							}
+						});
+
+						if (!valid) {
+							e.preventDefault(); // 阻止表單送出
+							alert("請填寫所有必填資料");
+						}
+					});
+
+					// 清除某個輸入框下的錯誤訊息（只移除該欄位相關的錯誤提示）
+					function clearError(inputElement) {
+						const parent = inputElement.parentElement;
+						const errorElem = parent.querySelector(".error-message");
+						if (errorElem) {
+							errorElem.remove();
+						}
+					}
+
+					// 在指定輸入框下方加入錯誤訊息
+					function showError(inputElement, message) {
+						// 若已存在錯誤訊息則不重複新增
+						if (inputElement.parentElement.querySelector(".error-message")) return;
+						const error = document.createElement("div");
+						error.className = "error-message";
+						error.style.color = "red";
+						error.style.fontSize = "0.9rem";
+						error.innerText = message;
+						inputElement.parentElement.appendChild(error);
+					}
+
+					// 當使用者 focus 某個必填欄位時，清除其錯誤訊息
+					const allRequired = orderForm.querySelectorAll("[data-required='true']");
+					allRequired.forEach(field => {
+						field.addEventListener("focus", function () {
+							clearError(field);
+						});
+					});
+				});
+
+
+				// 城市和區域存入 session
+				document.addEventListener("DOMContentLoaded", function () {
+					// 假設 updateDistrictOptions() 已定義且可以使用
+
+					// 取得城市和區域的下拉選單元素
+					const citySelect = document.getElementById("city");
+					const districtSelect = document.getElementById("district");
+
+					// 定義將選擇的城市與區域存入 session 的函式
+					function saveShippingAddressToSession() {
+						const selectedCity = citySelect.value;
+						const selectedDistrict = districtSelect.value;
+
+						// 利用 fetch API 發送 POST 請求
+						fetch('/api/checkout/session/setShippingAddress', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							body: new URLSearchParams({
+								selectedCity: selectedCity,
+								selectedDistrict: selectedDistrict
+							})
+						})
+							.then(response => response.json())
+							.then(data => console.log("Session data saved:", data))
+							.catch(error => console.error("Error saving session data:", error));
+					}
+
+					// 當城市選擇改變時，同時更新區域選單並儲存到 session
+					citySelect.addEventListener("change", function () {
+						updateDistrictOptions();  // 這裡假設你已有 updateDistrictOptions() 方法
+						saveShippingAddressToSession();
+					});
+
+					// 當區域選擇改變時也儲存
+					districtSelect.addEventListener("change", saveShippingAddressToSession);
+				});
+				/*]]>*/
 			</script>
 		</div>
 </body>

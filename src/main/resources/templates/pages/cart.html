@@ -61,6 +61,11 @@
 			margin-top: 1.5rem;
 			margin-bottom: 3rem;
 		}
+
+		/* placeholder 樣式 */
+		#couponInput::placeholder {
+			color: lightgray;
+		}
 	</style>
 </head>
 
@@ -181,14 +186,14 @@
 										</button>
 									</div>
 									<!-- 優惠券折扣，預設隱藏 -->
-									<div id="couponDiscountContainer" class="justify-content-between mb-3 mt-3"
+									<div id="couponDiscountRow" class="justify-content-between mb-3 mt-3"
 										style="display: none">
 										<span>折扣</span>
 										<span id="couponDiscount">-$0</span>
 									</div>
 								</div>
 							</div>
-							<hr />
+							<hr>
 							<!-- 運費提示訊息，預設隱藏 d-none -->
 							<div id="shippingFeeNote" class="alert alert-info d-none">
 								運費將於填寫送貨地址後，於結帳頁顯示。
@@ -214,219 +219,16 @@
 			/*<![CDATA[*/
 			// 全域變數：保存購物車小記 //
 			let currentSubtotal = 0;
-
 			// 全域變數：保存優惠券折扣跟資料庫比對 //
 			let couponDiscountOverall = 0;
-
 			// 全域變數：保存優惠券門檻 //
 			let couponTargetAmount = 0;
 
-			// 重新計算小記 //
-			function recalcSubtotal(cartItems) {
-				return cartItems.reduce((sum, item) => sum + item.subTotal, 0);
-			}
+			// 假設從後端或 Session 取得使用者編號與預設送貨方式
+			var userId = /*[[${userId}]]*/ 0;
+			var shippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
 
-			// 發送 API 請求驗證使用者輸入的優惠券代碼：優惠券有效則更新 couponDiscountOverall，並重新計算結帳金額 //
-			document.getElementById("applyCouponBtn").addEventListener("click", async function () {
-				const couponCode = document.getElementById("couponInput").value.trim();
-				if (!couponCode) {
-					alert("請輸入優惠碼");
-					couponDiscountOverall = 0;
-					couponTargetAmount = 0;
-					updateGrandTotal();
-					return;
-				}
-				//try裡面增加了未達目標金額(data.targetAmount>currentSubtotal)的限制
-				try {
-					// 呼叫後端 API 驗證優惠券
-					const response = await fetch(
-						`/api/coupons/validate?couponCode=${encodeURIComponent(couponCode)}`
-					);
-					if (!response.ok) throw new Error("無法驗證優惠券");
-					const data = await response.json();
-
-					// 假設回傳的資料格式為 { discountAmount: 100, valid: true, message: "..." }
-					if (!data.valid) {
-						alert("優惠碼無效或已過期");
-						couponDiscountOverall = 0;
-						couponTargetAmount = 0;
-						// 隱藏折扣區塊
-						document.getElementById("couponDiscountContainer").style.display = "none";
-						// 呼叫後端 API 清除 session 中的優惠券資訊
-						fetch("/api/coupons/clear", {method: "POST"});
-					} else if (data.targetAmount > currentSubtotal) {
-						alert("未能達到該優惠券的目標金額，目標金額：" + data.targetAmount);
-						couponDiscountOverall = 0;
-						couponTargetAmount = data.targetAmount;
-						document.getElementById("couponDiscountContainer").style.display = "none";
-						// 同時清除後端 session 中的優惠券資料
-						fetch("/api/coupons/clear", {method: "POST"});
-					} else {
-						couponDiscountOverall = data.discountAmount;
-						couponTargetAmount = data.targetAmount;
-						alert("折扣金額: " + couponDiscountOverall);
-						// 顯示折扣區塊
-						document.getElementById("couponDiscountContainer").style.display = "flex";
-					}
-				} catch (error) {
-					console.error("Error applying coupon:", error);
-					couponDiscountOverall = 0;
-					couponTargetAmount = 0;
-				}
-				updateGrandTotal();
-			});
-
-			// 更新結帳金額：合計 = 小記 + 運費 - 優惠券 //
-			function updateGrandTotal() {
-
-				// 檢查優惠券是否達到使用條件
-				if (couponDiscountOverall > 0 && currentSubtotal < couponTargetAmount) {
-					// 小計不足以使用優惠券，清除優惠券折扣
-					couponDiscountOverall = 0;
-					couponTargetAmount = 0;
-					document.getElementById("couponDiscountContainer").style.display = "none";
-					alert("目前訂單金額不足以使用該優惠券，優惠券已自動移除");
-				}
-
-				// 取得更新後的優惠券折扣
-				const couponDiscount = couponDiscountOverall;
-
-				// 根據折扣數值動態控制折扣區塊的顯示
-				const couponDiscountContainer = document.getElementById("couponDiscountContainer");
-				if (couponDiscount > 0) {
-					couponDiscountContainer.style.display = "flex";
-				} else {
-					couponDiscountContainer.style.display = "none";
-				}
-
-				// 更新前端優惠券折扣顯示
-				document.getElementById("couponDiscount").textContent = "-$" + couponDiscount;
-
-				// 取得運費並計算合計
-				const shippingFee =
-					parseInt(document.getElementById("shippingFee").textContent.replace("$", "")) || 0;
-				const grandTotalValue = currentSubtotal + shippingFee - couponDiscount;
-				document.getElementById("grandTotal").textContent = "$" + grandTotalValue;
-			}
-
-			// 載入購物車資料 //
-			async function fetchCartData() {
-				try {
-					const response = await fetch("/api/cart");
-					if (!response.ok) throw new Error("Network response was not ok");
-					const {cartItems, totalAmount} = await response.json();
-
-					// 若購物車為空，隱藏購物車區塊和結帳內容，顯示空購物車提示
-					if (cartItems.length === 0) {
-						document.getElementById("cartSection").classList.add("d-none");
-						document.getElementById("fullCartContent").classList.add("d-none");
-						document.getElementById("emptyCartMessage").classList.remove("d-none");
-						return;
-					} else {
-						// 若有商品，確保顯示購物車和結帳內容，隱藏空購物車提示
-						document.getElementById("cartSection").classList.remove("d-none");
-						document.getElementById("fullCartContent").classList.remove("d-none");
-						document.getElementById("emptyCartMessage").classList.add("d-none");
-					}
-
-					currentSubtotal = recalcSubtotal(cartItems);
-					const cartItemsContainer = document.getElementById("cartItems");
-					cartItemsContainer.innerHTML = "";
-
-					cartItems.forEach((item) => {
-						const row = document.createElement("tr");
-						row.innerHTML = `
-                                            <td class="text-center align-middle">
-                                                <img src="${item.product.imageUrl}" alt="" class="img-fluid rounded-circle" style="width:80px; height:80px;">
-                                            </td>
-                                            <td class="text-center align-middle">${item.product.productName}</td>
-                                            <td class="text-center align-middle">$${item.price}</td>
-                                            <td class="text-center align-middle">
-                                                <div class="d-flex justify-content-center align-items-center mx-auto" style="width:100px;">
-                                                    <button class="btn btn-sm btn-minus" onclick="updateQuantity(${item.cartItemId}, -1)">
-                                                    <i class="fa fa-minus"></i>
-                                                    </button>
-                                                    <input type="text" id="quantity-${item.cartItemId}" value="${item.quantity}"class="form-control form-control-sm text-center mx-2" style="width:50px;"onchange="updateQuantityFromInput(${item.cartItemId}, this.value)">
-                                                    <button class="btn btn-sm btn-plus" onclick="updateQuantity(${item.cartItemId}, 1)">
-                                                    <i class="fa fa-plus"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                            <td class="text-center align-middle">$${item.subTotal}</td>
-                                            <td class="text-center align-middle">
-                                                <button class="btn btn-danger" onclick="removeCartItem(${item.cartItemId})"><i class="fa fa-trash"></i></button>
-                                            </td>
-                                            `;
-						cartItemsContainer.appendChild(row);
-					});
-
-					// 更新小計、結帳金額
-					document.getElementById("subtotalAmount").textContent = "$" + currentSubtotal;
-					updateGrandTotal();
-				} catch (error) {
-					console.error("Error fetching cart data:", error);
-					// 如果錯誤是由於未登录導致的，可以直接顯示空購物車提示
-					document.getElementById("cartSection").classList.add("d-none");
-					document.getElementById("fullCartContent").classList.add("d-none");
-					document.getElementById("emptyCartMessage").classList.remove("d-none");
-				}
-			}
-
-			// "數量"輸入框即時更新數量 //
-			async function updateQuantityFromInput(cartItemId, newVal) {
-				let newQuantity = parseInt(newVal);
-				if (isNaN(newQuantity) || newQuantity < 1) {
-					newQuantity = 1;
-				}
-				try {
-					const response = await fetch(
-						`/api/cart/update?cartItemId=${cartItemId}&quantity=${newQuantity}`,
-						{method: "POST"}
-					);
-					if (!response.ok) throw new Error("Error updating quantity");
-					fetchCartData(); // 重新載入購物車資料
-				} catch (error) {
-					console.error("Error updating quantity from input:", error);
-				}
-			}
-
-			// 移除購物車項目 //
-			async function removeCartItem(cartItemId) {
-				try {
-					const response = await fetch(`/api/cart/remove?cartItemId=${cartItemId}`, {
-						method: "POST",
-						credentials: "same-origin",
-					});
-					if (!response.ok) throw new Error("Error removing cart item");
-					fetchCartData(); // 重新載入購物車資料
-					updateCartCount(); // 更新購物車圖示的數量
-				} catch (error) {
-					console.error("Error removing cart item:", error);
-				}
-			}
-
-			// 更新購物車項目數量 //
-			async function updateQuantity(cartItemId, delta) {
-				try {
-					const quantityInput = document.getElementById(`quantity-${cartItemId}`);
-					let currentQuantity = parseInt(quantityInput.value);
-					let newQuantity = currentQuantity + delta;
-					if (newQuantity < 1) newQuantity = 1;
-					const response = await fetch(
-						`/api/cart/update?cartItemId=${cartItemId}&quantity=${newQuantity}`,
-						{method: "POST"}
-					);
-					if (!response.ok) throw new Error("Error updating quantity");
-					sessionStorage.setItem("cartItem_" + cartItemId, newQuantity);
-					fetchCartData(); // 重新載入購物車資料
-				} catch (error) {
-					console.error("Error updating cart item quantity:", error);
-				}
-			}
-
-			// 載入購物車資料 //
-			document.addEventListener("DOMContentLoaded", fetchCartData);
-
+			//----------------------------
 			// 選擇送貨及付款方式 //
 			const shippingData = {
 				TW: {
@@ -453,30 +255,30 @@
 								credit: {
 									label: "信用卡",
 									message: `
-                                                <p style="margin: 0;">
-                                                    <strong>2025/1/1-2025/3/31</strong><br>
-                                                    刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
-                                                </p>
-                                                <p style="margin: 0; margin-top: 8px;">
-                                                    *每月活動獨立於 1/22、2/26、3/27 下午2點開始至
-                                                    「星展Card+信用卡數位服務」登錄【SHOPLINE】活動，
-                                                    活動詳情請參閱星展銀行官網公告
-                                                </p>
-                                                `,
+			                                 <p style="margin: 0;">
+			                                 	<strong>2025/1/1-2025/3/31</strong><br>
+			                                 	刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
+			                                 </p>
+			                                 <p style="margin: 0; margin-top: 8px;">
+			                                 	*每月活動獨立於 1/22、2/26、3/27 下午2點開始至
+			                                     「星展Card+信用卡數位服務」登錄【SHOPLINE】活動，
+			                                     活動詳情請參閱星展銀行官網公告
+			                                 </p>
+			                                 `,
 								},
 							},
 						},
 						hct: {
 							label: "新竹貨運",
 							shippingNote: `
-                                            <ol style="margin-left: 1em;">
-                                                <li>寄出後約需1-2個工作天，預計到達時間僅供參考。</li>
-                                                <li>週日及國定假日不配送，遇到特定節日或特殊狀況可能需要更長的工作天數。</li>
-                                                <li>外島的朋友們請選擇外島郵寄，若選擇新竹貨運，請諒解我們會手動更改成郵寄包裹寄出。</li>
-                                                <li>若有需要指定配送時段（9-13、13-17、17-20），請於上方的訂單備註內留言，一般司機大哥配送前或配達時會電話聯繫收件人，但不一定每位司機大哥都會，請見諒。</li>
-                                                <li>收件地址請詳細填寫，若縣市內有XX區、XX鎮，例：中正區、後龍鎮等，請勿省略。</li>
-                                            </ol>
-                                            `,
+			                              <ol style="margin-left: 1em;">
+			                              	<li>寄出後約需1-2個工作天，預計到達時間僅供參考。</li>
+			                                <li>週日及國定假日不配送，遇到特定節日或特殊狀況可能需要更長的工作天數。</li>
+			                                <li>外島的朋友們請選擇外島郵寄，若選擇新竹貨運，請諒解我們會手動更改成郵寄包裹寄出。</li>
+			                                <li>若有需要指定配送時段（9-13、13-17、17-20），請於上方的訂單備註內留言，一般司機大哥配送前或配達時會電話聯繫收件人，但不一定每位司機大哥都會，請見諒。</li>
+			                                <li>收件地址請詳細填寫，若縣市內有XX區、XX鎮，例：中正區、後龍鎮等，請勿省略。</li>
+			                              </ol>
+			                              `,
 							paymentOptions: {
 								linepay: {
 									label: "LINE Pay",
@@ -485,16 +287,16 @@
 								credit: {
 									label: "信用卡",
 									message: `
-                                                <p style="margin: 0;">
-                                                    <strong>2025/1/1-2025/3/31</strong><br>
-                                                    刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
-                                                </p>
-                                                <p style="margin: 0; margin-top: 8px;">
-                                                    *每月活動獨立於 1/22、2/26、3/27 下午2點開始至
-                                                    「星展Card+信用卡數位服務」登錄【SHOPLINE】活動，
-                                                    活動詳情請參閱星展銀行官網公告
-                                                </p>
-                                                `,
+			                                 <p style="margin: 0;">
+			                                 	<strong>2025/1/1-2025/3/31</strong><br>
+			                                    刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
+			                                 </p>
+			                                 <p style="margin: 0; margin-top: 8px;">
+			                                 	*每月活動獨立於 1/22、2/26、3/27 下午2點開始至
+			                                    「星展Card+信用卡數位服務」登錄【SHOPLINE】活動，
+			                                    活動詳情請參閱星展銀行官網公告
+			                                 </p>
+			                                 `,
 								},
 							},
 						},
@@ -508,17 +310,16 @@
 								},
 								credit: {
 									label: "信用卡",
-									message: `
-                                                <p style="margin: 0;">
-                                                    <strong>2025/1/1-2025/3/31</strong><br>
-                                                    刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
-                                                </p>
-                                                <p style="margin: 0; margin-top: 8px;">
-                                                    *每月活動獨立於 1/22、2/26、3/27 下午2點開始至
-                                                    「星展Card+信用卡數位服務」登錄【SHOPLINE】活動，
-                                                    活動詳情請參閱星展銀行官網公告
-                                                </p>
-                                                `,
+									message: `<p style="margin: 0;">
+			                                  	<strong>2025/1/1-2025/3/31</strong><br>
+			                                  	刷 星展卡 單筆 滿 $3,000，贈刷卡金 $100 元
+			                                  </p>
+			                                  <p style="margin: 0; margin-top: 8px;">
+			                                  	*每月活動獨立於 1/22、2/26、3/27 下午2點開始至
+			                                    「星展Card+信用卡數位服務」登錄【SHOPLINE】活動，
+			                                    活動詳情請參閱星展銀行官網公告
+			                                  </p>
+			                                  `,
 								},
 							},
 						},
@@ -527,6 +328,246 @@
 				// 其他國家 (US, JP...)
 			};
 
+			//----------------------------
+			// 優惠券顯示邏輯：點擊 "使用優惠代碼" 後顯示輸入區塊
+			document.addEventListener("DOMContentLoaded", function () {
+				// 初始化送貨/付款選單
+				initCountryOptions();
+				onCountryChange();
+
+				// 優惠代碼：綁定點擊事件，顯示優惠代碼輸入區塊
+				const showCouponLink = document.getElementById("showCouponLink");
+				const couponForm = document.getElementById("couponForm");
+				if (showCouponLink && couponForm) {
+					showCouponLink.addEventListener("click", function (e) {
+						e.preventDefault();
+						// 顯示優惠券輸入區塊
+						couponForm.style.display = "block";
+						// 隱藏「使用優惠代碼」連結
+						showCouponLink.style.display = "none";
+					});
+				}
+				// 初始載入購物車資料
+				fetchCartData();
+			});
+
+			//----------------------------
+			// 優惠券驗證及更新摘要
+			document.getElementById("applyCouponBtn").addEventListener("click", async function () {
+				const couponCode = document.getElementById("couponInput").value.trim();
+				if (!couponCode) {
+					alert("請輸入優惠碼");
+					couponDiscountOverall = 0;
+					couponTargetAmount = 0;
+					updateOrderSummary();
+					return;
+				}
+				try {
+					const response = await fetch(`/api/coupons/validate?couponCode=${encodeURIComponent(couponCode)}`);
+					if (!response.ok) throw new Error("無法驗證優惠券");
+					const data = await response.json();
+					if (!data.valid) {
+						alert("優惠碼無效或已過期");
+						couponDiscountOverall = 0;
+						couponTargetAmount = 0;
+						document.getElementById("couponDiscountRow").style.display = "none";
+						fetch("/api/coupons/clear", {method: "POST"});
+					} else if (data.targetAmount > currentSubtotal) {
+						alert("未達到該優惠券的目標金額，目標金額：" + data.targetAmount);
+						couponDiscountOverall = 0;
+						couponTargetAmount = data.targetAmount;
+						document.getElementById("couponDiscountRow").style.display = "none";
+						document.getElementById("couponInput").value = "";
+						fetch("/api/coupons/clear", {method: "POST"});
+					} else {
+						couponDiscountOverall = data.discountAmount;
+						couponTargetAmount = data.targetAmount;
+						alert("折扣金額: " + couponDiscountOverall);
+						fetch("/api/coupons/set", {
+							method: "POST",
+							headers: {"Content-Type": "application/json"},
+							body: JSON.stringify({couponCode: couponCode})
+						});
+						document.getElementById("couponDiscountRow").style.display = "flex";
+					}
+				} catch (error) {
+					console.error("Error applying coupon:", error);
+					couponDiscountOverall = 0;
+					couponTargetAmount = 0;
+				}
+				updateOrderSummary();
+			});
+
+			//----------------------------
+			// 更新訂單摘要：呼叫後端 API /api/orderSummary 並更新畫面
+			function updateOrderSummary() {
+				// 若 cart.html 沒有 city/district 選單，直接傳空字串
+				const selectedCity = "";
+				const selectedDistrict = "";
+				const couponCode = document.getElementById("couponInput").value.trim();
+
+				// 檢查 userId 是否存在
+				if (!userId || userId === "null") {
+					console.error("UserId not provided.");
+					return;
+				}
+
+				// 呼叫後端 API 取得訂單摘要
+				fetch("/api/orderSummary?userId=" + userId
+					+ "&shippingMethod=" + encodeURIComponent(shippingMethod)
+					+ "&selectedCity=" + encodeURIComponent(selectedCity)
+					+ "&selectedDistrict=" + encodeURIComponent(selectedDistrict)
+					+ "&couponCode=" + encodeURIComponent(couponCode))
+					.then(response => response.json())
+					.then(data => {
+						document.getElementById("subtotalAmount").innerText = "$" + data.subtotal;
+						document.getElementById("shippingFee").innerText = "NT$" + data.shippingFee;
+						if (data.couponDiscount > 0) {
+							document.getElementById("couponDiscountRow").style.display = "flex";
+							document.getElementById("couponDiscount").innerText = "-$" + data.couponDiscount;
+						} else {
+							document.getElementById("couponDiscountRow").style.display = "none";
+						}
+						document.getElementById("grandTotal").innerText = "$" + data.grandTotal;
+						// 也更新全域變數，供優惠券驗證參考
+						currentSubtotal = data.subtotal;
+					})
+					.catch(error => console.error("Error updating order summary:", error));
+			}
+
+			//----------------------------
+			// 載入購物車資料
+			async function fetchCartData() {
+				try {
+					const response = await fetch("/api/cart");
+					if (!response.ok) throw new Error("Network response was not ok");
+					const {cartItems, totalAmount} = await response.json();
+
+					if (cartItems.length === 0) {
+						// 若購物車為空，隱藏購物車區塊和結帳內容，顯示空購物車提示
+						document.getElementById("cartSection").classList.add("d-none");
+						document.getElementById("fullCartContent").classList.add("d-none");
+						document.getElementById("emptyCartMessage").classList.remove("d-none");
+						return;
+					} else {
+						// 若有商品，確保顯示購物車和結帳內容，隱藏空購物車提示
+						document.getElementById("cartSection").classList.remove("d-none");
+						document.getElementById("fullCartContent").classList.remove("d-none");
+						document.getElementById("emptyCartMessage").classList.add("d-none");
+					}
+					currentSubtotal = 0;
+					const cartItemsContainer = document.getElementById("cartItems");
+					cartItemsContainer.innerHTML = "";
+
+					cartItems.forEach((item) => {
+						currentSubtotal += item.subTotal;
+						const row = document.createElement("tr");
+						row.innerHTML = `
+										<td class="text-center align-middle">
+											<img src="${item.product.imageUrl}"
+												 alt="" 
+												 class="img-fluid rounded-circle" 
+												 style="width:80px; height:80px;">
+										</td>
+										<td class="text-center align-middle">${item.product.productName}</td>
+										<td class="text-center align-middle">$${item.price}</td>
+										<td class="text-center align-middle">
+											<div class="d-flex justify-content-center align-items-center mx-auto" style="width:100px;">
+										    	<button class="btn btn-sm btn-minus" onclick="updateQuantity(${item.cartItemId}, -1)">
+										        <i class="fa fa-minus"></i>
+										        </button>
+										        <input type="text" id="quantity-${item.cartItemId}" value="${item.quantity}"class="form-control form-control-sm text-center mx-2" style="width:50px;"onchange="updateQuantityFromInput(${item.cartItemId}, this.value)">
+										        <button class="btn btn-sm btn-plus" onclick="updateQuantity(${item.cartItemId}, 1)">
+										        <i class="fa fa-plus"></i>
+										        </button>
+										    </div>
+										</td>
+										<td class="text-center align-middle">$${item.subTotal}</td>
+										<td class="text-center align-middle">
+											<button class="btn btn-danger" onclick="removeCartItem(${item.cartItemId})">
+												<i class="fa fa-trash"></i>
+											</button>
+										</td>
+									`;
+						cartItemsContainer.appendChild(row);
+					});
+					document.getElementById("subtotalAmount").textContent = "$" + currentSubtotal;
+					updateOrderSummary();
+				} catch (error) {
+					console.error("Error fetching cart data:", error);
+				}
+			}
+
+			//----------------------------
+			// "數量"輸入框即時更新數量 //
+			async function updateQuantityFromInput(cartItemId, newVal) {
+				let newQuantity = parseInt(newVal);
+				if (isNaN(newQuantity) || newQuantity < 1) {
+					newQuantity = 1;
+				}
+				try {
+					const response = await fetch(
+						`/api/cart/update?cartItemId=${cartItemId}&quantity=${newQuantity}`,
+						{method: "POST"}
+					);
+					if (!response.ok) throw new Error("Error updating quantity");
+					fetchCartData(); // 重新載入購物車資料
+				} catch (error) {
+					console.error("Error updating quantity from input:", error);
+				}
+			}
+
+			//----------------------------
+			// 移除購物車項目 //
+			async function removeCartItem(cartItemId) {
+				try {
+					const response = await fetch(`/api/cart/remove?cartItemId=${cartItemId}`, {
+						method: "POST",
+						credentials: "same-origin",
+					});
+					if (!response.ok) throw new Error("Error removing cart item");
+					fetchCartData(); // 重新載入購物車資料
+					updateCartCount(); // 更新購物車圖示的數量
+				} catch (error) {
+					console.error("Error removing cart item:", error);
+				}
+			}
+
+			//----------------------------
+			// 更新購物車項目數量 //
+			async function updateQuantity(cartItemId, delta) {
+				try {
+					const quantityInput = document.getElementById(`quantity-${cartItemId}`);
+					let currentQuantity = parseInt(quantityInput.value);
+					let newQuantity = currentQuantity + delta;
+					if (newQuantity < 1) newQuantity = 1;
+					const response = await fetch(
+						`/api/cart/update?cartItemId=${cartItemId}&quantity=${newQuantity}`,
+						{method: "POST"}
+					);
+					if (!response.ok) throw new Error("Error updating quantity");
+					sessionStorage.setItem("cartItem_" + cartItemId, newQuantity);
+					fetchCartData(); // 重新載入購物車資料
+				} catch (error) {
+					console.error("Error updating cart item quantity:", error);
+				}
+			}
+
+			//----------------------------
+			// 點選 "去買單" 時將目前選擇的參數組合成 URL 傳遞到 checkout.html
+			document.getElementById("goToCheckout").addEventListener("click", function () {
+				const shippingMethodVal = document.getElementById("deliveryMethod").value;
+				const paymentMethodVal = document.getElementById("paymentMethod").value;
+				const couponCode = document.getElementById("couponInput").value.trim();
+				const url = "/checkout?shippingMethod=" + encodeURIComponent(shippingMethodVal)
+					+ "&paymentMethod=" + encodeURIComponent(paymentMethodVal)
+					+ "&selectedCity=" + encodeURIComponent("")
+					+ "&selectedDistrict=" + encodeURIComponent("")
+					+ "&couponCode=" + encodeURIComponent(couponCode);
+				window.location.href = url;
+			});
+
+			//----------------------------
 			// 選擇送貨及付款方式中"送貨地點"、"送貨方式、"付款方式"下拉選單 //
 			const countrySelect = document.getElementById("deliveryCountry");
 			const methodSelect = document.getElementById("deliveryMethod");
@@ -588,7 +629,6 @@
 				}
 				paymentSelect.selectedIndex = 0;
 				onPaymentChange();
-
 				// 判斷送貨方式，更新運費或提示訊息
 				const shippingFeeRow = document.getElementById("shippingFeeRow");
 				const shippingFee = document.getElementById("shippingFee");
@@ -603,7 +643,7 @@
 				if (selectedMethodKey === "711-cod" || selectedMethodKey === "711-no-cod") {
 					// 7-11 運費 60
 					shippingFee.textContent = "$60";
-					updateGrandTotal();
+					updateOrderSummary();
 				} else if (selectedMethodKey === "hct" || selectedMethodKey === "outer-island") {
 					// 新竹貨運 / 外島郵寄：隱藏運費和結帳金額欄位，顯示提示
 					shippingFeeRow.classList.add("d-none");
@@ -612,7 +652,7 @@
 				} else {
 					// 其他狀況預設運費 0
 					shippingFee.textContent = "$0";
-					updateGrandTotal();
+					updateOrderSummary();
 				}
 			}
 
@@ -629,91 +669,39 @@
 			countrySelect.addEventListener("change", onCountryChange);
 			methodSelect.addEventListener("change", onMethodChange);
 			paymentSelect.addEventListener("change", onPaymentChange);
+			
+			function saveShippingAndPaymentToSession() {
+			    const shippingMethodVal = document.getElementById("deliveryMethod").value;
+			    const paymentMethodVal = document.getElementById("paymentMethod").value;
+			    
+			    const data = {
+			        shippingMethod: shippingMethodVal,
+			        paymentMethod: paymentMethodVal
+			    };
 
-			// 訂單資訊中"優惠代碼"區塊是否顯示 //
-			document.addEventListener("DOMContentLoaded", () => {
-				initCountryOptions();
-				onCountryChange();
-				const showCouponLink = document.getElementById("showCouponLink");
-				const couponForm = document.getElementById("couponForm");
-				showCouponLink.addEventListener("click", function (e) {
-					e.preventDefault();
-					couponForm.style.display = "block";
-					showCouponLink.style.display = "none";
-				});
-			});
+			    fetch("/api/cart/session/setShippingAndPayment", {
+			        method: "POST",
+			        headers: { "Content-Type": "application/json" },
+			        body: JSON.stringify(data)
+			    })
+			    .then(response => {
+			        if (!response.ok) {
+			            throw new Error("Failed to save session data");
+			        }
+			        console.log("Session data saved:", data);
+			    })
+			    .catch(error => console.error("Error saving session data:", error));
+			}
 
-			// 存取送貨、付款方式後組成 url 傳到 checkout.html 中 //
-			document.addEventListener("DOMContentLoaded", function () {
-				// 選單 id 為 "deliveryMethod" 與 "paymentMethod"
-				document.getElementById("goToCheckout").addEventListener("click", function () {
-					// 先檢查是否有登入資訊， token 是否存在
-					const token = sessionStorage.getItem("token");
-					if (!token) {
-						// 未登入：導向登入頁面，並帶上 redirect 參數，讓登入後導回結帳頁面
-						window.location.href = "/login?redirect=/checkout";
-					} else {
-						// 已登入，則組合 URL 跳轉至結帳頁面
-						// 取得下拉選單的選取值
-						const shippingMethod = document.getElementById("deliveryMethod").value;
-						const paymentMethod = document.getElementById("paymentMethod").value;
-						// 組合成 URL query string (encodeURIComponent)
-						const url =
-							"/checkout?shippingMethod=" +
-							encodeURIComponent(shippingMethod) +
-							"&paymentMethod=" +
-							encodeURIComponent(paymentMethod);
-						window.location.href = url;
-					}
-				});
-			});
+			// 當使用者改變下拉選單時呼叫
+			document.getElementById("deliveryMethod").addEventListener("change", saveShippingAndPaymentToSession);
+			document.getElementById("paymentMethod").addEventListener("change", saveShippingAndPaymentToSession);
 
-			// 抓取 Session 中的"送貨方式"、"付款方式"、"優惠券折扣" //
-			var sessionShippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
-			var sessionPaymentMethod = /*[[${paymentMethod}]]*/ "711-cod-only";
-			var sessionCouponDiscount = /*[[${couponDiscount}]]*/ 0;
-
-			document.addEventListener("DOMContentLoaded", () => {
-				// 每次載入購物車頁面時，先清除後端的優惠券 session 資料
-				fetch("/api/coupons/clear", {method: "POST"})
-					.then(response => {
-						if (!response.ok) {
-							console.error("無法清除優惠券 session");
-						}
-					})
-					.catch(error => {
-						console.error("清除優惠券 session 時發生錯誤：", error);
-					});
-
-				initCountryOptions();
-				onCountryChange();
-				// 設定送貨方式下拉選單的值
-				if (sessionShippingMethod) {
-					methodSelect.value = sessionShippingMethod;
-					onMethodChange();
-				}
-				// 設定付款方式下拉選單的值
-				if (sessionPaymentMethod) {
-					paymentSelect.value = sessionPaymentMethod;
-					onPaymentChange();
-				}
-				// 重置優惠券全域變數
-				couponDiscountOverall = 0;
-				couponTargetAmount = 0;
-				// 隱藏優惠券區塊
-				document.getElementById("couponForm").style.display = "none";
-				document.getElementById("showCouponLink").style.display = "block";
-				document.getElementById("couponDiscountContainer").style.display = "none";
-
-				updateGrandTotal();
-			});
-
+			//----------------------------
 			window.addEventListener('pageshow', function (event) {
-				// 如果頁面從 bfcache 中恢復，強制重新加載
 				if (event.persisted) {
 					window.location.reload();
 				} else {
-					// 否則調用 fetchCartData() 更新數據
 					fetchCartData();
 				}
 			});

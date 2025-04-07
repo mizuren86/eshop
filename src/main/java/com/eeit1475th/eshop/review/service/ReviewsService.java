@@ -116,7 +116,7 @@ public class ReviewsService {
 
         // 檢查該使用者是否有購買該商品且訂單狀態為 DELIVERED
         boolean purchased = ordersRepository.existsByUsersUserIdAndOrderItemsProductsProductIdAndShippingStatus(
-                userId, productId, ShippingStatus.Delivered);
+                userId, productId, ShippingStatus.已送達);
         if (!purchased) {
             return true;
         }else {

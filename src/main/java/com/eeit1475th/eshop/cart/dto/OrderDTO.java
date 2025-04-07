@@ -22,6 +22,12 @@ public class OrderDTO {
 	private String paymentStatus;
 	
 	private String shipmentStatus;
+	
+	private BigDecimal shippingFee;
+	
+    private BigDecimal couponDiscount;
+    
+    private String merchantTradeNo;
 
 	private List<OrderItemDTO> orderItems;
 

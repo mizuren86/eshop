@@ -8,6 +8,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.eeit1475th.eshop.member.entity.Users;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -41,32 +42,45 @@ public class Orders {
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
+	@JsonBackReference
 	private Users users;
-
+	
+	@Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
+	private BigDecimal totalAmount;
+	
+	@Column(name = "merchant_trade_no", unique = true)
+	private String merchantTradeNo;
+	
 	@Column(name = "order_date", nullable = false, updatable = false)
 	@CreationTimestamp
 	private LocalDateTime orderDate;
-
-	@Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
-	private BigDecimal totalAmount;
-
+	
 	@Column(name = "payment_method")
 	private String paymentMethod;
-
+	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "payment_status", nullable = false)
 	private PaymentStatus paymentStatus;
 
+	@Column(name = "shipping_method")
+	private String shippingMethod;
+	
 	@Column(name = "shipping_address")
 	private String shippingAddress;
+	
+	@Column(name = "recipient_name")
+	private String recipientName;
+
+	@Column(name = "recipient_phone")
+	private String recipientPhone;
+
+	@Column(name = "order_remark")
+	private String orderRemark;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "shipping_status", nullable = false)
 	private ShippingStatus shippingStatus;
-
-	@Column(name = "ec_pay_trade_no", unique = true)
-	private String ecPayTradeNo;
-
+	
 	@OneToMany(mappedBy = "orders", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private List<OrderItems> orderItems = new ArrayList<>();
@@ -78,5 +92,16 @@ public class Orders {
 	@OneToOne(mappedBy = "orders", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private Shipment shipment;
+	
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "selected_store_id", referencedColumnName = "selected_store_id")
+	private SelectedStore selectedStore;
+	
+	@Column(name = "shipping_fee", precision = 10, scale = 2)
+	private BigDecimal shippingFee;
+
+	@Column(name = "coupon_discount", precision = 10, scale = 2)
+	private BigDecimal couponDiscount;
+
 
 }

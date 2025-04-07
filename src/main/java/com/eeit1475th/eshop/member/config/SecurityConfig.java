@@ -51,7 +51,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+<<<<<<< HEAD
         configuration.setAllowedOriginPatterns(Arrays.asList("https://406f-59-125-142-166.ngrok-free.app", "https://smooth-ends-cover.loca.lt", "https://logistics-stage.ecpay.com.tw"));
+=======
+        configuration.setAllowedOriginPatterns(Arrays.asList("https://7ab9-124-218-129-55.ngrok-free.app", "https://smooth-ends-cover.loca.lt", "https://logistics-stage.ecpay.com.tw"));
+>>>>>>> dev
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(false);
