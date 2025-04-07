@@ -121,6 +121,10 @@ public class ATMRequestObj {
 	 */
 	private String ExpireDate;
 	
+	
+
+	private String BidingCard;
+	
 	/********************* getters and setters *********************/
 	
 	/**
@@ -389,6 +393,15 @@ public class ATMRequestObj {
 	public void setSimulatePaid(String simulatePaid) {
 		SimulatePaid = simulatePaid;
 	}
+	
+	
+	public String getBidingCard() {
+	    return BidingCard;
+	}
+
+	public void setBidingCard(String bidingCard) {
+	    BidingCard = bidingCard;
+	}
 	@Override
 	public String toString() {
 		return "ATMRequestObj [MerchantID=" + MerchantID + ", MerchantTradeNo=" + MerchantTradeNo + ", StoreID="
@@ -397,6 +410,18 @@ public class ATMRequestObj {
 				+ ", TradeDate=" + TradeDate + ", SimulatePaid=" + SimulatePaid + ", CustomField1=" + CustomField1
 				+ ", CustomField2=" + CustomField2 + ", CustomField3=" + CustomField3 + ", CustomField4=" + CustomField4
 				+ ", CheckMacValue=" + CheckMacValue + ", BankCode=" + BankCode + ", vAccount=" + vAccount
-				+ ", ExpireDate=" + ExpireDate + "]";
+				+ ", ExpireDate=" + ExpireDate + ", BidingCard=" + BidingCard + "]";
 	}
+	
+	
+//	@Override
+//	public String toString() {
+//		return "ATMRequestObj [MerchantID=" + MerchantID + ", MerchantTradeNo=" + MerchantTradeNo + ", StoreID="
+//				+ StoreID + ", RtnCode=" + RtnCode + ", RtnMsg=" + RtnMsg + ", TradeNo=" + TradeNo + ", TradeAmt="
+//				+ TradeAmt + ", PaymentType=" + PaymentType + ", PaymentTypeChargeFee=" + PaymentTypeChargeFee
+//				+ ", TradeDate=" + TradeDate + ", SimulatePaid=" + SimulatePaid + ", CustomField1=" + CustomField1
+//				+ ", CustomField2=" + CustomField2 + ", CustomField3=" + CustomField3 + ", CustomField4=" + CustomField4
+//				+ ", CheckMacValue=" + CheckMacValue + ", BankCode=" + BankCode + ", vAccount=" + vAccount
+//				+ ", ExpireDate=" + ExpireDate + "]";
+//	}
 }
