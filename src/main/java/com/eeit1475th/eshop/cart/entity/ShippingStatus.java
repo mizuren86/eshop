@@ -2,7 +2,7 @@ package com.eeit1475th.eshop.cart.entity;
 
 public enum ShippingStatus {
 	
-	Processing, Shipped, Delivered, Cancelled;
+	處理中, 已出貨, 已送達, 已取消;
 
     public static ShippingStatus fromString(String value) {
         for (ShippingStatus status : ShippingStatus.values()) {
@@ -14,3 +14,5 @@ public enum ShippingStatus {
     }
 	
 }
+
+

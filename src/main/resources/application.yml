@@ -54,11 +54,6 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
-# 綠界 URL 和 API 密鑰
-  gateway:
-    url:  https://api.mock-payment.com
-    apiKey: mock-api-key
-
 # JWT 配置（24小時 = 86400000毫秒）
 jwt:
   secret: VG9rZW5TZWNyZXRLZXlGb3JTaG9wcGluZ1dlYnNpdGUxMjM0NTY3ODkw
