@@ -38,17 +38,12 @@ public class EcpayController {
         mapObj.setMerchantTradeNo("TestTradeNo001");
         mapObj.setLogisticsSubType("UNIMART");              // 必填，選項之一，例如 FAMI
         mapObj.setIsCollection("N");                     // 必填，通常設為 "N"
-<<<<<<< HEAD
-        mapObj.setServerReplyURL("https://6dde-59-125-142-166.ngrok-free.app/ecpay/callback");
-//        mapObj.setServerReplyURL("https://406f-59-125-142-166.ngrok-free.app/checkout");
-=======
         // 將 shippingMethod 和 paymentMethod 加入 ServerReplyURL 的查詢字串中
         String callbackUrl = "https://7ab9-124-218-129-55.ngrok-free.app/ecpay/callback"
                 + "?shippingMethod=" + shippingMethod
                 + "&paymentMethod=" + paymentMethod;
         mapObj.setServerReplyURL(callbackUrl);
         
->>>>>>> dev
 
         // 取得綠界電子地圖的 HTML 表單，該表單會自動提交
         String htmlForm = allInOne.expressMap(mapObj);
