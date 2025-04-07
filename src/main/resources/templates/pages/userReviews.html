@@ -17,10 +17,13 @@
       .page-btn {
         margin: 0 5px;
         padding: 5px 10px;
+        border: 1px solid rgb(255, 185, 64);
       }
+
       .activebutton {
-        background-color: #007bff;
+        background-color: rgb(111, 199, 51);
         color: white;
+        border: 1px solid rgb(255, 185, 64);
       }
       #reviewsTable {
         table-layout: fixed;
@@ -382,7 +385,7 @@
           // 創建分頁按鈕輔助函數
           function createPageButton(pageNum, text) {
             const button = document.createElement("button");
-            button.className = `page-btn ${pageNum === currentPage ? "activebutton" : ""}`;
+            button.className = `page-btn ${pageNum === currentPage ? "activebutton rounded" : "rounded"}`;
             button.textContent = text;
             button.onclick = () => {
                 if (pageNum !== currentPage) {
