@@ -227,14 +227,37 @@ public class UserRestController {
 	@GetMapping("/current")
 	public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String token) {
 		try {
+			System.out.println("收到獲取當前用戶請求");
+			System.out.println("原始Token: " + token);
+
+			// 移除 "Bearer " 前綴（如果有的話）
+			if (token != null && token.startsWith("Bearer ")) {
+				token = token.substring(7);
+			}
+			System.out.println("處理後的Token: " + token);
+
 			Users user = usersService.getUserByToken(token);
 			if (user != null) {
+				System.out.println("成功獲取用戶信息");
+				System.out.println("用戶ID: " + user.getUserId());
+				System.out.println("用戶名: " + user.getUsername());
+				System.out.println("郵箱: " + user.getEmail());
+
+				// 確保加載關聯數據
+				if (user.getUserVip() != null) {
+					System.out.println("VIP等級: " + user.getUserVip().getVipLevel());
+					System.out.println("VIP到期日: " + user.getUserVip().getEndDate());
+				}
+
 				return ResponseEntity.ok(new ApiResponse(true, "獲取成功", user));
 			} else {
-				return ResponseEntity.badRequest().body(new ApiResponse(false, "用戶不存在"));
+				System.out.println("未找到用戶");
+				return ResponseEntity.status(401).body(new ApiResponse(false, "用戶不存在或token無效"));
 			}
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
+			System.out.println("獲取用戶信息時發生錯誤: " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(401).body(new ApiResponse(false, "token無效或已過期"));
 		}
 	}
 
@@ -251,5 +274,55 @@ public class UserRestController {
 	@GetMapping("/forgot-password")
 	public String showForgotPasswordPage() {
 		return "forgot-password";
+	}
+
+	@PostMapping("/send-verification-code")
+	public ResponseEntity<?> sendVerificationCode(@RequestBody Map<String, String> request,
+			@RequestHeader("Authorization") String token) {
+		try {
+			String email = request.get("email");
+			if (email == null || email.isEmpty()) {
+				return ResponseEntity.badRequest().body(new ApiResponse(false, "請提供電子郵件"));
+			}
+
+			// 驗證郵箱是否屬於當前用戶
+			Users user = usersService.getUserByToken(token);
+			if (user == null || !user.getEmail().equals(email)) {
+				return ResponseEntity.badRequest().body(new ApiResponse(false, "電子郵件與帳號不符"));
+			}
+
+			// 生成驗證碼
+			String verificationCode = usersService.generateVerificationCode(email);
+
+			// 發送驗證碼郵件
+			usersService.sendVerificationEmail(email, verificationCode);
+
+			return ResponseEntity.ok(new ApiResponse(true, "驗證碼已發送"));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
+		}
+	}
+
+	@PutMapping("/verify-and-update-password")
+	public ResponseEntity<?> verifyAndUpdatePassword(@RequestBody Map<String, String> request,
+			@RequestHeader("Authorization") String token) {
+		try {
+			String code = request.get("code");
+			String newPassword = request.get("newPassword");
+
+			if (code == null || code.isEmpty() || newPassword == null || newPassword.isEmpty()) {
+				return ResponseEntity.badRequest().body(new ApiResponse(false, "請提供驗證碼和新密碼"));
+			}
+
+			// 驗證碼驗證並更新密碼
+			boolean success = usersService.verifyAndUpdatePassword(token, code, newPassword);
+			if (success) {
+				return ResponseEntity.ok(new ApiResponse(true, "密碼更新成功"));
+			} else {
+				return ResponseEntity.badRequest().body(new ApiResponse(false, "驗證碼無效或已過期"));
+			}
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
+		}
 	}
 }

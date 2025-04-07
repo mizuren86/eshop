@@ -44,21 +44,18 @@
 			<div class="d-flex justify-content-between">
 				<div class="top-info ps-2">
 					<small class="me-3" id="userLocation" style="display: none;">
-						<i class="fas fa-map-marker-alt me-2 text-secondary"></i>
-						<span id="locationText" class="text-white"></span>
-					</small>
-					<small class="me-3" th:if="${user != null}">
-						<i class="fas fa-envelope me-2 text-secondary"></i>
-						<a href="#" class="text-white" th:text="${user.email}"></a>
+						<i class="fas fa-map-marker-alt me-2 text-secondary"></i> <span id="locationText"
+							class="text-white"></span>
+					</small> <small class="me-3" th:if="${user != null}"> <i
+							class="fas fa-envelope me-2 text-secondary"></i> <a href="#" class="text-white"
+							th:text="${user.email}"></a>
 					</small>
 				</div>
 				<div class="top-link pe-2">
 					<a th:href="@{/privacypolicy}" class="text-white"><small class="text-white mx-2">Privacy
-							Policy</small>/</a>
-					<a th:href="@{/termsofuse}" class="text-white"><small class="text-white mx-2">Terms of
-							Use</small>/</a>
-					<a th:href="@{/salesandrefunds}" class="text-white"><small class="text-white mx-2">Sales and
-							Refunds</small>/</a>
+							Policy</small>/</a> <a th:href="@{/termsofuse}" class="text-white"><small
+							class="text-white mx-2">Terms of Use</small>/</a> <a th:href="@{/salesandrefunds}"
+						class="text-white"><small class="text-white mx-2">Sales and Refunds</small>/</a>
 				</div>
 			</div>
 		</div>
@@ -77,7 +74,7 @@
 						<a th:href="@{/shop}" class="nav-item nav-link">Shop</a>
 						<a th:href="@{/orders}" class="nav-item nav-link">Orders</a>
 						<a th:href="@{/contact}" class="nav-item nav-link">Contact</a>
-					<!--
+						<!--
 					<div class="nav-item dropdown">
 						<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
 						<div class="dropdown-menu m-0 bg-secondary rounded-0">
@@ -90,46 +87,48 @@
 							<a th:href="@{/shop-detail}" class="dropdown-item">Shop Detail</a>
 						</div>
 					</div>
-					-->	
+					-->
 					</div>
 				</div>
-					<div class="d-flex m-3 me-0">
-						<button
-							class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"
-							data-bs-toggle="modal" data-bs-target="#searchModal">
-							<i class="fas fa-search text-primary"></i>
-						</button>
-						<a th:href="@{/cart}" class="position-relative me-4 my-auto">
-							<i class="fa fa-shopping-bag fa-2x"></i>
-							<span id="cartCount"
-								class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
-								style="top: -5px; left: 15px; height: 20px; min-width: 20px">0</span>
+				<div class="d-flex m-3 me-0">
+					<button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"
+						data-bs-toggle="modal" data-bs-target="#searchModal">
+						<i class="fas fa-search text-primary"></i>
+					</button>
+					<a th:href="@{/cart}" class="position-relative me-4 my-auto"> <i
+							class="fa fa-shopping-bag fa-2x"></i> <span id="cartCount"
+							class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
+							style="top: -5px; left: 15px; height: 20px; min-width: 20px">0</span>
+					</a>
+					<!-- 用戶圖示和下拉選單 -->
+					<div class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+							data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="fas fa-user fa-2x"></i>
 						</a>
-						<!-- 用戶圖示和下拉選單 -->
-						<div class="nav-item dropdown">
-							<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-								data-bs-toggle="dropdown" aria-expanded="false">
-								<i class="fas fa-user fa-2x"></i>
-							</a>
-							<div class="dropdown-menu m-0 bg-secondary rounded-0">
-								<!-- 未登入時顯示 -->
-								<div id="guestMenu">
-									<a th:href="@{/login}" class="dropdown-item">登入</a>
-									<a th:href="@{/register}" class="dropdown-item">註冊</a>
+						<div class="dropdown-menu m-0 bg-secondary rounded-0">
+							<!-- 未登入時顯示 -->
+							<div id="guestMenu">
+								<a th:href="@{/login}" class="dropdown-item">登入</a> <a th:href="@{/register}"
+									class="dropdown-item">註冊</a>
+							</div>
+							<!-- 已登入時顯示 -->
+							<div id="userMenu" style="display: none;">
+								<a th:href="@{/profile}" class="dropdown-item">個人資料</a>
+								<a th:href="@{/orders}" class="dropdown-item">訂單記錄</a>
+								<div th:if="${user != null}">
+									<a th:href="@{/reviews/user/{userId}(userId=${user.userId})}"
+										class="dropdown-item">評論管理</a>
 								</div>
-								<!-- 已登入時顯示 -->
-								<div id="userMenu" style="display: none;">
-									<a th:href="@{/profile}" class="dropdown-item">個人資料</a>
-									<a th:href="@{/orders}" class="dropdown-item">訂單記錄</a>
-									<div class="dropdown-divider"></div>
-									<a class="dropdown-item" href="/logout" onclick="logout()">
-										<i class="fas fa-sign-out-alt me-2"></i>登出
-									</a>
-									</li>
-									</ul>
-								</div>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="/logout" onclick="logout()">
+									<i class="fas fa-sign-out-alt me-2"></i>登出
+								</a>
+								</li>
+								</ul>
 							</div>
 						</div>
+					</div>
 			</nav>
 		</div>
 	</div>
@@ -140,14 +139,14 @@
 		<div class="modal-dialog modal-fullscreen">
 			<div class="modal-content rounded-0">
 				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalLabel">Search by keyword</h5>
+					<h5 class="modal-title" id="exampleModalLabel">Search by
+						keyword</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body d-flex align-items-center">
 					<div class="input-group w-75 mx-auto d-flex">
 						<input type="search" class="form-control p-3" placeholder="keywords"
-							aria-describedby="search-icon-1" />
-						<span id="search-icon-1" class="input-group-text p-3">
+							aria-describedby="search-icon-1" /> <span id="search-icon-1" class="input-group-text p-3">
 							<i class="fa fa-search"></i>
 						</span>
 					</div>
@@ -179,18 +178,14 @@
 								placeholder="Your Email" />
 							<button type="submit"
 								class="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white"
-								style="top: 0; right: 0">
-								Subscribe Now
-							</button>
+								style="top: 0; right: 0">Subscribe Now</button>
 						</div>
 					</div>
 					<div class="col-lg-3">
 						<div class="d-flex justify-content-end pt-3">
 							<a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle"
-								href="https://www.facebook.com/ispanTaipei">
-								<i class="fab fa-facebook-f"></i>
-							</a>
-							<a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle"
+								href="https://www.facebook.com/ispanTaipei"> <i class="fab fa-facebook-f"></i>
+							</a> <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle"
 								href="https://youtube.com/channel/UCAmAou-O23Eb-6rQWy2w0Ew?si=e4P7VAdkheDMACRv">
 								<i class="fab fa-youtube"></i>
 							</a>
@@ -204,39 +199,45 @@
 						<h4 class="text-light mb-3">Why People Like us!</h4>
 						<p class="mb-4" style="text-align: justify;">
 							堅持每日新鮮直送，確保每一顆水果都保持最佳口感與營養價值。嚴格挑選優質產地，並以合理價格提供消費者，輕鬆享受大自然的甘甜與健康。
-							我們用心服務，致力於打造愉悅的購物體驗，讓每位顧客都能感受到水果的魅力與我們的誠意。
-						</p>
+							我們用心服務，致力於打造愉悅的購物體驗，讓每位顧客都能感受到水果的魅力與我們的誠意。</p>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
 					<div class="d-flex flex-column text-start footer-item">
 						<h4 class="text-light mb-3">Shop Info</h4>
-						<a th:href="@{/aboutus}" class="btn-link">About Us</a>
-						<a th:href="@{/contact}" class="btn-link">Contact Us</a>
-						<a th:href="@{/privacypolicy}" class="btn-link">Privacy Policy</a>
-						<a th:href="@{/termsofuse}" class="btn-link">Terms of Use</a>
-						<a th:href="@{/salesandrefunds}" class="btn-link">Sales and Refunds</a>
-						<a th:href="@{/faqshelp}" class="btn-link">FAQs & Help</a>
+						<a th:href="@{/aboutus}" class="btn-link">About Us</a> <a th:href="@{/contact}"
+							class="btn-link">Contact Us</a> <a th:href="@{/privacypolicy}" class="btn-link">Privacy
+							Policy</a> <a th:href="@{/termsofuse}" class="btn-link">Terms of Use</a> <a
+							th:href="@{/salesandrefunds}" class="btn-link">Sales and
+							Refunds</a> <a th:href="@{/faqshelp}" class="btn-link">FAQs &
+							Help</a>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
 					<div class="d-flex flex-column text-start footer-item">
 						<h4 class="text-light mb-3">Account</h4>
-						<a class="btn-link" href="">My Account</a>
-						<a class="btn-link" href="">Shop details</a>
-						<a class="btn-link" href="">Shopping Cart</a>
-						<a class="btn-link" href="">Wishlist</a>
-						<a class="btn-link" href="">Order History</a>
-						<a class="btn-link" href="">International Orders</a>
+						<a class="btn-link" href="">My Account</a> <a class="btn-link" href="">Shop details</a> <a
+							class="btn-link" href="">Shopping
+							Cart</a> <a class="btn-link" href="">Wishlist</a> <a class="btn-link" href="">Order
+							History</a> <a class="btn-link" href="">International
+							Orders</a>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
 					<div class="footer-item">
 						<h4 class="text-light mb-3">Contact</h4>
-						<p><strong>Address: 801 高雄市前金區中正四路 211 號 8 樓之 1</strong></p>
-						<p><strong>Email: fruitablesservice@fruitables.net</strong></p>
-						<p><strong>Phone: (07) 9699-885 #6511</strong></p>
-						<p><strong>Payment Accepted</strong></p>
+						<p>
+							<strong>Address: 801 高雄市前金區中正四路 211 號 8 樓之 1</strong>
+						</p>
+						<p>
+							<strong>Email: fruitablesservice@fruitables.net</strong>
+						</p>
+						<p>
+							<strong>Phone: (07) 9699-885 #6511</strong>
+						</p>
+						<p>
+							<strong>Payment Accepted</strong>
+						</p>
 						<img th:src="@{/img/payment.png}" class="img-fluid" alt="" />
 					</div>
 				</div>
@@ -249,9 +250,9 @@
 	<div class="container-fluid copyright bg-dark py-4">
 		<div class="container">
 			<div class="row">
-				<span class="text-light text-md-center">
-					<a href="#"> <i class="fas fa-copyright text-light me-2"></i>Fruitables</a>,
-					All right reserved.
+				<span class="text-light text-md-center"> <a href="#"> <i
+							class="fas fa-copyright text-light me-2"></i>Fruitables
+					</a>, All right reserved.
 				</span>
 			</div>
 		</div>
@@ -400,7 +401,7 @@
 		// 頁面載入後執行
 		document.addEventListener('DOMContentLoaded', showUserLocation);
 
-		
+
 		// 自動登出 //
 		const autoLogoutTime = 30 * 30 * 1000; // 30 分鐘
 		function autoLogout() {

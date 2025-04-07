@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/base}">
+<head>
+<title>編輯評論</title>
+</head>
+<body>
+	<div layout:fragment="content">
+
+		<div class="container-fluid page-header py-5">
+			<h1 class="text-center text-white display-6">Update Reviews</h1>
+			<ol class="breadcrumb justify-content-center mb-0">
+				<li class="breadcrumb-item"><a th:href="@{/index}">Home</a></li>
+				<li class="breadcrumb-item"><a th:href="@{/pages}">Pages</a></li>
+				<li class="breadcrumb-item active text-white">Update Reviews</li>
+			</ol>
+		</div>
+
+		<div class="container my-5">
+			<h2>編輯評論</h2>
+			<form method="post"
+				th:action="@{/reviews/update/{reviewId}(reviewId=${review.reviewId})}"
+				enctype="multipart/form-data">
+
+				<input type="hidden" name="_redirect"
+					th:value="@{/reviews/user/{userId}(userId=${review.users.userId})}">
+
+				<div class="mb-3">
+					<label class="form-label">評分</label> <select name="rating"
+						class="form-select" required>
+						<option th:each="i : ${#numbers.sequence(1, 5)}" th:value="${i}"
+							th:selected="${i == review.rating}">[[${i}]]星</option>
+					</select>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">評論內容</label>
+					<textarea name="comment" class="form-control"
+						th:text="${review.comment}"></textarea>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">更新照片（選填，只接受jpg或jpeg格式，最大5MB）</label> <input
+						type="file" name="photoFile" class="form-control"
+						accept="image/jpeg, image/jpg" id="photoInput"> <small
+						id="photoHelp" class="text-danger d-none">圖片格式錯誤，僅接受jpg或jpeg格式</small>
+					<small id="photoSizeHelp" class="text-danger d-none">圖片大小不能超過5MB</small>
+					<div>
+						<!-- 新增 id 以便 JavaScript 操作 -->
+						<img id="currentPhotoPreview" th:if="${review.photo != null}"
+							th:src="@{'data:image/jpeg;base64,' + ${@base64Util.encode(review.photo)}}"
+							class="img-thumbnail mt-2" style="max-height: 200px;">
+						<!-- 新增新照片預覽區域 -->
+						<img id="newPhotoPreview" src="#" alt="新照片預覽"
+							class="img-thumbnail mt-2 d-none" style="max-height: 200px;">
+					</div>
+					<div class="form-check mt-2" th:if="${review.photo != null}">
+						<input class="form-check-input" type="checkbox" name="deletePhoto"
+							id="deletePhoto"> <label class="form-check-label"
+							for="deletePhoto"> 刪除當前照片 </label>
+					</div>
+				</div>
+
+				<button type="submit" class="btn btn-primary">更新評論</button>
+			</form>
+		</div>
+		<script th:inline="javascript">
+    // 顯示錯誤訊息
+    function showError(message) {
+        const errorMessage = document.getElementById('photoHelp');
+        const sizeMessage = document.getElementById('photoSizeHelp');
+        errorMessage.classList.add('d-none');
+        sizeMessage.classList.add('d-none');
+        if (message) {
+            if (message === 'size') {
+                sizeMessage.classList.remove('d-none');
+            } else if (message === 'format') {
+                errorMessage.classList.remove('d-none');
+            }
+        }
+    }
+
+    // 驗證圖片格式和大小
+    document.getElementById('photoInput')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const fileType = file.type.split('/')[1].toLowerCase();
+            const fileSize = file.size;
+            const allowedTypes = ['jpeg', 'jpg'];
+
+            // 驗證文件格式
+            if (!allowedTypes.includes(fileType)) {
+                showError('format'); // 顯示格式錯誤訊息
+                e.target.value = ''; // 清空選擇的文件
+                return;
+            }
+
+            // 驗證文件大小
+            if (fileSize > 5 * 1024 * 1024) {
+                showError('size'); // 顯示大小錯誤訊息
+                e.target.value = ''; // 清空選擇的文件
+                return;
+            }
+
+         // 顯示新照片預覽
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const newPreview = document.getElementById('newPhotoPreview');
+                const currentPreview = document.getElementById('currentPhotoPreview');
+                
+                // 顯示新預覽圖
+                newPreview.src = event.target.result;
+                newPreview.classList.remove('d-none');
+                
+                // 隱藏舊照片（如果存在）
+                if (currentPreview) {
+                    currentPreview.classList.add('d-none');
+                }
+            };
+            reader.readAsDataURL(file);
+
+            // 隱藏錯誤提示
+            showError('');
+        }
+    });
+    
+ // 處理刪除照片勾選框
+    document.getElementById('deletePhoto')?.addEventListener('change', function() {
+        const newPreview = document.getElementById('newPhotoPreview');
+        const currentPreview = document.getElementById('currentPhotoPreview');
+        
+        if (this.checked) {
+            // 如果勾選刪除，隱藏所有預覽
+            if (currentPreview) currentPreview.classList.add('d-none');
+            if (newPreview) newPreview.classList.add('d-none');
+        } else {
+            // 如果取消勾選，恢復顯示當前照片（如果沒有新照片）
+            if (currentPreview && !newPreview.src.includes('#')) {
+                currentPreview.classList.remove('d-none');
+            }
+        }
+    });
+
+    // 字數計數器
+    document.getElementById('commentInput')?.addEventListener('input', function() {
+        const counter = document.getElementById('charCounter');
+        counter.textContent = this.value.length + '/1000';
+    });
+
+    // 表單提交前驗證
+    document.getElementById('reviewForm')?.addEventListener('submit', function(e) {
+        const ratingValue = parseInt(document.getElementById('ratingSelect').value);
+        if (isNaN(ratingValue)) {
+            e.preventDefault();
+            showErrorModal('請選擇評分');
+            return;
+        }
+
+        const comment = document.getElementById('commentInput').value;
+        if (comment.length > 1000) {
+            e.preventDefault();
+            showErrorModal('評論內容不能超過1000字元');
+            return;
+        }
+    });
+    </script>
+	</div>
+</body>
+</html>

@@ -5,12 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.eeit1475th.eshop.member.dto.UsersDTO;
 import com.eeit1475th.eshop.member.dto.UserVipDTO;
@@ -22,6 +25,10 @@ import com.eeit1475th.eshop.member.repository.UserVipHistoryRepository;
 import com.eeit1475th.eshop.member.repository.UserVipRepository;
 
 import jakarta.servlet.http.HttpSession;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @Transactional
@@ -50,6 +57,12 @@ public class UsersService {
 
     @Autowired
     private EmailService emailService;
+
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    private final Map<String, String> verificationCodes = new ConcurrentHashMap<>();
+    private final Map<String, Long> verificationCodeExpiry = new ConcurrentHashMap<>();
 
     // 創建用戶
     @Transactional
@@ -262,25 +275,47 @@ public class UsersService {
 
     public Users getUserByToken(String token) {
         try {
-            // 从 token 中获取用户 ID
-            Integer userId = jwtService.extractUserId(token);
-            // 获取用户信息，包括VIP信息
-            Users user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("用戶不存在"));
+            System.out.println("開始處理token: " + token);
 
-            // 确保加载VIP信息
-            if (user.getUserVip() != null) {
-                user.getUserVip().getVipLevel(); // 触发懒加载
+            // 從 token 中提取用戶ID
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            Integer userId = claims.get("userId", Integer.class);
+            System.out.println("從token中提取的用戶ID: " + userId);
+
+            if (userId == null) {
+                System.out.println("token中未找到用戶ID");
+                return null;
             }
 
-            // 确保加载VIP历史
-            if (user.getVipHistories() != null) {
-                user.getVipHistories().size(); // 触发懒加载
-            }
+            // 使用用戶ID查詢用戶
+            Optional<Users> userOpt = userRepository.findById(userId);
+            if (userOpt.isPresent()) {
+                Users user = userOpt.get();
+                System.out.println("在數據庫中找到用戶: " + user.getUserId());
+                System.out.println("用戶名: " + user.getUsername());
+                System.out.println("郵箱: " + user.getEmail());
+                System.out.println("電話: " + user.getPhone());
+                System.out.println("地址: " + user.getAddress());
 
-            return user;
+                // 觸發懶加載
+                if (user.getUserVip() != null) {
+                    System.out.println("VIP等級: " + user.getUserVip().getVipLevel());
+                    System.out.println("VIP到期日: " + user.getUserVip().getEndDate());
+                }
+
+                return user;
+            }
+            System.out.println("未在數據庫中找到用戶");
+            return null;
         } catch (Exception e) {
-            throw new RuntimeException("無效的token或token已過期");
+            System.out.println("處理token時發生錯誤: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("無效或過期的 token");
         }
     }
 
@@ -344,5 +379,51 @@ public class UsersService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    public String generateVerificationCode(String email) {
+        // 生成6位數字驗證碼
+        String code = String.format("%06d", new Random().nextInt(1000000));
+        verificationCodes.put(email, code);
+        verificationCodeExpiry.put(email, System.currentTimeMillis() + 15 * 60 * 1000); // 15分鐘有效期
+        return code;
+    }
+
+    public void sendVerificationEmail(String email, String code) {
+        // TODO: 實現郵件發送邏輯
+        // 這裡應該使用您的郵件服務來發送驗證碼
+        // 例如：使用 JavaMailSender 或其他郵件服務
+        System.out.println("向 " + email + " 發送驗證碼: " + code);
+    }
+
+    public boolean verifyAndUpdatePassword(String token, String code, String newPassword) {
+        try {
+            Users user = getUserByToken(token);
+            if (user == null) {
+                return false;
+            }
+
+            String storedCode = verificationCodes.get(user.getEmail());
+            Long expiryTime = verificationCodeExpiry.get(user.getEmail());
+
+            // 驗證碼檢查
+            if (storedCode == null || !storedCode.equals(code) ||
+                    expiryTime == null || System.currentTimeMillis() > expiryTime) {
+                return false;
+            }
+
+            // 更新密碼
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+
+            // 清除驗證碼
+            verificationCodes.remove(user.getEmail());
+            verificationCodeExpiry.remove(user.getEmail());
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
