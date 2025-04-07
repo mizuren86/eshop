@@ -78,17 +78,49 @@ CREATE TABLE cart_items(
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
-CREATE TABLE orders(
-    order_id INT PRIMARY KEY IDENTITY(1, 1),
+CREATE TABLE selected_store(
+    selected_store_id INT PRIMARY KEY IDENTITY(1, 1),
+    CVS_store_id NVARCHAR(255),
+    CVS_store_name NVARCHAR(255),
+    CVS_address NVARCHAR(255),
+    CVS_telephone NVARCHAR(255)
+);
+
+-- Pending：待處理
+
+-- Paid：已付款
+
+-- Failed：失敗
+
+-- Refunded：已退款
+
+-- Processing：處理中
+
+-- Shipped：已出貨
+
+-- Delivered：已送達
+
+-- Cancelled：已取消
+
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY IDENTITY(1,1),
     user_id INT NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL CHECK (total_amount >= 0),
+    merchant_trade_no NVARCHAR(20) NULL,  -- 新增：綠界金流所需的廠商交易編號
     order_date DATETIME DEFAULT GETDATE(),
-    total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0),
     payment_method NVARCHAR(50),
-    payment_status VARCHAR(50) CHECK(payment_status IN ('Pending', 'Paid', 'Failed', 'Refunded')),
-    shipping_address NVARCHAR(255),
-    shipping_status VARCHAR(50) CHECK (shipping_status IN ('Processing', 'Shipped', 'Delivered', 'Cancelled')),
-    ec_pay_trade_no VARCHAR(30) NULL,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    payment_status VARCHAR(50) CHECK (payment_status IN ('待處理', '已付款', '失敗', '已退款')),
+    shipping_method VARCHAR(50),  -- 新增：送貨方式，宅配、新竹貨運、外島郵寄、7-11 取貨
+    shipping_address VARCHAR(255),
+    recipient_name VARCHAR(100),  -- 新增：收件人姓名
+    recipient_phone VARCHAR(20),  -- 新增：收件人電話
+    order_remark TEXT,  -- 新增：訂單備註（記錄客戶留言或特殊要求）
+    selected_store_id INT NULL,  -- 新增：選擇取貨商店
+    shipping_fee DECIMAL(10,2),  -- 新增：運費
+    coupon_discount DECIMAL(10,2),  -- 新增：優惠金額
+    shipping_status VARCHAR(50) CHECK (shipping_status IN ('處理中', '已出貨', '已送達', '已取消')),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (selected_store_id) REFERENCES selected_store(selected_store_id)
 );
 
 CREATE TABLE order_items(
@@ -108,7 +140,7 @@ CREATE TABLE payments(
     payment_date DATETIME DEFAULT GETDATE(),
     amount DECIMAL(10, 2) NOT NULL CHECK (amount >= 0),
     payment_method NVARCHAR(50),
-    payment_status VARCHAR(50) CHECK (payment_status IN ('Pending', 'Paid', 'Failed', 'Refunded')),
+    payment_status VARCHAR(50) CHECK (payment_status IN ('待處理', '已付款', '失敗', '已退款')),
     ec_pay_trade_no VARCHAR(30) NULL,
     FOREIGN KEY (order_id) REFERENCES orders(order_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
@@ -120,10 +152,9 @@ CREATE TABLE shipment(
     tracking_number VARCHAR(50) UNIQUE,
     carrier NVARCHAR(50),
     estimated_delivery DATETIME,
-    delivery_status VARCHAR(50) CHECK (delivery_status IN ('Pending', 'InTransit', 'Delivered')),
+    delivery_status VARCHAR(50) CHECK (delivery_status IN ('待處理', '運送中', '已送達')),
     FOREIGN KEY (order_id) REFERENCES orders(order_id)
 ); 
-
 
 -- 客服對話紀錄表
 CREATE TABLE chat_sessions (
@@ -225,8 +256,6 @@ CREATE TABLE [dbo].[coupon](
 INSERT INTO product_category (category_name)
 VALUES ('水果'), ('蔬菜');
 
-
-
 -- 插入水果商品資料，圖片路徑指向本機專案的靜態資源
 INSERT INTO products (sku, product_name, [description], unit_price, image_url, unit_in_stock, category_id)
 VALUES 
@@ -247,7 +276,6 @@ VALUES
 ('VGE0005', '蘿蔔', '矸仔', 14, '/img/vegetable-item-5.jpg', 100, 2),
 ('VGE0006', '辣椒', '朝天椒', 110, '/img/vegetable-item-6.jpg', 100, 2),
 ('VGE0007', '玉米', '玉米筍', 36, '/img/vegetable-item-7.jpg', 100, 2);
-
 
 
 -- 插入假資料到 users 表
