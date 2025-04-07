@@ -54,67 +54,87 @@
                 <img id="userPhoto" src="/img/avatar.jpg" alt="User Photo" class="rounded-circle"
                   style="width: 150px; height: 150px; object-fit: cover;">
                 <div class="mt-3">
-                  <h3 id="fullName"></h3>
-                  <span id="username"></span>
+                  <h3 id="username"></h3>
                   <span id="vipBadge" class="vip-badge d-none">VIP</span>
                 </div>
               </div>
 
-              <form id="profileForm">
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required autocomplete="email">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h5 class="mb-0">個人資料</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">使用者ID</label>
+                      <p id="userId" class="form-control-static"></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">使用者名稱</label>
+                      <p id="username-display" class="form-control-static"></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">電子郵件</label>
+                      <p id="email" class="form-control-static"></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">電話</label>
+                      <p id="phone" class="form-control-static"></p>
+                    </div>
+                    <div class="col-12 mb-3">
+                      <label class="form-label fw-bold">地址</label>
+                      <p id="address" class="form-control-static"></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">註冊日期</label>
+                      <p id="registerDate" class="form-control-static"></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">最後更新</label>
+                      <p id="lastUpdate" class="form-control-static"></p>
+                    </div>
                   </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="phone" class="form-label">Phone</label>
-                    <input type="tel" class="form-control" id="phone" name="phone" required autocomplete="tel">
+                </div>
+              </div>
+
+              <!-- VIP信息部分 -->
+              <div class="card mb-4" id="vipCard">
+                <div class="card-header">
+                  <h5 class="mb-0">VIP 狀態</h5>
+                </div>
+                <div class="card-body">
+                  <div id="vipStatus">
+                    <p>您目前不是 VIP 會員</p>
+                  </div>
+                  <div id="vipDetails" class="d-none">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <label class="form-label fw-bold">VIP 等級</label>
+                        <p id="vipLevel" class="form-control-static"></p>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label fw-bold">開始日期</label>
+                        <p id="vipStartDate" class="form-control-static"></p>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label fw-bold">結束日期</label>
+                        <p id="vipEndDate" class="form-control-static"></p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="mb-3">
-                  <label for="address" class="form-label">Address</label>
-                  <textarea class="form-control" id="address" name="address" rows="3" required
-                    autocomplete="street-address"></textarea>
-                </div>
-                <div class="mb-3">
-                  <label for="currentPassword" class="form-label">Current Password</label>
-                  <input type="password" class="form-control" id="currentPassword" name="currentPassword"
-                    autocomplete="current-password">
-                </div>
-                <div class="mb-3">
-                  <label for="newPassword" class="form-label">New Password</label>
-                  <input type="password" class="form-control" id="newPassword" name="newPassword"
-                    autocomplete="new-password">
-                </div>
-                <div class="mb-3">
-                  <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                  <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
-                    autocomplete="new-password">
-                </div>
-                <div class="d-grid">
-                  <button type="submit" class="btn btn-primary" id="updateButton">
-                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    Update Profile
-                  </button>
-                </div>
-              </form>
+              </div>
+
+              <!-- 修改密碼按鈕 -->
+              <div class="text-center">
+                <a href="/change-password" class="btn btn-primary">
+                  <i class="fas fa-key me-2"></i>修改密碼
+                </a>
+              </div>
 
               <div class="error-message" id="errorMessage"></div>
               <div class="success-message" id="successMessage"></div>
               <div class="loading" id="loadingMessage">Loading...</div>
-
-              <!-- VIP信息部分 -->
-              <div class="vip-info" id="vipInfo">
-                <h4>VIP Status</h4>
-                <div id="vipStatus">
-                  <p>You are not a VIP member.</p>
-                </div>
-                <div id="vipDetails" class="d-none">
-                  <p><strong>Level:</strong> <span id="vipLevel"></span></p>
-                  <p><strong>Start Date:</strong> <span id="vipStartDate"></span></p>
-                  <p><strong>End Date:</strong> <span id="vipEndDate"></span></p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -124,170 +144,132 @@
 
   <script th:inline="javascript">
     /*<![CDATA[*/
-    // 获取当前用户信息
+    // 載入用戶資料
     function loadUserProfile() {
-      const loadingMessage = document.getElementById('loadingMessage');
-      const errorMessage = document.getElementById('errorMessage');
       const token = localStorage.getItem('token');
-
       if (!token) {
-        errorMessage.textContent = "請先登入";
-        errorMessage.style.display = 'block';
+        console.error('未找到token，請重新登入');
+        window.location.href = '/login';
         return;
       }
 
-      loadingMessage.style.display = 'block';
-      errorMessage.style.display = 'none';
+      console.log('開始載入用戶資料...');
+      console.log('使用的token:', token);
 
-      fetch(/*[[${'/api/users/current'}]]*/ '/api/users/current', {
+      // 確保token格式正確
+      const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      console.log('處理後的token:', authToken);
+
+      fetch('/api/users/current', {
         headers: {
-          'Authorization': token
+          'Authorization': authToken,
+          'Content-Type': 'application/json'
         }
       })
         .then(response => {
+          console.log('API響應狀態:', response.status);
           if (!response.ok) {
             if (response.status === 401) {
-              throw new Error("登入已過期，請重新登入");
+              throw new Error('登入已過期，請重新登入');
             }
-            return response.text().then(text => { throw new Error(text) });
+            return response.text().then(text => {
+              console.error('錯誤響應:', text);
+              throw new Error(text);
+            });
           }
           return response.json();
         })
-        .then(response => {
-          if (response.success) {
-            const user = response.data;
-            console.log("獲取到的用戶資料:", user); // 添加日誌
+        .then(data => {
+          console.log('收到的用戶數據:', data);
+          if (data.success && data.data) {
+            const user = data.data;
+            console.log('處理用戶數據:', user);
 
-            // 填充用户信息
-            document.getElementById('fullName').textContent = user.fullName || user.username;
-            document.getElementById('username').textContent = user.username;
-            document.getElementById('email').value = user.email || '';
-            document.getElementById('phone').value = user.phone || '';
-            document.getElementById('address').value = user.address || '';
+            // 填充用戶信息
+            document.getElementById('userId').textContent = user.userId || '未設置';
+            document.getElementById('username').textContent = user.username || '未設置';
+            document.getElementById('username-display').textContent = user.username || '未設置';
+            document.getElementById('email').textContent = user.email || '未設置';
+            document.getElementById('phone').textContent = user.phone || '未設置';
+            document.getElementById('address').textContent = user.address || '未設置';
+            document.getElementById('registerDate').textContent = user.registerDate ? new Date(user.registerDate).toLocaleString('zh-TW') : '未設置';
+            document.getElementById('lastUpdate').textContent = user.lastUpdate ? new Date(user.lastUpdate).toLocaleString('zh-TW') : '未設置';
 
-            // 处理VIP信息
+            // 處理VIP狀態
+            const vipStatus = document.getElementById('vipStatus');
+            const vipCard = document.getElementById('vipCard');
+            const vipDetails = document.getElementById('vipDetails');
+            const vipBadge = document.getElementById('vipBadge');
+
             if (user.userVip) {
-              document.getElementById('vipBadge').classList.remove('d-none');
-              document.getElementById('vipStatus').innerHTML = '<p>您是VIP會員！</p>';
-              document.getElementById('vipDetails').classList.remove('d-none');
-              document.getElementById('vipLevel').textContent = user.userVip.vipLevel;
-              document.getElementById('vipStartDate').textContent = new Date(user.userVip.startDate).toLocaleDateString();
-              document.getElementById('vipEndDate').textContent = new Date(user.userVip.endDate).toLocaleDateString();
+              console.log('VIP信息:', user.userVip);
+              vipCard.classList.remove('d-none');
+              vipDetails.classList.remove('d-none');
+              vipBadge.classList.remove('d-none');
+
+              document.getElementById('vipLevel').textContent = user.userVip.vipLevel || '未設置';
+              document.getElementById('vipStartDate').textContent = user.userVip.startDate ? new Date(user.userVip.startDate).toLocaleString('zh-TW') : '未設置';
+              document.getElementById('vipEndDate').textContent = user.userVip.endDate ? new Date(user.userVip.endDate).toLocaleString('zh-TW') : '未設置';
+
+              vipStatus.innerHTML = `
+                <span class="badge bg-warning text-dark">
+                  <i class="fas fa-crown"></i> VIP ${user.userVip.vipLevel}
+                </span>
+                <small class="text-muted">到期日: ${new Date(user.userVip.endDate).toLocaleDateString('zh-TW')}</small>
+              `;
+            } else {
+              vipCard.classList.add('d-none');
+              vipDetails.classList.add('d-none');
+              vipBadge.classList.add('d-none');
+              vipStatus.innerHTML = `
+                <span class="badge bg-secondary">
+                  <i class="fas fa-user"></i> 一般會員
+                </span>
+              `;
             }
 
-            // 处理用户头像
+            // 處理用戶照片
+            const userPhoto = document.getElementById('userPhoto');
             if (user.userPhoto) {
-              document.getElementById('userPhoto').src = user.userPhoto;
+              userPhoto.src = user.userPhoto;
+            } else {
+              userPhoto.src = '/img/avatar.jpg';
             }
+
+            console.log('用戶資料載入完成');
           } else {
-            throw new Error(response.message || "獲取用戶資料失敗");
+            console.error('API返回錯誤:', data.message);
+            showError(data.message || '載入用戶資料失敗');
           }
         })
         .catch(error => {
-          console.error("Failed to load profile:", error);
-          errorMessage.textContent = error.message;
-          errorMessage.style.display = 'block';
-          if (error.message.includes("登入已過期")) {
+          console.error('載入用戶資料時發生錯誤:', error);
+          if (error.message.includes('登入已過期')) {
             localStorage.removeItem('token');
             window.location.href = '/login';
+          } else {
+            showError('載入用戶資料失敗，請稍後再試');
           }
-        })
-        .finally(() => {
-          loadingMessage.style.display = 'none';
         });
     }
 
-    // 页面加载时获取用户信息
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log("頁面加載完成，開始獲取用戶資料");
+    // 確保在頁面加載完成後執行
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log("頁面加載完成，開始獲取用戶資料");
+        loadUserProfile();
+      });
+    } else {
+      console.log("頁面已經加載，直接獲取用戶資料");
       loadUserProfile();
-    });
+    }
 
-    // 处理表单提交
-    document.getElementById('profileForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-
-      const updateButton = document.getElementById('updateButton');
-      const spinner = updateButton.querySelector('.spinner-border');
-      const errorMessage = document.getElementById('errorMessage');
-      const successMessage = document.getElementById('successMessage');
-      const token = localStorage.getItem('token');
-
-      if (!token) {
-        errorMessage.textContent = "請先登入";
-        errorMessage.style.display = 'block';
-        return;
+    // 監聽頁面可見性變化
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        console.log("頁面變為可見，重新獲取用戶資料");
+        loadUserProfile();
       }
-
-      // 验证新密码
-      const newPassword = document.getElementById('newPassword').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-      if (newPassword && newPassword !== confirmPassword) {
-        errorMessage.textContent = "新密碼與確認密碼不符";
-        errorMessage.style.display = 'block';
-        return;
-      }
-
-      // 显示加载状态
-      updateButton.disabled = true;
-      spinner.classList.remove('d-none');
-      errorMessage.style.display = 'none';
-      successMessage.style.display = 'none';
-
-      // 收集表单数据
-      const userData = {
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        address: document.getElementById('address').value,
-        currentPassword: document.getElementById('currentPassword').value,
-        newPassword: newPassword
-      };
-
-      // 发送更新请求
-      fetch(/*[[${'/api/users/current'}]]*/ '/api/users/current', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify(userData)
-      })
-        .then(response => {
-          if (!response.ok) {
-            if (response.status === 401) {
-              throw new Error("登入已過期，請重新登入");
-            }
-            return response.text().then(text => { throw new Error(text) });
-          }
-          return response.json();
-        })
-        .then(response => {
-          if (response.success) {
-            successMessage.textContent = "個人資料更新成功！";
-            successMessage.style.display = 'block';
-            // 清空密码字段
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-          } else {
-            throw new Error(response.message || "更新失敗");
-          }
-        })
-        .catch(error => {
-          console.error("Failed to update profile:", error);
-          errorMessage.textContent = error.message;
-          errorMessage.style.display = 'block';
-          if (error.message.includes("登入已過期")) {
-            // 清除token并重定向到登录页
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-          }
-        })
-        .finally(() => {
-          // 恢复按钮状态
-          updateButton.disabled = false;
-          spinner.classList.add('d-none');
-        });
     });
     /*]]>*/
   </script>

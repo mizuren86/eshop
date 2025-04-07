@@ -84,9 +84,12 @@
         text-decoration: underline;
       }
       .review-photo {
-        max-width: 100px;
-        max-height: 100px;
-        object-fit: contain;
+        width: 100%;       /* 讓圖片寬度填滿欄位 */
+        height: auto;      /* 高度自動按比例調整 */
+        max-height: 200px; /* 限制最大高度（避免過高） */
+        object-fit: contain; /* 保持比例且完整顯示 */
+        display: block;    /* 避免下方留白 */
+        margin: 5px 0;     /* 適當邊距 */
       }
       
       /* 新增樣式 */
@@ -141,7 +144,7 @@
       <!-- 主要內容區 -->
       <div class="container">
         <div class="page-title">
-          <h1>產品評論</h1>
+          <h2 th:text="|會員為『${ProductName}』留下的寶貴意見~|">產品名稱讀取中...</h2>
           <div class="average-rating" id="averageRating"></div>
         </div>
         
@@ -190,7 +193,7 @@
           const productId = /*[[${productId}]]*/ 1;
           let currentPage = 0;
           let currentRating = 0; // 0表示全部
-          const pageSize = 1; // 與後端 @PageableDefault(size = 1) 保持一致
+          const pageSize = 2; // 與後端 @PageableDefault(size = 1) 保持一致
 
           // 載入平均評分（只載入一次）
           loadAverageRating();
@@ -282,15 +285,19 @@
                 <td>${createRatingStars(review.rating)}</td>
                 <td>${commentHtml}</td>
                 <td>
-                  ${
+                ${
                     review.photo
-                      ? `<img src="${review.photo}" class="review-photo" loading="lazy"/>`
-                      : "無圖片"
-                  }
-                </td>
+                        ? `<img src="${review.photo}" class="review-photo" loading="lazy"/>`
+                        : "無圖片"
+                }
+            </td>
                 <td>${new Date(review.updatedAt).toLocaleString()}</td>
               `;
               tbody.appendChild(tr);
+              
+              console.log(review.photo); // 確認數據類型
+              console.log(review.photo instanceof Uint8Array); // 應為 false（因為 JSON 會轉為普通陣列）
+
 
               // 處理評論內容折疊邏輯
               if (review.comment) {
@@ -301,7 +308,7 @@
                 commentContent.style.maxHeight = "none"; // 暫時取消限制以測量高度
                 const lineHeight = parseFloat(getComputedStyle(commentText).lineHeight);
                 const contentHeight = commentText.offsetHeight;
-                const maxHeight = lineHeight * 3; // 3行高度
+                const maxHeight = lineHeight * 9; // 3行高度
 
                 if (contentHeight > maxHeight) {
                   commentContent.classList.add("collapsed");

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/base}">
+<head>
+  <meta charset="utf-8">
+  <title>Create Reviews</title>
+</head>
+<body>
+  <div layout:fragment="content">
+    <!-- 登入提示標記 (隱藏) -->
+    <div th:if="${showLoginModal == true}" id="showLoginModalFlag" style="display:none;"></div>
+    
+    <!-- 錯誤訊息顯示 -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="container-fluid page-header py-5">
+      <h1 class="text-center text-white display-6">Create Reviews</h1>
+      <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a th:href="@{/index}">Home</a></li>
+        <li class="breadcrumb-item"><a th:href="@{/pages}">Pages</a></li>
+        <li class="breadcrumb-item active text-white">Create Reviews</li>
+      </ol>
+    </div>
+
+    <div class="container my-5">
+      <h2 th:text="|為『${ProductName}』留下您寶貴的意見吧~|">產品名稱載入中...</h2>
+      <form id="reviewForm" method="post" th:action="@{/reviews/create.do}" enctype="multipart/form-data">
+        <input type="hidden" name="products.productId" th:value="${productId}">
+        <input type="hidden" name="_redirect" th:value="@{/reviews/product/{productId}(productId=${productId})}">
+        <div class="mb-3">
+            <label class="form-label">評分</label>
+            <select name="rating" class="form-select" required id="ratingSelect">
+                <option value="">請選擇評分</option>
+                <option th:each="i : ${#numbers.sequence(1, 5)}" 
+                        th:value="${i}"
+                        th:text="${i} + '星'"></option>
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">評論內容</label>
+            <textarea name="comment" class="form-control" maxlength="1000" id="commentInput"></textarea>
+            <div class="text-end">
+                <span id="charCounter">0/1000</span>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">上傳圖片（選填，只接受jpg或jpeg格式，最大5MB）</label>
+            <input type="file" name="photoFile" class="form-control" accept="image/jpeg, image/jpg" id="photoInput">
+            <small id="photoHelp" class="text-danger d-none">圖片格式錯誤，僅接受jpg或jpeg格式</small>
+            <small id="photoSizeHelp" class="text-danger d-none">圖片大小不能超過5MB</small>
+            <div class="mt-2">
+                <img id="imagePreview" src="#" alt="預覽圖" class="img-thumbnail d-none" style="max-height: 200px;">
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">提交評論</button>
+      </form>
+    </div>
+
+    <script th:inline="javascript">
+    // 顯示錯誤訊息
+    function showError(message) {
+        const errorMessage = document.getElementById('photoHelp');
+        const sizeMessage = document.getElementById('photoSizeHelp');
+        errorMessage.classList.add('d-none');
+        sizeMessage.classList.add('d-none');
+        if (message) {
+            if (message === 'size') {
+                sizeMessage.classList.remove('d-none');
+            } else if (message === 'format') {
+                errorMessage.classList.remove('d-none');
+            }
+        }
+    }
+
+    // 驗證圖片格式和大小
+    document.getElementById('photoInput')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const fileType = file.type.split('/')[1].toLowerCase();
+            const fileSize = file.size;
+            const allowedTypes = ['jpeg', 'jpg'];
+
+            // 驗證文件格式
+            if (!allowedTypes.includes(fileType)) {
+                showError('format'); // 顯示格式錯誤訊息
+                e.target.value = ''; // 清空選擇的文件
+                return;
+            }
+
+            // 驗證文件大小
+            if (fileSize > 5 * 1024 * 1024) {
+                showError('size'); // 顯示大小錯誤訊息
+                e.target.value = ''; // 清空選擇的文件
+                return;
+            }
+
+            // 顯示預覽圖
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const preview = document.getElementById('imagePreview');
+                preview.src = event.target.result;
+                preview.classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+
+            // 隱藏錯誤提示
+            showError('');
+        }
+    });
+
+    // 字數計數器
+    document.getElementById('commentInput')?.addEventListener('input', function() {
+        const counter = document.getElementById('charCounter');
+        counter.textContent = this.value.length + '/1000';
+    });
+
+    // 表單提交前驗證
+    document.getElementById('reviewForm')?.addEventListener('submit', function(e) {
+        const ratingValue = parseInt(document.getElementById('ratingSelect').value);
+        if (isNaN(ratingValue)) {
+            e.preventDefault();
+            showErrorModal('請選擇評分');
+            return;
+        }
+
+        const comment = document.getElementById('commentInput').value;
+        if (comment.length > 1000) {
+            e.preventDefault();
+            showErrorModal('評論內容不能超過1000字元');
+            return;
+        }
+    });
+    </script>
+  </div>
+</body>
+</html>

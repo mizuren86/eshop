@@ -2,7 +2,7 @@ package com.eeit1475th.eshop.cart.entity;
 
 public enum PaymentStatus {
 
-	Pending, Paid, Failed, Refunded;
+	待處理, 已付款, 失敗, 已退款;
 
     public static PaymentStatus fromString(String value) {
         for (PaymentStatus status : PaymentStatus.values()) {
@@ -14,3 +14,5 @@ public enum PaymentStatus {
     }
 	
 }
+
+

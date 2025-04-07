@@ -33,6 +33,7 @@ public class ShoppingCartController {
 	        // 從資料庫讀取會員的購物車資料
 	        List<CartItemsDTO> cartItems = shoppingCartService.getCartItems(user.getUserId());
 	        model.addAttribute("cartItems", cartItems);
+	        model.addAttribute("userId", user.getUserId());
 	    } else {
 	        // 未登入狀態，從 session 讀取暫存購物車
 	        List<CartItemsDTO> tempCart = (List<CartItemsDTO>) session.getAttribute("tempCart");
@@ -40,6 +41,7 @@ public class ShoppingCartController {
 	            tempCart = new ArrayList<>();
 	        }
 	        model.addAttribute("cartItems", tempCart);
+	        model.addAttribute("userId", null);
 	    }
 		
 		// 從 session 讀取用戶先前選擇的運送與付款方式

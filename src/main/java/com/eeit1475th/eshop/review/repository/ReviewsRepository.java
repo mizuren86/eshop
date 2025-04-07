@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.eeit1475th.eshop.member.entity.Users;
 import com.eeit1475th.eshop.product.entity.Products;
 import com.eeit1475th.eshop.review.dto.ReviewsDto;
+import com.eeit1475th.eshop.review.dto.ReviewsDto2;
 import com.eeit1475th.eshop.review.entity.Reviews;
 
 @Repository
@@ -64,5 +65,34 @@ public interface ReviewsRepository extends JpaRepository<Reviews, Integer> {
             @Param("productId") Integer productId,
             @Param("rating") Integer rating,
             Pageable pageable);
+    
+    @Query("SELECT new com.eeit1475th.eshop.review.dto.ReviewsDto2(" +
+    	       "r.reviewId, p.productId, p.productName, r.rating, r.comment, r.photo, r.updatedAt) " +
+    	       "FROM Reviews r " +
+    	       "JOIN r.products p " +
+    	       "JOIN r.users u " +
+    	       "WHERE u.userId = :userId " +
+    	       "ORDER BY r.updatedAt DESC")
+    	Page<ReviewsDto2> findReviewsByUserIdWithProductInfo(
+    	    @Param("userId") Integer userId,
+    	    Pageable pageable
+    	);
+    
+    @Query("SELECT new com.eeit1475th.eshop.review.dto.ReviewsDto2(" +
+    	       "r.reviewId, p.productId, p.productName, r.rating, r.comment, r.photo, r.updatedAt) " +
+    	       "FROM Reviews r " +
+    	       "JOIN r.products p " +
+    	       "JOIN r.users u " +
+    	       "WHERE u.userId = :userId " +
+    	       "AND p.productName LIKE %:productName% " +  // 這裡加入了模糊搜尋
+    	       "ORDER BY r.updatedAt DESC")
+    	Page<ReviewsDto2> findReviewsByUserIdWithProductInfoAndProductName(
+    	    @Param("userId") Integer userId,
+    	    @Param("productName") String productName,  // 新增了 productName 參數
+    	    Pageable pageable
+    	);
+
 }
+
+
 

@@ -1,19 +1,17 @@
 package com.eeit1475th.eshop.controller;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.eeit1475th.eshop.coupon.Coupon;
-import com.eeit1475th.eshop.coupon.CouponRepository;
+import com.eeit1475th.eshop.coupon.CouponService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -22,49 +20,40 @@ import jakarta.servlet.http.HttpSession;
 public class CouponRestController {
 
 	@Autowired
-	private CouponRepository couponRepository;
+	private CouponService couponService;
 
+	/**
+	 * 驗證優惠券：前端呼叫時傳入 couponCode，並回傳 JSON 結果 範例回傳格式： { "valid": true,
+	 * "discountAmount": 100, "targetAmount": 500, "message": "優惠碼有效" }
+	 */
 	@GetMapping("/validate")
-	public ResponseEntity<Map<String, Object>> validateCoupon(@RequestParam("couponCode") String couponCode, HttpSession session) {
-		Map<String, Object> response = new HashMap<>();
-
-		// 從資料庫中根據 couponCode 查詢優惠券
-		Coupon coupon = couponRepository.findByCouponCode(couponCode);
-
-		if (coupon == null) {
-            response.put("valid", false);
-            response.put("message", "優惠碼不存在");
-            // 清除 session 中優惠券的資料
-            session.removeAttribute("couponDiscount");
-            return ResponseEntity.ok(response);
-        }
-
-		// 檢查優惠券是否過期
-        if (coupon.getEndDate().isBefore(LocalDateTime.now())) {
-            response.put("valid", false);
-            response.put("message", "優惠碼已過期");
-            // 清除 session 中優惠券的資料
-            session.removeAttribute("couponDiscount");
-            return ResponseEntity.ok(response);
-        }
-
-     // 驗證成功：回傳折扣金額及目標金額，並將折扣存入 session
-        int discount = coupon.getDiscountAmount();
-        session.setAttribute("couponDiscount", discount);
-
-        response.put("valid", true);
-        response.put("discountAmount", discount);
-        response.put("targetAmount", coupon.getTargetAmount());
-        response.put("message", "優惠碼有效");
-        return ResponseEntity.ok(response);
+	public ResponseEntity<Map<String, Object>> validateCoupon(@RequestParam("couponCode") String couponCode,
+			HttpSession session) {
+		Map<String, Object> result = couponService.validateCoupon(couponCode, session);
+		return ResponseEntity.ok(result);
 	}
-	
+
+	/**
+	 * 清除優惠券資料，例如從 Session 中移除優惠券資訊
+	 */
 	@PostMapping("/clear")
-    public ResponseEntity<String> clearCoupon(HttpSession session) {
-        // 清除 session 中優惠券相關的資訊
-        session.setAttribute("couponDiscount", 0);
-        session.removeAttribute("couponCode");
-        return ResponseEntity.ok("OK");
-    }
+	public ResponseEntity<String> clearCoupon(HttpSession session) {
+		couponService.clearCoupon(session);
+		return ResponseEntity.ok("OK");
+	}
+
+	/**
+	 * 儲存優惠券碼到 Session，前端呼叫 /api/coupons/set 會觸發這個方法
+	 */
+	@PostMapping("/set")
+	public ResponseEntity<?> setCouponCode(@RequestBody Map<String, String> payload, HttpSession session) {
+		String couponCode = payload.get("couponCode");
+		if (couponCode != null && !couponCode.isEmpty()) {
+			session.setAttribute("couponCode", couponCode);
+			return ResponseEntity.ok().build();
+		} else {
+			return ResponseEntity.badRequest().body("couponCode is required");
+		}
+	}
 
 }

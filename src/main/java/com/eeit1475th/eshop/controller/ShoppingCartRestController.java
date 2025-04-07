@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +33,21 @@ public class ShoppingCartRestController {
 	
 	@Autowired
 	private ProductService productService;
+	
+	// shippingMethod 、 paymentMethod 存入 session
+	@PostMapping("/session/setShippingAndPayment")
+    public ResponseEntity<?> setShippingAndPayment(@RequestBody Map<String, String> params, HttpSession session) {
+        String shippingMethod = params.get("shippingMethod");
+        String paymentMethod = params.get("paymentMethod");
+
+        if (shippingMethod != null && !shippingMethod.trim().isEmpty()) {
+            session.setAttribute("shippingMethod", shippingMethod);
+        }
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            session.setAttribute("paymentMethod", paymentMethod);
+        }
+        return ResponseEntity.ok().build();
+    }
 
 	// 取得購物車資料
 	@GetMapping
@@ -81,13 +97,28 @@ public class ShoppingCartRestController {
 	            return ResponseEntity.badRequest().body("無此商品");
 	        }
 	        BigDecimal price = productDTO.getUnitPrice();
-	        BigDecimal subTotal = price.multiply(new BigDecimal(quantity));
 			
 	        @SuppressWarnings("unchecked")
 			List<CartItemsDTO> tempCart = (List<CartItemsDTO>) session.getAttribute("tempCart");
 			if (tempCart == null) {
 				tempCart = new ArrayList<>();
 			}
+			
+			// 檢查購物車中是否已存在此商品
+	        boolean productExists = false;
+	        for (CartItemsDTO item : tempCart) {
+	            if (item.getProduct().getProductId().equals(productId)) {
+	                // 若存在則更新數量與小計
+	                int newQuantity = item.getQuantity() + quantity;
+	                item.setQuantity(newQuantity);
+	                item.setSubTotal(price.multiply(new BigDecimal(newQuantity)));
+	                productExists = true;
+	                break;
+	            }
+	        }
+	        
+	     // 若購物車中沒有此商品，則新增購物車項目
+	        if (!productExists) {
 			
 			// 取得或初始化計數器
 	        Integer counter = (Integer) session.getAttribute("tempCartCounter");
@@ -97,6 +128,9 @@ public class ShoppingCartRestController {
 	            counter++;
 	        }
 	        session.setAttribute("tempCartCounter", counter);
+	        
+	        // 計算小計
+	        BigDecimal subTotal = price.multiply(new BigDecimal(quantity));
 			
 			// 建立 CartItemsDTO 並加入暫存購物車中
 			CartItemsDTO newItem = new CartItemsDTO();
@@ -106,6 +140,7 @@ public class ShoppingCartRestController {
 			newItem.setSubTotal(subTotal);
 			newItem.setProduct(productDTO);
 			tempCart.add(newItem);
+	        }
 			session.setAttribute("tempCart", tempCart);
 		}
 		return ResponseEntity.ok("商品已加入購物車");

@@ -29,9 +29,15 @@ public class UserController {
     // 顯示用戶個人資料頁面
     @GetMapping("/profile")
     public String profilePage(Model model) {
-        model.addAttribute("pageTitle", "Profile");
+        model.addAttribute("pageTitle", "個人資料");
         // 依需求從 session 或 service 中取得用戶資料，加入 model
         return "/pages/profile"; // 對應 templates/pages/profile.html
+    }
+
+    @GetMapping("/change-password")
+    public String changePasswordPage(Model model) {
+        model.addAttribute("pageTitle", "修改密碼");
+        return "/pages/change-password";
     }
 
     @GetMapping("/logout")
