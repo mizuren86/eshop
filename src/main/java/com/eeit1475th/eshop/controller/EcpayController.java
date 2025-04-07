@@ -2,6 +2,7 @@ package com.eeit1475th.eshop.controller;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -12,6 +13,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class EcpayController {
+	
+	@Value("${public.base-url}")
+	private String publicBaseUrl;
 
     @GetMapping("/ecpay/expressMap")
     public void expressMap(HttpServletRequest request, HttpServletResponse response) throws IOException {

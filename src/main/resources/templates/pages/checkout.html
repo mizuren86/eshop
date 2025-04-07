@@ -1273,6 +1273,39 @@
 					updateDistrictOptions();
 				});
 
+				// 重新載入購物車資料
+				document.addEventListener("DOMContentLoaded", fetchCartData);
+				
+				/////////////////////////
+				async function fetchSelectedStore() {
+				        try {
+				            const response = await fetch("/api/selectedStore", {
+				                headers: {
+				                    'ngrok-skip-browser-warning': 'any_value' // 若使用 ngrok，加入這個標頭
+				                }
+				            });
+				            if (response.ok) {
+				                const store = await response.json();
+				                if (store) {
+				                    document.getElementById("selectedStore").innerHTML = `
+				                        <h5>已選擇門市</h5>
+				                        <p>門市編號：${store.storeID}</p>
+				                        <p>門市名稱：${store.storeName}</p>
+				                        <p>地址：${store.storeAddress}</p>
+				                        <p>電話：${store.storePhone}</p>
+				                    `;
+				                }
+				            } else {
+				                // 如果 API 回傳 404，也可以清空或顯示提示訊息
+				                document.getElementById("selectedStore").innerHTML = "<p>尚未選擇門市</p>";
+				            }
+				        } catch (error) {
+				            console.error("Error fetching selected store:", error);
+				        }
+				    }
+				    // 每隔 3 秒查詢一次
+				    setInterval(fetchSelectedStore, 3000);
+				/////////////////////////
 				// 用來移除錯誤訊息的函式
 				function removeError(inputElement) {
 					const errorElem = inputElement.parentElement.querySelector(".error-message");

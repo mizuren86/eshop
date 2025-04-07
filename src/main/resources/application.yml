@@ -73,3 +73,7 @@ server:
   servlet:
     session:
       timeout: 30m
+
+public:
+  base-url: "https://abcdef123.ngrok.io"
+
