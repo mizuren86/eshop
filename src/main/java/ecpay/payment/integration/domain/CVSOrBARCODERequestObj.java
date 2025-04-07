@@ -133,6 +133,11 @@ public class CVSOrBARCODERequestObj {
 	 */
 	private String CustomField4;
 	
+	
+	private String BidingCard;
+
+	
+	
 	/********************* getters and setters *********************/
 
 	/**
@@ -429,6 +434,16 @@ public class CVSOrBARCODERequestObj {
 	public void setSimulatePaid(String simulatePaid) {
 		SimulatePaid = simulatePaid;
 	}
+	
+	public String getBidingCard() {
+	    return BidingCard;
+	}
+
+	public void setBidingCard(String bidingCard) {
+	    BidingCard = bidingCard;
+	}
+	
+	
 	@Override
 	public String toString() {
 		return "CVSOrBARCODERequestObj [MerchantID=" + MerchantID + ", MerchantTradeNo=" + MerchantTradeNo
@@ -438,6 +453,19 @@ public class CVSOrBARCODERequestObj {
 				+ PaymentNo + ", ExpireDate=" + ExpireDate + ", Barcode1=" + Barcode1 + ", Barcode2=" + Barcode2
 				+ ", Barcode3=" + Barcode3 + ", StoreID=" + StoreID + ", CustomField1=" + CustomField1
 				+ ", CustomField2=" + CustomField2 + ", CustomField3=" + CustomField3 + ", CustomField4=" + CustomField4
-				+ "]";
+				+ ", BidingCard=" + BidingCard + "]";
 	}
+	
+	
+//	@Override
+//	public String toString() {
+//		return "CVSOrBARCODERequestObj [MerchantID=" + MerchantID + ", MerchantTradeNo=" + MerchantTradeNo
+//				+ ", RtnCode=" + RtnCode + ", RtnMsg=" + RtnMsg + ", TradeNo=" + TradeNo + ", TradeAmt=" + TradeAmt
+//				+ ", PaymentType=" + PaymentType + ", PaymentTypeChargeFee=" + PaymentTypeChargeFee + ", TradeDate="
+//				+ TradeDate + ", SimulatePaid=" + SimulatePaid + ", CheckMacValue=" + CheckMacValue + ", PaymentNo="
+//				+ PaymentNo + ", ExpireDate=" + ExpireDate + ", Barcode1=" + Barcode1 + ", Barcode2=" + Barcode2
+//				+ ", Barcode3=" + Barcode3 + ", StoreID=" + StoreID + ", CustomField1=" + CustomField1
+//				+ ", CustomField2=" + CustomField2 + ", CustomField3=" + CustomField3 + ", CustomField4=" + CustomField4
+//				+ "]";
+//	}
 }

@@ -157,6 +157,7 @@ public class CheckoutRestController {
 //					obj.setChoosePayment("Credit");
 //					obj.setEncryptType("1");
 					obj.setClientBackURL("http://localhost:8080/orders");
+					obj.setBidingCard("0");
 					
 					// 計算檢查碼 CheckMacValue，利用 SDK 的 EcpayFunction
                     String checkMacValue = EcpayFunction.genCheckMacValue(HASH_KEY, HASH_IV, obj);
