@@ -170,4 +170,21 @@ public class ReviewsService {
 			return dto5;
 		});
 	}
+	
+	// 新增照片刪除邏輯
+	@Transactional
+	public void updateReviewPhoto(Integer reviewId, byte[] photo) {
+	    Reviews review = reviewsRepository.findById(reviewId)
+	        .orElseThrow(() -> new RuntimeException("評論不存在"));
+	    review.setPhoto(photo);
+	    reviewsRepository.save(review);
+	}
+
+	@Transactional
+	public void deleteReviewPhoto(Integer reviewId) {
+	    Reviews review = reviewsRepository.findById(reviewId)
+	        .orElseThrow(() -> new RuntimeException("評論不存在"));
+	    review.setPhoto(null);
+	    reviewsRepository.save(review);
+	}
 }

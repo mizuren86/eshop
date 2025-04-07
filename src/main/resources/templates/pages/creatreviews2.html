@@ -19,7 +19,7 @@
     </div>
 
     <div class="container-fluid page-header py-5">
-      <h1 class="text-center text-white display-6">Contact</h1>
+      <h1 class="text-center text-white display-6">Create Reviews</h1>
       <ol class="breadcrumb justify-content-center mb-0">
         <li class="breadcrumb-item"><a th:href="@{/index}">Home</a></li>
         <li class="breadcrumb-item"><a th:href="@{/pages}">Pages</a></li>
@@ -31,7 +31,7 @@
       <h2 th:text="|為『${ProductName}』留下您寶貴的意見吧~|">產品名稱載入中...</h2>
       <form id="reviewForm" method="post" th:action="@{/reviews/create.do}" enctype="multipart/form-data">
         <input type="hidden" name="products.productId" th:value="${productId}">
-        
+        <input type="hidden" name="_redirect" th:value="@{/reviews/product/{productId}(productId=${productId})}">
         <div class="mb-3">
             <label class="form-label">評分</label>
             <select name="rating" class="form-select" required id="ratingSelect">

@@ -34,7 +34,7 @@
       }
       #reviewsTable th:nth-child(1),
       #reviewsTable td:nth-child(1) {
-        width: 15%;
+        width: 10%;
       }
       #reviewsTable th:nth-child(2),
       #reviewsTable td:nth-child(2) {
@@ -42,7 +42,7 @@
       }
       #reviewsTable th:nth-child(3),
       #reviewsTable td:nth-child(3) {
-        width: 35%;
+        width: 30%;
       }
       #reviewsTable th:nth-child(4),
       #reviewsTable td:nth-child(4) {
@@ -51,6 +51,10 @@
       #reviewsTable th:nth-child(5),
       #reviewsTable td:nth-child(5) {
         width: 20%;
+      }
+      #reviewsTable th:nth-child(6),
+      #reviewsTable td:nth-child(6) {
+        width: 10%;
       }
       .comment-content {
         position: relative;
@@ -142,7 +146,7 @@
       </div>
 
       <!-- 主要內容區 -->
-      <div class="container">
+      <div class="container my-5">
         <div class="page-title">
           <h2>歷史評論:</h2>
         </div>
@@ -157,6 +161,7 @@
                 <th>評論內容</th>
                 <th>評論照片</th>
                 <th>更新時間</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -212,7 +217,7 @@
             if (data.content.length === 0) {
               // 沒有評論時的處理
               const tr = document.createElement("tr");
-              tr.innerHTML = `<td colspan="5" class="text-center">暫無評論數據</td>`;
+              tr.innerHTML = `<td colspan="6" class="text-center">暫無評論數據</td>`;
               tbody.appendChild(tr);
               return;
             }
@@ -227,7 +232,7 @@
                 : "";
 
               tr.innerHTML = `
-                <td>${review.productName}</td>
+            	<td><a href="/shop-detail?productId=${review.productId}">${review.productName}</a></td>
                 <td>${createRatingStars(review.rating)}</td>
                 <td>${commentHtml}</td>
                 <td>
@@ -238,13 +243,40 @@
                 }
             </td>
                 <td>${new Date(review.updatedAt).toLocaleString()}</td>
+                <td>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-warning btn-edit" 
+                          data-review-id="${review.reviewId}">編輯</button>
+                  <button class="btn btn-sm btn-danger btn-delete" 
+                          data-review-id="${review.reviewId}">刪除</button>
+                </div>
+              </td>
               `;
               tbody.appendChild(tr);
               
               console.log(review.photo); // 確認數據類型
               console.log(review.photo instanceof Uint8Array); // 應為 false（因為 JSON 會轉為普通陣列）
 
-
+             // 綁定刪除事件
+              tr.querySelector('.btn-delete').addEventListener('click', function() {
+                const reviewId = this.dataset.reviewId;
+                if (confirm('確定要刪除這則評論嗎？')) {
+                  axios.delete(`/reviews/${reviewId}`)
+                    .then(() => {
+                      loadReviews(currentPage); // 重新載入當前頁面
+                    })
+                    .catch(error => {
+                      alert('刪除失敗: ' + error.response?.data?.message);
+                    });
+                }
+              });
+              
+              // 綁定編輯事件
+              tr.querySelector('.btn-edit').addEventListener('click', function() {
+                const reviewId = this.dataset.reviewId;
+                window.location.href = `/reviews/edit/${reviewId}`;
+              });
+              
               // 處理評論內容折疊邏輯
               if (review.comment) {
                 const commentCell = tr.querySelector("td:nth-child(3)");
