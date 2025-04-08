@@ -52,10 +52,10 @@
 					</small>
 				</div>
 				<div class="top-link pe-2">
-					<a th:href="@{/privacypolicy}" class="text-white"><small class="text-white mx-2">Privacy
-							Policy</small>/</a> <a th:href="@{/termsofuse}" class="text-white"><small
-							class="text-white mx-2">Terms of Use</small>/</a> <a th:href="@{/salesandrefunds}"
-						class="text-white"><small class="text-white mx-2">Sales and Refunds</small>/</a>
+					<a th:href="@{/privacypolicy}" class="text-white"><small class="text-white mx-2">隱私權政策</small>/</a>
+					<a th:href="@{/termsofuse}" class="text-white"><small class="text-white mx-2">條款與細則</small>/</a>
+					<a th:href="@{/faqshelp}" class="text-white"><small class="text-white mx-2">Q&A</small>/</a>
+					<a th:href="@{/salesandrefunds}" class="text-white"><small class="text-white mx-2">退換貨政策</small></a>
 				</div>
 			</div>
 		</div>
@@ -70,10 +70,10 @@
 				</button>
 				<div class="collapse navbar-collapse bg-white" id="navbarCollapse">
 					<div class="navbar-nav mx-auto">
-						<a th:href="@{/index}" class="nav-item nav-link">Home</a>
-						<a th:href="@{/shop}" class="nav-item nav-link">Shop</a>
-						<a th:href="@{/orders}" class="nav-item nav-link">Orders</a>
-						<a th:href="@{/contact}" class="nav-item nav-link">Contact</a>
+						<a th:href="@{/shop}" class="nav-item nav-link">所有商品</a>
+						<a th:href="@{/orders}" class="nav-item nav-link">我的訂單</a>
+						<a th:href="@{/aboutus}" class="nav-item nav-link">關於我們</a>
+						<a th:href="@{/contact}" class="nav-item nav-link">聯絡我們</a>
 						<!--
 					<div class="nav-item dropdown">
 						<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
@@ -175,10 +175,10 @@
 					<div class="col-lg-6">
 						<div class="position-relative mx-auto">
 							<input class="form-control border-0 w-100 py-3 px-4 rounded-pill" type="number"
-								placeholder="Your Email" />
+								placeholder="請輸入Email" />
 							<button type="submit"
 								class="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white"
-								style="top: 0; right: 0">Subscribe Now</button>
+								style="top: 0; right: 0">接收最新優惠</button>
 						</div>
 					</div>
 					<div class="col-lg-3">
@@ -194,47 +194,44 @@
 				</div>
 			</div>
 			<div class="row g-5">
-				<div class="col-lg-3 col-md-6">
+				<div class="col-lg-5 col-md-6">
 					<div class="footer-item">
-						<h4 class="text-light mb-3">Why People Like us!</h4>
+						<h4 class="text-light mb-3">為什麼大家喜歡我們！</h4>
 						<p class="mb-4" style="text-align: justify;">
-							堅持每日新鮮直送，確保每一顆水果都保持最佳口感與營養價值。嚴格挑選優質產地，並以合理價格提供消費者，輕鬆享受大自然的甘甜與健康。
-							我們用心服務，致力於打造愉悅的購物體驗，讓每位顧客都能感受到水果的魅力與我們的誠意。</p>
+							堅持每日新鮮直送，確保每一顆水果都<br>
+							保持最佳口感與營養價值。嚴格挑選優<br>
+							質產地，並以合理價格提供消費者，輕<br>
+							鬆享受大自然的甘甜與健康。<br>
+							我們用心服務，致力於打造愉悅的購物<br>
+							體驗，讓每位顧客都能感受到水果的魅<br>
+							力與我們的誠意。</p>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
 					<div class="d-flex flex-column text-start footer-item">
-						<h4 class="text-light mb-3">Shop Info</h4>
-						<a th:href="@{/aboutus}" class="btn-link">About Us</a>
-						<a th:href="@{/contact}" class="btn-link">Contact Us</a>
-						<a th:href="@{/privacypolicy}" class="btn-link">Privacy Policy</a>
-						<a th:href="@{/termsofuse}" class="btn-link">Terms of Use</a>
-						<a th:href="@{/salesandrefunds}" class="btn-link">Sales and Refunds</a>
-						<a th:href="@{/faqshelp}" class="btn-link">FAQs & Help</a>
+						<h4 class="text-light mb-3">店鋪資訊</h4>
+						<a th:href="@{/aboutus}" class="btn-link">關於我們</a>
+						<a th:href="@{/contact}" class="btn-link">聯絡我們</a>
+						<a th:href="@{/privacypolicy}" class="btn-link">隱私權政策</a>
+						<a th:href="@{/termsofuse}" class="btn-link">條款與細則</a>
+						<a th:href="@{/salesandrefunds}" class="btn-link">退換貨政策</a>
+						<a th:href="@{/faqshelp}" class="btn-link">Q&A</a>
 					</div>
 				</div>
-				<div class="col-lg-3 col-md-6">
-					<div class="d-flex flex-column text-start footer-item">
-						<h4 class="text-light mb-3">Account</h4>
-						<a class="btn-link" th:href="@{/profile}">My Account</a> 
-						<a class="btn-link" th:href="@{/cart}">Shopping Cart</a>
-						<a class="btn-link" th:href="@{/orders}">Order History</a>
-					</div>
-				</div>
-				<div class="col-lg-3 col-md-6">
+				<div class="col-lg-4 col-md-6">
 					<div class="footer-item">
-						<h4 class="text-light mb-3">Contact</h4>
+						<h4 class="text-light mb-3">如何找到我們</h4>
 						<p>
-							<strong>Address: 801 高雄市前金區中正四路 211 號 8 樓之 1</strong>
+							<strong>地址: </strong>801 高雄市前金區中正四路 211 號 8 樓之 1
 						</p>
 						<p>
-							<strong>Email: fruitablesservice@fruitables.net</strong>
+							<strong>Email: </strong>fruitablesservice@fruitables.net
 						</p>
 						<p>
-							<strong>Phone: (07) 9699-885 #6511</strong>
+							<strong>電話: </strong>(07) 9699-885 #6511
 						</p>
 						<p>
-							<strong>Payment Accepted</strong>
+							<strong>付款方式</strong>
 						</p>
 						<img th:src="@{/img/payment.png}" class="img-fluid" alt="" />
 					</div>
@@ -243,6 +240,9 @@
 		</div>
 	</div>
 	<!-- Footer End -->
+
+	<!-- 客服 -->
+	<div th:replace="@{/fragments/chat-widget.html}"></div>
 
 	<!-- Copyright Start -->
 	<div class="container-fluid copyright bg-dark py-4">

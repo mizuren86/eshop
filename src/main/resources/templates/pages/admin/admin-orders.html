@@ -83,24 +83,26 @@
 		<table class="order-table table">
 			<thead>
 				<tr>
-					<th>訂單編號</th>
-					<th>交易編號</th>
-					<th>顧客姓名</th>
-					<th>訂單金額</th>
-					<th>付款狀態</th>
-					<th>配送狀態</th>
-					<th>訂單日期</th>
-					<th></th>
+					<th class="text-center align-middle">訂單編號</th>
+					<th class="text-center align-middle">交易編號</th>
+					<th class="text-center align-middle">顧客姓名</th>
+					<th class="text-center align-middle">訂單金額</th>
+					<th class="text-center align-middle">付款狀態</th>
+					<th class="text-center align-middle">配送狀態</th>
+					<th class="text-center align-middle">訂單日期</th>
+					<th class="text-center align-middle"></th>
+					<th class="text-center align-middle"></th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr th:each="order : ${ordersPage.content}">
-					<td th:text="${order.orderId}">訂單編號</td>
-					<td th:text="${order.merchantTradeNo}">訂單編號</td>
-					<td th:text="${order.users.username}">顧客姓名</td>
-					<td th:text="${'$' + #numbers.formatDecimal(order.totalAmount, 0, 0)}">$0</td>
-					<td th:text="${order.paymentStatus}">付款狀態</td>
-					<td>
+				<tr th:each="order : ${ordersPage.content}" th:attr="data-order-id=${order.orderId}, data-shipping-status=${order.shippingStatus}">
+					<td class="text-center align-middle" th:text="${order.orderId}">訂單編號</td>
+					<td class="text-center align-middle" th:text="${order.merchantTradeNo}">訂單編號</td>
+					<td class="text-center align-middle" th:text="${order.users.username}">顧客姓名</td>
+					<td class="text-center align-middle"
+						th:text="${'$' + #numbers.formatDecimal(order.totalAmount, 0, 0)}">$0</td>
+					<td class="text-center align-middle" th:text="${order.paymentStatus}">付款狀態</td>
+					<td class="text-center align-middle shippingStatus">
 						<a href="#" th:data-shipping-method="${order.shippingMethod}"
 							th:data-shipping-address="${order.shippingAddress}"
 							th:data-recipient-name="${order.recipientName}"
@@ -109,12 +111,18 @@
 							onclick="showShippingDetails(this); return false;"
 							th:text="${order.shippingStatus}">配送狀態</a>
 					</td>
-					<td th:text="${#temporals.format(order.orderDate, 'yyyy/MM/dd HH:mm:ss')}">訂單日期</td>
-					<td>
-						<a th:href="@{'/admin/orders/view/' + ${order.orderId}}" class="action-btn">檢視</a>
-						<a th:href="@{'/admin/orders/edit/' + ${order.orderId}}" class="action-btn">編輯</a>
-						<button type="button" class="action-btn"
-							th:onclick="'deleteOrder(' + ${order.orderId} + ')'">刪除</button>
+					<td class="text-center align-middle"
+						th:text="${#temporals.format(order.orderDate, 'yyyy/MM/dd HH:mm:ss')}">訂單日期</td>
+					<td class="text-center align-middle">
+						<button type="button" class="action-btn" onclick="editOrder(this);">
+							編輯
+						</button>
+					</td>
+					<td class="text-center align-middle">
+						<button type="button" class="btn btn-danger action-btn"
+							th:onclick="'deleteOrder(' + ${order.orderId} + ')'">
+							<i class="fa fa-trash"></i>
+						</button>
 					</td>
 				</tr>
 			</tbody>
@@ -123,17 +131,19 @@
 		<!-- 分頁 -->
 		<div class="pagination d-flex justify-content-center mt-5">
 			<!-- 上一頁 -->
-			<a th:if="${ordersPage.number > 0}" th:href="@{'/admin/orders'(page=${ordersPage.number - 1})}"
-				class="rounded">&laquo;</a>
+			<a th:if="${ordersPage.number > 0}" th:href="@{'/admin-orders'(page=${ordersPage.number - 1})}"
+				class="rounded">&laquo;
+			</a>
 
 			<!-- 頁碼 -->
-			<a th:each="i : ${#numbers.sequence(0, ordersPage.totalPages - 1)}" th:href="@{'/admin/orders'(page=${i})}"
+			<a th:each="i : ${#numbers.sequence(0, ordersPage.totalPages - 1)}" th:href="@{'/admin-orders'(page=${i})}"
 				th:text="${i + 1}" th:classappend="${i == ordersPage.number} ? ' active rounded' : ' rounded'">
 			</a>
 
 			<!-- 下一頁 -->
 			<a th:if="${ordersPage.number < ordersPage.totalPages - 1}"
-				th:href="@{'/admin/orders'(page=${ordersPage.number + 1})}" class="rounded">&raquo;</a>
+				th:href="@{'/admin-orders'(page=${ordersPage.number + 1})}" class="rounded">&raquo;
+			</a>
 		</div>
 	</main>
 
@@ -186,7 +196,92 @@
 	<!-- Template Javascript -->
 	<script th:src="@{/js/main.js}"></script>
 	<script>
-		// 刪除訂單（使用 SweetAlert 做確認）
+		// 訂單狀態編輯，並更新後端資料
+		function editOrder(buttonElement) {
+			// 取得所在表格的 <tr>
+			const row = buttonElement.closest('tr');
+
+			// 從 data 屬性中取出 orderId、付款狀態與配送狀態
+			const orderId = row.getAttribute('data-order-id');
+			const currentShippingStatus = row.getAttribute('data-shipping-status');
+
+			Swal.fire({
+				title: '編輯訂單狀態',
+				html:
+					'<form id="editForm" class="text-start">' +
+					'  <div class="mb-3">' +
+					'    <label for="swal-shippingStatus" class="form-label"><strong>配送狀態</strong></label>' +
+					'    <select id="swal-shippingStatus" class="form-select">' +
+					'      <option value="處理中">處理中</option>' +
+					'      <option value="已出貨">已出貨</option>' +
+					'      <option value="已送達">已送達</option>' +
+					'      <option value="已取消">已取消</option>' +
+					'    </select>' +
+					'  </div>' +
+					'</form>',
+				showCancelButton: true,
+				confirmButtonText: '儲存變更',
+				cancelButtonText: '取消',
+				preConfirm: () => {
+					const shippingStatus = document.getElementById('swal-shippingStatus').value;
+					if (!shippingStatus) {
+						Swal.showValidationMessage('請選擇所有狀態');
+					}
+					return {shippingStatus: shippingStatus};
+				},
+				didOpen: () => {
+					// 預設選取目前狀態
+					document.getElementById('swal-shippingStatus').value = currentShippingStatus;
+				},
+				customClass: {
+					confirmButton: 'btn btn-primary me-3',
+					cancelButton: 'btn btn-secondary'
+				},
+				buttonsStyling: false,
+				width: '600px'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					const data = result.value;
+					fetch('/admin-orders/updateAjax/' + orderId, {
+						method: 'POST',
+						headers: {'Content-Type': 'application/json'},
+						body: JSON.stringify(data)
+					})
+						.then(response => {
+							if (!response.ok) {
+								throw new Error(response.statusText);
+							}
+							return response.json();
+						})
+						.then(updated => {
+							// 更新表格中該筆訂單的配送狀態顯示
+							const shippingStatusCell = row.querySelector('.shippingStatus a');
+							if (shippingStatusCell) {
+								shippingStatusCell.textContent = updated.shippingStatus;
+							}
+							// 同步更新 data 屬性供未來再次編輯時使用
+							row.setAttribute('data-shipping-status', updated.shippingStatus);
+							Swal.fire({
+								icon: 'success',
+								title: '更新成功',
+								text: '配送狀態已更新',
+								timer: 1500,
+								showConfirmButton: false
+							});
+						})
+						.catch(error => {
+							console.error('更新訂單時發生錯誤：', error);
+							Swal.fire({
+								icon: 'error',
+								title: '更新失敗',
+								text: '請稍後再試。'
+							});
+						});
+				}
+			});
+		}
+
+		// 刪除訂單
 		function deleteOrder(orderId) {
 			Swal.fire({
 				icon: 'warning',
@@ -244,34 +339,24 @@
 			// 組合要顯示的 HTML 內容
 			var htmlContent =
 				'<div class="shipping-details" style="text-align: left;">' +
-				'<p><strong>配送方式：</strong>' + shippingMethod + '</p>' +
-				'<p><strong>配送地址：</strong>' + shippingAddress + '</p>' +
-				'<p><strong>收件人姓名：</strong>' + recipientName + '</p>' +
-				'<p><strong>收件人電話：</strong>' + recipientPhone + '</p>' +
-				'<p><strong>訂單備註：</strong>' + orderRemark + '</p>' +
+				'<p><strong>配送方式：</strong><br>' + shippingMethod + '</p>' +
+				'<p><strong>配送地址：</strong><br>' + shippingAddress + '</p>' +
+				'<p><strong>收件人姓名：</strong><br>' + recipientName + '</p>' +
+				'<p><strong>收件人電話：</strong><br>' + recipientPhone + '</p>' +
+				'<p><strong>訂單備註：</strong><br>' + orderRemark + '</p>' +
 				'</div>';
 
 			Swal.fire({
+				icon: "info",
 				title: '配送詳情',
+				width: '600px',
 				html: htmlContent,
-				confirmButtonText: '確定',
-				customClass: {
-					confirmButton: 'btn btn-primary'
-				},
-				buttonsStyling: false
-			});
-
-			Swal.fire({
-				icon: 'warning',
-				title: '訂單資料不完整',
-				html: "<p>請填寫以下欄位：</p><p>" + missingFields.join("<br>") + "</p>",
 				confirmButtonText: '確定',
 				customClass: {
 					confirmButton: 'btn border-secondary rounded px-4 py-3 text-primary text-uppercase'
 				},
 				buttonsStyling: false
 			});
-
 		}
 	</script>
 </body>
