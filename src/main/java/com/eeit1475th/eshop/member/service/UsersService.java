@@ -85,6 +85,7 @@ public class UsersService {
         user.setFullName(userDTO.getFullName());
         user.setPhone(userDTO.getPhone());
         user.setAddress(userDTO.getAddress());
+        user.setUserPhoto(userDTO.getUserPhoto());
 
         // 保存用戶
         return userRepository.save(user);
@@ -140,6 +141,7 @@ public class UsersService {
         existingUser.setFullName(userDTO.getFullName());
         existingUser.setPhone(userDTO.getPhone());
         existingUser.setAddress(userDTO.getAddress());
+        existingUser.setUserPhoto(userDTO.getUserPhoto());
 
         return userRepository.save(existingUser);
     }
@@ -327,6 +329,7 @@ public class UsersService {
         user.setFullName(userDTO.getFullName());
         user.setPhone(userDTO.getPhone());
         user.setAddress(userDTO.getAddress());
+        user.setUserPhoto(userDTO.getUserPhoto());
 
         return userRepository.save(user);
     }

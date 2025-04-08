@@ -23,255 +23,190 @@
       margin-top: 10px;
     }
 
-    .vip-badge {
-      background-color: #ffd700;
-      color: #000;
-      padding: 5px 10px;
-      border-radius: 15px;
-      font-weight: bold;
-      display: inline-block;
-      margin-left: 10px;
+    .profile-header {
+      background-color: #fff;
+      padding: 20px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin: 180px 0 20px 0;
+      border-radius: 10px;
+      position: relative;
     }
 
-    .vip-info {
-      background-color: #f8f9fa;
-      padding: 15px;
-      border-radius: 5px;
-      margin-top: 20px;
+    .profile-photo-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      margin-top: -60px;
+      background-color: #fff;
+      border: 4px solid #fff;
+      z-index: 1;
     }
+
+    .profile-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-name {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .profile-content {
+      padding-top: 0;
+    }
+
+    .card {
+      border: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      border-radius: 10px;
+    }
+
+    .card-header {
+      padding: 12px 20px;
+      background-color: #f8f9fa;
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .form-control {
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      height: 40px;
+      padding: 8px 12px;
+    }
+
+    .form-control:read-only {
+      background-color: #fff;
+    }
+
+    .btn-primary {
+      padding: 10px 25px;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 15px;
+    } */
   </style>
 </head>
 
 <body>
+
   <div layout:fragment="content">
-    <div class="container py-5">
-      <div class="row justify-content-center">
-        <div class="col-md-8">
-          <div class="card">
-            <div class="card-body">
-              <h2 class="text-center mb-4">Profile</h2>
-              <div class="text-center mb-4">
-                <img id="userPhoto" src="/img/avatar.jpg" alt="User Photo" class="rounded-circle"
-                  style="width: 150px; height: 150px; object-fit: cover;">
-                <div class="mt-3">
-                  <h3 id="username"></h3>
-                  <span id="vipBadge" class="vip-badge d-none">VIP</span>
-                </div>
-              </div>
+    <header class="container-fluid page-header py-5">
+      <h1 class="text-center text-white display-6">Sales and Refunds</h1>
+      <nav aria-label="breadcrumb" class="breadcrumb justify-content-center">
+        <a th:href="@{/index}" class="breadcrumb-item">Home</a>
+        <span class="breadcrumb-item active text-white">Sales and Refunds</span>
+      </nav>
+    </header>
 
-              <div class="card mb-4">
-                <div class="card-header">
-                  <h5 class="mb-0">個人資料</h5>
-                </div>
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col-md-6 mb-3">
-                      <label class="form-label fw-bold">使用者ID</label>
-                      <p id="userId" class="form-control-static"></p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label class="form-label fw-bold">使用者名稱</label>
-                      <p id="username-display" class="form-control-static"></p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label class="form-label fw-bold">電子郵件</label>
-                      <p id="email" class="form-control-static"></p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label class="form-label fw-bold">電話</label>
-                      <p id="phone" class="form-control-static"></p>
-                    </div>
-                    <div class="col-12 mb-3">
-                      <label class="form-label fw-bold">地址</label>
-                      <p id="address" class="form-control-static"></p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label class="form-label fw-bold">註冊日期</label>
-                      <p id="registerDate" class="form-control-static"></p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label class="form-label fw-bold">最後更新</label>
-                      <p id="lastUpdate" class="form-control-static"></p>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <!-- VIP信息部分 -->
-              <div class="card mb-4" id="vipCard">
-                <div class="card-header">
-                  <h5 class="mb-0">VIP 狀態</h5>
-                </div>
-                <div class="card-body">
-                  <div id="vipStatus">
-                    <p>您目前不是 VIP 會員</p>
-                  </div>
-                  <div id="vipDetails" class="d-none">
-                    <div class="row">
-                      <div class="col-md-4">
-                        <label class="form-label fw-bold">VIP 等級</label>
-                        <p id="vipLevel" class="form-control-static"></p>
-                      </div>
-                      <div class="col-md-4">
-                        <label class="form-label fw-bold">開始日期</label>
-                        <p id="vipStartDate" class="form-control-static"></p>
-                      </div>
-                      <div class="col-md-4">
-                        <label class="form-label fw-bold">結束日期</label>
-                        <p id="vipEndDate" class="form-control-static"></p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <!-- 修改密碼按鈕 -->
-              <div class="text-center">
-                <a href="/change-password" class="btn btn-primary">
-                  <i class="fas fa-key me-2"></i>修改密碼
-                </a>
-              </div>
-
-              <div class="error-message" id="errorMessage"></div>
-              <div class="success-message" id="successMessage"></div>
-              <div class="loading" id="loadingMessage">Loading...</div>
+    <div class="container">
+      <div class="profile-header">
+        <div class="container">
+          <div class="text-center">
+            <div class="profile-photo-container">
+              <img th:src="@{${user.userPhoto != null ? user.userPhoto : '/img/avatar.jpg'}}" alt="User Photo"
+                class="profile-photo" onerror="this.src='/img/avatar.jpg'">
+            </div>
+            <div class="mt-3">
+              <h3 class="profile-name" th:text="${user.username}">未設置</h3>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div class="profile-content">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">個人資料</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">用戶名</label>
+                  <input type="text" class="form-control" th:value="${user.username}" readonly>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">電子郵件</label>
+                  <input type="email" class="form-control" th:value="${user.email}" readonly>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">姓名</label>
+                  <input type="text" class="form-control" th:value="${user.fullName}" readonly>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">電話</label>
+                  <input type="tel" class="form-control" th:value="${user.phone}" readonly>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">地址</label>
+                  <input type="text" class="form-control" th:value="${user.address}" readonly>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-4">
+          <a href="/change-password" class="btn btn-primary me-2">
+            <i class="fas fa-key me-2"></i>修改密碼
+          </a>
+          <a href="/edit-profile" class="btn btn-primary">
+            <i class="fas fa-user-edit me-2"></i>編輯個人資料
+          </a>
         </div>
       </div>
     </div>
   </div>
 
-  <script th:inline="javascript">
-    /*<![CDATA[*/
-    // 載入用戶資料
-    function loadUserProfile() {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('未找到token，請重新登入');
-        window.location.href = '/login';
-        return;
-      }
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const photoContainer = document.querySelector('.profile-photo-container');
+      if (photoContainer) {
+        const img = photoContainer.querySelector('img');
+        if (img) {
+          // 強制重新加載圖片
+          const currentSrc = img.src;
+          const timestamp = new Date().getTime();
+          if (currentSrc.includes('?')) {
+            img.src = currentSrc.split('?')[0] + '?t=' + timestamp;
+          } else {
+            img.src = currentSrc + '?t=' + timestamp;
+          }
 
-      console.log('開始載入用戶資料...');
-      console.log('使用的token:', token);
-
-      // 確保token格式正確
-      const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      console.log('處理後的token:', authToken);
-
-      fetch('/api/users/current', {
-        headers: {
-          'Authorization': authToken,
-          'Content-Type': 'application/json'
+          // 如果圖片加載失敗，使用默認頭像
+          img.onerror = function () {
+            this.src = '/img/avatar.jpg';
+          };
         }
-      })
-        .then(response => {
-          console.log('API響應狀態:', response.status);
-          if (!response.ok) {
-            if (response.status === 401) {
-              throw new Error('登入已過期，請重新登入');
-            }
-            return response.text().then(text => {
-              console.error('錯誤響應:', text);
-              throw new Error(text);
-            });
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log('收到的用戶數據:', data);
-          if (data.success && data.data) {
-            const user = data.data;
-            console.log('處理用戶數據:', user);
-
-            // 填充用戶信息
-            document.getElementById('userId').textContent = user.userId || '未設置';
-            document.getElementById('username').textContent = user.username || '未設置';
-            document.getElementById('username-display').textContent = user.username || '未設置';
-            document.getElementById('email').textContent = user.email || '未設置';
-            document.getElementById('phone').textContent = user.phone || '未設置';
-            document.getElementById('address').textContent = user.address || '未設置';
-            document.getElementById('registerDate').textContent = user.registerDate ? new Date(user.registerDate).toLocaleString('zh-TW') : '未設置';
-            document.getElementById('lastUpdate').textContent = user.lastUpdate ? new Date(user.lastUpdate).toLocaleString('zh-TW') : '未設置';
-
-            // 處理VIP狀態
-            const vipStatus = document.getElementById('vipStatus');
-            const vipCard = document.getElementById('vipCard');
-            const vipDetails = document.getElementById('vipDetails');
-            const vipBadge = document.getElementById('vipBadge');
-
-            if (user.userVip) {
-              console.log('VIP信息:', user.userVip);
-              vipCard.classList.remove('d-none');
-              vipDetails.classList.remove('d-none');
-              vipBadge.classList.remove('d-none');
-
-              document.getElementById('vipLevel').textContent = user.userVip.vipLevel || '未設置';
-              document.getElementById('vipStartDate').textContent = user.userVip.startDate ? new Date(user.userVip.startDate).toLocaleString('zh-TW') : '未設置';
-              document.getElementById('vipEndDate').textContent = user.userVip.endDate ? new Date(user.userVip.endDate).toLocaleString('zh-TW') : '未設置';
-
-              vipStatus.innerHTML = `
-                <span class="badge bg-warning text-dark">
-                  <i class="fas fa-crown"></i> VIP ${user.userVip.vipLevel}
-                </span>
-                <small class="text-muted">到期日: ${new Date(user.userVip.endDate).toLocaleDateString('zh-TW')}</small>
-              `;
-            } else {
-              vipCard.classList.add('d-none');
-              vipDetails.classList.add('d-none');
-              vipBadge.classList.add('d-none');
-              vipStatus.innerHTML = `
-                <span class="badge bg-secondary">
-                  <i class="fas fa-user"></i> 一般會員
-                </span>
-              `;
-            }
-
-            // 處理用戶照片
-            const userPhoto = document.getElementById('userPhoto');
-            if (user.userPhoto) {
-              userPhoto.src = user.userPhoto;
-            } else {
-              userPhoto.src = '/img/avatar.jpg';
-            }
-
-            console.log('用戶資料載入完成');
-          } else {
-            console.error('API返回錯誤:', data.message);
-            showError(data.message || '載入用戶資料失敗');
-          }
-        })
-        .catch(error => {
-          console.error('載入用戶資料時發生錯誤:', error);
-          if (error.message.includes('登入已過期')) {
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-          } else {
-            showError('載入用戶資料失敗，請稍後再試');
-          }
-        });
-    }
-
-    // 確保在頁面加載完成後執行
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        console.log("頁面加載完成，開始獲取用戶資料");
-        loadUserProfile();
-      });
-    } else {
-      console.log("頁面已經加載，直接獲取用戶資料");
-      loadUserProfile();
-    }
-
-    // 監聽頁面可見性變化
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        console.log("頁面變為可見，重新獲取用戶資料");
-        loadUserProfile();
       }
     });
-    /*]]>*/
   </script>
 </body>
 

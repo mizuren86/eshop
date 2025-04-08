@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +30,7 @@ import com.eeit1475th.eshop.member.dto.PasswordUpdateRequest;
 import com.eeit1475th.eshop.member.dto.UsersDTO;
 import com.eeit1475th.eshop.member.entity.Users;
 import com.eeit1475th.eshop.member.service.EmailVerificationService;
+import com.eeit1475th.eshop.member.service.JwtService;
 import com.eeit1475th.eshop.member.service.UsersService;
 
 import jakarta.servlet.http.HttpSession;
@@ -42,6 +44,9 @@ public class UserRestController {
 
 	@Autowired
 	private EmailVerificationService emailVerificationService;
+
+	@Autowired
+	private JwtService jwtService;
 
 	// 年測試 //
 	@Autowired
@@ -102,13 +107,14 @@ public class UserRestController {
 			// 处理头像上传
 			if (userPhoto != null && !userPhoto.isEmpty()) {
 				String fileName = UUID.randomUUID().toString() + "_" + userPhoto.getOriginalFilename();
-				Path uploadDir = Paths.get("src/main/resources/static/uploads");
+				Path uploadDir = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "static", "img",
+						"users");
 				if (!Files.exists(uploadDir)) {
 					Files.createDirectories(uploadDir);
 				}
 				Path filePath = uploadDir.resolve(fileName);
 				Files.copy(userPhoto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-				userDTO.setUserPhoto("/uploads/" + fileName);
+				userDTO.setUserPhoto("img/users/" + fileName);
 			}
 
 			// 创建用户
@@ -136,22 +142,29 @@ public class UserRestController {
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session,
-			@RequestParam(value = "redirect", required = false) String redirect) { // 年測試
+			@RequestParam(value = "redirect", required = false) String redirect) {
 		try {
+			System.out.println("收到登入請求");
+			System.out.println("Email: " + request.getEmail());
+
 			String token = usersService.login(request.getEmail(), request.getPassword());
 			Users user = usersService.getUserByEmail(request.getEmail());
 
+			System.out.println("用戶登入成功");
+			System.out.println("用戶ID: " + user.getUserId());
+			System.out.println("用戶名: " + user.getUsername());
+			System.out.println("Token: " + token);
+
 			// 将用户信息存储在会话中
 			session.setAttribute("user", user);
-
-			// 年測試 start //
 			session.setAttribute("token", token);
-
 			session.setAttribute("userId", user.getUserId());
+
 			// 檢查是否存在未登入時暫存的購物車
 			@SuppressWarnings("unchecked")
 			List<CartItemsDTO> tempCart = (List<CartItemsDTO>) session.getAttribute("tempCart");
 			if (tempCart != null && !tempCart.isEmpty()) {
+				System.out.println("發現暫存購物車，開始合併");
 				// 將每個項目合併到該會員的購物車中
 				for (CartItemsDTO item : tempCart) {
 					shoppingCartService.addToCart(user.getUserId(), item.getProduct().getProductId(),
@@ -159,17 +172,19 @@ public class UserRestController {
 				}
 				// 清除暫存購物車
 				session.removeAttribute("tempCart");
+				System.out.println("購物車合併完成");
 			}
-			// 年測試 end //
 
 			Map<String, Object> responseData = new HashMap<>();
 			responseData.put("token", token);
 			responseData.put("user", user);
+			responseData.put("redirect", redirect != null ? redirect : "/");
 
-			responseData.put("redirect", redirect != null ? redirect : "/"); // 年測試
-
+			System.out.println("準備返回響應數據");
 			return ResponseEntity.ok(new ApiResponse(true, "登入成功", responseData));
 		} catch (Exception e) {
+			System.out.println("登入失敗: " + e.getMessage());
+			e.printStackTrace();
 			return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
 		}
 	}
@@ -185,42 +200,53 @@ public class UserRestController {
 	}
 
 	@PutMapping("/profile")
-	public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String token,
-			@RequestBody UsersDTO userDTO) {
+	public ResponseEntity<?> updateProfile(
+			@RequestHeader("Authorization") String token,
+			@RequestParam(value = "fullName", required = false) String fullName,
+			@RequestParam(value = "phone", required = false) String phone,
+			@RequestParam(value = "address", required = false) String address,
+			@RequestParam(value = "userPhoto", required = false) MultipartFile userPhoto) {
 		try {
-			Users user = usersService.updateUser(token, userDTO);
-			return ResponseEntity.ok(new ApiResponse(true, "更新成功", user));
+			// 验证token并获取用户ID
+			Integer userId = jwtService.extractUserId(token);
+			if (userId == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("無效的token");
+			}
+
+			// 获取用户信息
+			Users user = usersService.getUserById(userId);
+			if (user == null) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("用戶不存在");
+			}
+
+			// 创建UsersDTO对象
+			UsersDTO userDTO = new UsersDTO();
+			userDTO.setMemberId(userId);
+			userDTO.setUsername(user.getUsername());
+			userDTO.setEmail(user.getEmail());
+			userDTO.setFullName(fullName != null ? fullName : user.getFullName());
+			userDTO.setPhone(phone != null ? phone : user.getPhone());
+			userDTO.setAddress(address != null ? address : user.getAddress());
+			userDTO.setUserPhoto(user.getUserPhoto());
+
+			// 处理用户照片
+			if (userPhoto != null && !userPhoto.isEmpty()) {
+				String fileName = UUID.randomUUID().toString() + "_" + userPhoto.getOriginalFilename();
+				Path uploadDir = Paths.get("src/main/resources/static/img/users");
+				if (!Files.exists(uploadDir)) {
+					Files.createDirectories(uploadDir);
+				}
+				Path filePath = uploadDir.resolve(fileName);
+				Files.copy(userPhoto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+				userDTO.setUserPhoto("/img/users/" + fileName);
+			}
+
+			// 保存更新后的用户信息
+			Users updatedUser = usersService.updateUser(userId, userDTO);
+			return ResponseEntity.ok(new ApiResponse(true, "個人資料更新成功", updatedUser));
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
-		}
-	}
-
-	@PutMapping("/profile/password")
-	public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String token,
-			@RequestBody PasswordUpdateRequest request) {
-		try {
-			usersService.updatePassword(token, request.getOldPassword(), request.getNewPassword());
-			return ResponseEntity.ok(new ApiResponse(true, "密碼更新成功"));
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
-		}
-	}
-
-	@PostMapping("/logout")
-	public ResponseEntity<?> logout(HttpSession session) {
-		try {
-			System.out.println("正在處理登出請求...");
-			System.out.println("Session ID: " + session.getId());
-
-			// 清除会话
-			session.invalidate();
-			System.out.println("會話已清除");
-
-			return ResponseEntity.ok(new ApiResponse(true, "登出成功"));
-		} catch (Exception e) {
-			System.out.println("登出過程發生錯誤: " + e.getMessage());
-			e.printStackTrace();
-			return ResponseEntity.ok(new ApiResponse(true, "登出成功")); // 即使发生错误也返回成功
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new ApiResponse(false, "更新個人資料時發生錯誤：" + e.getMessage()));
 		}
 	}
 
@@ -321,6 +347,24 @@ public class UserRestController {
 			} else {
 				return ResponseEntity.badRequest().body(new ApiResponse(false, "驗證碼無效或已過期"));
 			}
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
+		}
+	}
+
+	@PutMapping("/profile/password")
+	public ResponseEntity<?> updatePassword(
+			@RequestHeader("Authorization") String token,
+			@RequestBody PasswordUpdateRequest request) {
+		try {
+			// 移除 "Bearer " 前綴（如果有的話）
+			if (token != null && token.startsWith("Bearer ")) {
+				token = token.substring(7);
+			}
+
+			// 更新密碼
+			usersService.updatePassword(token, request.getOldPassword(), request.getNewPassword());
+			return ResponseEntity.ok(new ApiResponse(true, "密碼更新成功"));
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
 		}
