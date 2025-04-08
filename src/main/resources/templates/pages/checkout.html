@@ -5,6 +5,8 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Checkout - Fruitables</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<style>
 		.hidden {
 			display: none !important;
@@ -91,7 +93,8 @@
 		/* placeholder 樣式 */
 		#customerPhone::placeholder,
 		#recipientPhone::placeholder,
-		#shippingAddress::placeholder {
+		#shippingAddress::placeholder,
+		#orderRemark::placeholder {
 			color: lightgray;
 		}
 
@@ -1276,37 +1279,6 @@
 
 				// 重新載入購物車資料
 				document.addEventListener("DOMContentLoaded", fetchCartData);
-				
-				/////////////////////////
-//				async function fetchSelectedStore() {
-//				        try {
-//				            const response = await fetch("/api/selectedStore", {
-//				                headers: {
-//				                    'ngrok-skip-browser-warning': 'any_value' // 若使用 ngrok，加入這個標頭
-//				                }
-//				            });
-//				            if (response.ok) {
-//				                const store = await response.json();
-//				                if (store) {
-//				                    document.getElementById("selectedStore").innerHTML = `
-//				                        <h5>已選擇門市</h5>
-//				                        <p>門市編號：${store.storeID}</p>
-//				                        <p>門市名稱：${store.storeName}</p>
-//				                        <p>地址：${store.storeAddress}</p>
-//				                        <p>電話：${store.storePhone}</p>
-//				                    `;
-//				                }
-//				            } else {
-//				                // 如果 API 回傳 404，也可以清空或顯示提示訊息
-//				                document.getElementById("selectedStore").innerHTML = "<p>尚未選擇門市</p>";
-//				            }
-//				        } catch (error) {
-//				            console.error("Error fetching selected store:", error);
-//				        }
-//				    }
-				    // 每隔 3 秒查詢一次
-				//    setInterval(fetchSelectedStore, 3000);
-				/////////////////////////
 
 				// 用來移除錯誤訊息的函式
 				function removeError(inputElement) {
@@ -1316,6 +1288,37 @@
 					}
 				}
 
+				// 使用 localStorage 保存「收件人資料與顧客資料相同」勾選狀態
+				document.addEventListener("DOMContentLoaded", function () {
+					const sameCheckbox = document.getElementById("sameAsCustomer");
+					const customerName = document.getElementById("customerName");
+					const customerPhone = document.getElementById("customerPhone");
+					const recipientName = document.getElementById("recipientName");
+					const recipientPhone = document.getElementById("recipientPhone");
+
+					// 檢查 localStorage 是否保存了勾選狀態
+					const storedSame = localStorage.getItem("sameAsCustomerChecked");
+					if (storedSame === "true") {
+						sameCheckbox.checked = true;
+						recipientName.value = customerName.value;
+						recipientPhone.value = customerPhone.value;
+					} else {
+						sameCheckbox.checked = false;
+					}
+
+					sameCheckbox.addEventListener("change", function () {
+						if (this.checked) {
+							localStorage.setItem("sameAsCustomerChecked", "true");
+							recipientName.value = customerName.value;
+							recipientPhone.value = customerPhone.value;
+						} else {
+							localStorage.setItem("sameAsCustomerChecked", "false");
+							// 可根據需求清空收件人欄位
+							// recipientName.value = "";
+							// recipientPhone.value = "";
+						}
+					});
+				});
 
 				// 返回購物車、收件人資料複製
 				document.addEventListener("DOMContentLoaded", function () {
@@ -1417,7 +1420,6 @@
 				document.addEventListener("DOMContentLoaded", function () {
 					const orderForm = document.getElementById("orderForm");
 
-					// 檢查 shippingMethod 是否正確
 					console.log("shippingMethod:", shippingMethod);
 
 					// 用 data‑shipping 屬性找出目前 active 的 branch
@@ -1428,39 +1430,64 @@
 							activeBranch = branch;
 						}
 					});
-					// 若找不到，則預設以整個表單作驗證
 					if (!activeBranch) {
 						console.warn("找不到 active branch，將以整個 form 驗證");
 						activeBranch = orderForm;
 					}
 					console.log("activeBranch:", activeBranch);
 
-					// 當表單送出時，僅檢查 activeBranch 中的必填欄位
 					orderForm.addEventListener("submit", function (e) {
 						// 只從 active branch 取得必填欄位
 						const requiredFields = activeBranch.querySelectorAll("[data-required='true']");
 						let valid = true;
+						// 用來彙整缺少的欄位訊息
+						let missingFields = [];
 
-						// 清除所有先前的錯誤訊息
+						// 清除先前的錯誤訊息
 						requiredFields.forEach(field => {
 							clearError(field);
 						});
 
-						// 檢查每個必填欄位，但只處理可見的欄位
+						// 檢查每個必填欄位（只處理可見欄位）
 						requiredFields.forEach(field => {
 							if (field.value.trim() === "") {
 								valid = false;
+								// 取得對應的 label 文字
+								const labelElem = document.querySelector(`label[for="${field.id}"]`);
+								let fieldName = "";
+								if (labelElem) {
+									fieldName = labelElem.innerText;
+								} else {
+									fieldName = field.getAttribute("name") || "欄位";
+								}
+								missingFields.push(fieldName);
 								showError(field, "此欄位必填");
 							}
 						});
 
+						// 驗證門市選擇（針對 7-11 取貨分支）
+						if ((shippingMethod === "711-cod" || shippingMethod === "711-no-cod") &&
+							document.getElementById("temporaryStoreId").value.trim() === "") {
+							valid = false;
+							missingFields.push("選擇取貨門市");
+						}
+
 						if (!valid) {
 							e.preventDefault(); // 阻止表單送出
-							alert("請填寫所有必填資料");
+							// 產生提示訊息，列出缺少填寫的欄位
+							Swal.fire({
+								icon: 'warning',
+								title: '訂單資料不完整',
+								html: "<p>請填寫以下欄位：</p><p>" + missingFields.join("<br>") + "</p>",
+								confirmButtonText: '確定',
+								customClass: {
+									confirmButton: 'btn border-secondary rounded px-4 py-3 text-primary text-uppercase'
+								},
+								buttonsStyling: false
+							});
 						}
 					});
 
-					// 清除某個輸入框下的錯誤訊息（只移除該欄位相關的錯誤提示）
 					function clearError(inputElement) {
 						const parent = inputElement.parentElement;
 						const errorElem = parent.querySelector(".error-message");
@@ -1469,9 +1496,7 @@
 						}
 					}
 
-					// 在指定輸入框下方加入錯誤訊息
 					function showError(inputElement, message) {
-						// 若已存在錯誤訊息則不重複新增
 						if (inputElement.parentElement.querySelector(".error-message")) return;
 						const error = document.createElement("div");
 						error.className = "error-message";
@@ -1481,7 +1506,6 @@
 						inputElement.parentElement.appendChild(error);
 					}
 
-					// 當使用者 focus 某個必填欄位時，清除其錯誤訊息
 					const allRequired = orderForm.querySelectorAll("[data-required='true']");
 					allRequired.forEach(field => {
 						field.addEventListener("focus", function () {
@@ -1489,6 +1513,7 @@
 						});
 					});
 				});
+
 
 
 				// 城市和區域存入 session
@@ -1529,6 +1554,20 @@
 					// 當區域選擇改變時也儲存
 					districtSelect.addEventListener("change", saveShippingAddressToSession);
 				});
+
+				document.addEventListener("DOMContentLoaded", function () {
+					const orderRemark = document.getElementById("orderRemark");
+					// 從 localStorage 還原之前儲存的訂單備註
+					const savedRemark = localStorage.getItem("orderRemark");
+					if (savedRemark) {
+						orderRemark.value = savedRemark;
+					}
+					// 當使用者輸入時，自動保存到 localStorage
+					orderRemark.addEventListener("input", function () {
+						localStorage.setItem("orderRemark", orderRemark.value);
+					});
+				});
+
 				/*]]>*/
 			</script>
 		</div>

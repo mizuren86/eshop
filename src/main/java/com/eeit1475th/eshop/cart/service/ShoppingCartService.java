@@ -3,6 +3,7 @@ package com.eeit1475th.eshop.cart.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -134,6 +135,57 @@ public class ShoppingCartService {
         if (shoppingCart != null) {
             cartItemsRepository.deleteByShoppingCart(shoppingCart);
         }
+    }
+    
+    /**
+     * 合併未登入狀態下暫存的購物車 (tempCart) 到會員購物車中。
+     * 如果會員購物車已存在相同產品，則累加數量；若不存在則新增購物車項目。
+     *
+     * @param userId   會員編號
+     * @param tempCart 暫存購物車項目列表 (CartItemsDTO)
+     */
+    public void mergeTempCartToUserCart(Integer userId, List<CartItemsDTO> tempCart) {
+        // 取得會員的購物車，假設購物車與使用者一對一
+        ShoppingCart userCart = shoppingCartRepository.findByUsers_UserId(userId);
+        if (userCart == null) {
+            // 如果會員購物車不存在，根據需求可以建立一個新的購物車
+            userCart = new ShoppingCart();
+            // 假設有一個 Users 物件可以設定，這邊略過設定過程
+            // userCart.setUsers(...);
+        }
+
+        // 遍歷暫存購物車項目
+        for (CartItemsDTO tempItem : tempCart) {
+            // 假設 CartItemsDTO 提供 getProductId() 與 getQuantity()
+            Integer productId = tempItem.getProduct().getProductId();
+            int tempQuantity = tempItem.getQuantity();
+
+            // 嘗試在會員購物車中尋找相同的商品
+            Optional<CartItems> existingItemOpt = 
+                userCart.getCartItems().stream()
+                .filter(item -> item.getProducts().getProductId().equals(productId))
+                .findFirst();
+
+            if (existingItemOpt.isPresent()) {
+                // 如果已存在，更新數量（累加）
+                CartItems existingItem = existingItemOpt.get();
+                existingItem.setQuantity(existingItem.getQuantity() + tempQuantity);
+            } else {
+                // 如果不存在，建立新的 CartItems 實體
+                CartItems newItem = new CartItems();
+                // 依照實際情況，從資料庫取得產品資訊
+                newItem.setProducts(productsRepository.findById(productId)
+                        .orElseThrow(() -> new RuntimeException("Product not found, productId=" + productId)));
+                newItem.setQuantity(tempQuantity);
+                newItem.setPrice(tempItem.getPrice()); // 假設價格從 DTO 取得
+
+                // 將新的購物車項目加入會員購物車
+                userCart.getCartItems().add(newItem);
+            }
+        }
+
+        // 儲存更新後的購物車
+        shoppingCartRepository.save(userCart);
     }
 
 }

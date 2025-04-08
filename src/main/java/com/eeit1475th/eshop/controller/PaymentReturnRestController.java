@@ -45,55 +45,11 @@ public class PaymentReturnRestController {
 	public void ecpayReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.setContentType("text/plain;charset=UTF-8");
 		try {
-//			StringBuilder rawData = new StringBuilder();
-//			try (BufferedReader reader = request.getReader()) {
-//				String line;
-//				while ((line = reader.readLine()) != null) {
-//					rawData.append(line);
-//				}
-//			}
-//			String rawBody = rawData.toString();
-//			logger.info("Raw request body: {}", rawBody);
-//			
-//			String receivedCheckMacValue = request.getParameter("CheckMacValue");
-//			logger.info("Received CheckMacValue from request.getParameter: {}", receivedCheckMacValue);
-
-
-//			// 列印所有請求參數
-//			request.getParameterMap().forEach((key, value) -> {
-//				logger.info("收到參數 - {}: {}", key, String.join(",", value));
-//			});
-			
-			
-
-
-//	        String receivedCheckMacValue = request.getParameter("CheckMacValue");
-//	        logger.info("Received CheckMacValue from request.getParameter: {}", receivedCheckMacValue);
-
 			 // 印出所有參數以便除錯
 	        request.getParameterMap().forEach((key, value) -> {
 	            logger.info("收到參數 - {}: {}", key, String.join(",", value));
 	        });
 
-//	        // 合併 Query String 與 POST Body 的參數
-//	        Map<String, String> allParams = EcpayUtil.mergeRequestParameters(request);
-//	        // 重建原始字串
-//	        String rawString = EcpayUtil.buildRawStringForCheckMac(allParams);
-//	        logger.info("重建的原始字串: {}", rawString);
-//
-//	        // 計算檢查碼
-//	        String computedCheckMac = EcpayUtil.calculateCheckMacValue(rawString);
-//	        logger.info("計算出的 CheckMacValue: {}", computedCheckMac);
-//
-//	        // 取得 ECPay 回傳的檢查碼
-//	        String receivedCheckMac = request.getParameter("CheckMacValue");
-//	        logger.info("收到的 CheckMacValue: {}", receivedCheckMac);
-//
-//	        // 比對檢查碼
-//	        if (!computedCheckMac.equals(receivedCheckMac)) {
-//	            throw new Exception("檢查碼驗證失敗");
-//	        }
-	        
 	        // 取得所有參數（注意：你原本的 mergeRequestParameters 方法會過濾掉 bidingcard）
 	        Map<String, String> paramMap = EcpayUtil.mergeRequestParameters(request);
 	        
@@ -102,16 +58,10 @@ public class PaymentReturnRestController {
 	        paramTable.putAll(paramMap);
 
 	        // 使用 compareCheckMacValue 方法檢查檢查碼
-	        boolean valid = allInOne.compareCheckMacValue(paramTable); // 假設你將 compareCheckMacValue 寫在 EcpayFunction 裡
+	        boolean valid = allInOne.compareCheckMacValue(paramTable);
 	        if (!valid) {
 	            throw new Exception("檢查碼驗證失敗");
 	        }
-	        
-	        
-	        
-	        
-//			// 驗證回傳資料
-//			Object feedback = allInOne.aioCheckOutFeedback(request);
 
 			String rtnCode = request.getParameter("RtnCode");
 			String merchantTradeNo = request.getParameter("MerchantTradeNo");

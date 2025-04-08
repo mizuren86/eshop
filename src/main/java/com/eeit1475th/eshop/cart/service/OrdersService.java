@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.eeit1475th.eshop.cart.dto.CartItemsDTO;
 import com.eeit1475th.eshop.cart.dto.OrderDTO;
 import com.eeit1475th.eshop.cart.dto.OrderItemDTO;
 import com.eeit1475th.eshop.cart.dto.OrderSummary;
@@ -190,6 +191,16 @@ public class OrdersService {
 		BigDecimal grandTotal = subtotal.add(shippingFee).subtract(couponDiscount);
 		if (grandTotal.compareTo(BigDecimal.ZERO) < 0) {
 			grandTotal = BigDecimal.ZERO;
+		}
+
+		// 如果運送方式不是 7-11 取貨，則把城市、區域與使用者填寫的地址合併起來
+		if (!"711-cod".equalsIgnoreCase(shippingMethod) && !"711-no-cod".equalsIgnoreCase(shippingMethod)) {
+			// 確保城市與區域有資料
+			if (selectedCity != null && !selectedCity.isEmpty() && selectedDistrict != null
+					&& !selectedDistrict.isEmpty()) {
+				// 可根據需求選擇合併的格式，城市 + " " + 區域 + " " + 原始地址
+				shippingAddress = selectedCity + " " + selectedDistrict + " " + shippingAddress;
+			}
 		}
 
 		// 若運送方式為 711-cod 或 711-no-cod，從資料庫取得 SelectedStore
@@ -385,30 +396,30 @@ public class OrdersService {
 		// 去除多餘空白
 		final String trimmedMerchantTradeNo = merchantTradeNo.trim();
 		logger.info("收到更新請求，訂單號碼: '{}'", merchantTradeNo);
-		
+
 		if (!isValidMerchantTradeNo(merchantTradeNo)) {
-	        throw new IllegalArgumentException("訂單號碼格式錯誤: " + merchantTradeNo);
-	    }
-		
+			throw new IllegalArgumentException("訂單號碼格式錯誤: " + merchantTradeNo);
+		}
+
 		Orders order = ordersRepository.findByMerchantTradeNo(merchantTradeNo)
-	            .orElseThrow(() -> new RuntimeException("Order not found，merchantTradeNo=" + merchantTradeNo));
-	    logger.info("找到訂單，訂單編號: {}", order.getOrderId());
-	    
-	    if (status == null) {
-	        throw new IllegalArgumentException("狀態不能為 null");
-	    }
-	    status = status.trim();
+				.orElseThrow(() -> new RuntimeException("Order not found，merchantTradeNo=" + merchantTradeNo));
+		logger.info("找到訂單，訂單編號: {}", order.getOrderId());
 
-	    if ("paid".equalsIgnoreCase(status) || "已付款".equals(status)) {
-	        order.setPaymentStatus(PaymentStatus.已付款);
-	    } else if ("shipped".equalsIgnoreCase(status) || "已出貨".equals(status)) {
-	        order.setShippingStatus(ShippingStatus.已出貨);
-	    } else {
-	        throw new IllegalArgumentException("不支援的狀態: " + status);
-	    }
+		if (status == null) {
+			throw new IllegalArgumentException("狀態不能為 null");
+		}
+		status = status.trim();
 
-	    ordersRepository.save(order);
-	    logger.info("訂單 {} 狀態更新為 {}", order.getOrderId(), status);
+		if ("paid".equalsIgnoreCase(status) || "已付款".equals(status)) {
+			order.setPaymentStatus(PaymentStatus.已付款);
+		} else if ("shipped".equalsIgnoreCase(status) || "已出貨".equals(status)) {
+			order.setShippingStatus(ShippingStatus.已出貨);
+		} else {
+			throw new IllegalArgumentException("不支援的狀態: " + status);
+		}
+
+		ordersRepository.save(order);
+		logger.info("訂單 {} 狀態更新為 {}", order.getOrderId(), status);
 	}
 
 	public boolean isValidMerchantTradeNo(String merchantTradeNo) {
@@ -483,4 +494,49 @@ public class OrdersService {
 			return dto;
 		});
 	}
+
+	public OrderSummary calculateOrderSummaryForCartItems(List<CartItemsDTO> cartItems, String shippingMethod,
+			String selectedCity, String selectedDistrict, String couponCode) {
+
+		OrderSummary summary = new OrderSummary();
+
+		// 1. 計算購物車小計：累加所有 CartItemsDTO 的價格 * 數量
+		BigDecimal subtotal = BigDecimal.ZERO;
+		for (CartItemsDTO item : cartItems) {
+			// 假設 getPrice() 回傳 BigDecimal，getQuantity() 回傳 int
+			subtotal = subtotal.add(item.getPrice().multiply(new BigDecimal(item.getQuantity())));
+		}
+		summary.setSubtotal(subtotal);
+
+		// 2. 計算運費，這裡直接使用原有的 calculateShippingFee 方法
+		BigDecimal shippingFee = calculateShippingFee(shippingMethod, selectedCity, selectedDistrict);
+		summary.setShippingFee(shippingFee);
+
+		// 3. 根據優惠碼取得優惠折扣，使用 CouponService 的邏輯
+		BigDecimal couponDiscount = couponService.getDiscountByCouponCode(couponCode);
+		if (couponDiscount == null) {
+			couponDiscount = BigDecimal.ZERO;
+		}
+		summary.setCouponDiscount(couponDiscount);
+
+		// 4. 計算最終合計：小計 + 運費 - 優惠折扣（最低不得低於 0）
+		BigDecimal grandTotal = subtotal.add(shippingFee).subtract(couponDiscount);
+		if (grandTotal.compareTo(BigDecimal.ZERO) < 0) {
+			grandTotal = BigDecimal.ZERO;
+		}
+		summary.setGrandTotal(grandTotal);
+
+		return summary;
+	}
+	
+	// 刪除訂單
+	public void deleteOrder(Integer orderId) {
+	    ordersRepository.deleteById(orderId);
+	}
+
+	// 取得所有訂單（管理者專用）
+	public Page<Orders> getAllOrders(PageRequest pageRequest) {
+	    return ordersRepository.findAll(pageRequest);
+	}
+
 }

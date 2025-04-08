@@ -205,22 +205,20 @@
 				<div class="col-lg-3 col-md-6">
 					<div class="d-flex flex-column text-start footer-item">
 						<h4 class="text-light mb-3">Shop Info</h4>
-						<a th:href="@{/aboutus}" class="btn-link">About Us</a> <a th:href="@{/contact}"
-							class="btn-link">Contact Us</a> <a th:href="@{/privacypolicy}" class="btn-link">Privacy
-							Policy</a> <a th:href="@{/termsofuse}" class="btn-link">Terms of Use</a> <a
-							th:href="@{/salesandrefunds}" class="btn-link">Sales and
-							Refunds</a> <a th:href="@{/faqshelp}" class="btn-link">FAQs &
-							Help</a>
+						<a th:href="@{/aboutus}" class="btn-link">About Us</a>
+						<a th:href="@{/contact}" class="btn-link">Contact Us</a>
+						<a th:href="@{/privacypolicy}" class="btn-link">Privacy Policy</a>
+						<a th:href="@{/termsofuse}" class="btn-link">Terms of Use</a>
+						<a th:href="@{/salesandrefunds}" class="btn-link">Sales and Refunds</a>
+						<a th:href="@{/faqshelp}" class="btn-link">FAQs & Help</a>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
 					<div class="d-flex flex-column text-start footer-item">
 						<h4 class="text-light mb-3">Account</h4>
-						<a class="btn-link" href="">My Account</a> <a class="btn-link" href="">Shop details</a> <a
-							class="btn-link" href="">Shopping
-							Cart</a> <a class="btn-link" href="">Wishlist</a> <a class="btn-link" href="">Order
-							History</a> <a class="btn-link" href="">International
-							Orders</a>
+						<a class="btn-link" th:href="@{/profile}">My Account</a> 
+						<a class="btn-link" th:href="@{/cart}">Shopping Cart</a>
+						<a class="btn-link" th:href="@{/orders}">Order History</a>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
@@ -403,7 +401,7 @@
 
 
 		// 自動登出 //
-		const autoLogoutTime = 30 * 30 * 1000; // 30 分鐘
+		const autoLogoutTime = 30 * 60 * 1000; // 30 分鐘
 		function autoLogout() {
 			setTimeout(() => {
 				// 發送登出請求

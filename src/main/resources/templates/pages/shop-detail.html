@@ -5,6 +5,8 @@
 <head>
 	<meta charset="utf-8">
 	<title>Shop Detail - Fruitables</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<style scoped>
 		.product-image {
 			width: 100%;
@@ -304,12 +306,26 @@
 						return response.text();
 					})
 					.then(data => {
-						alert("商品已加入購物車！");
+						Swal.fire({
+							icon: 'warning',
+							title: '商品已加入購物車！',
+							confirmButtonText: '確定',
+							customClass: {
+								confirmButton: 'btn border-secondary rounded px-4 py-3 text-primary text-uppercase'
+							},
+						});
 						updateCartCount();
 					})
 					.catch(error => {
 						console.error("Error:", error);
-						alert("加入購物車時發生錯誤");
+						Swal.fire({
+							icon: 'warning',
+							title: '加入購物車時發生錯誤',
+							confirmButtonText: '確定',
+							customClass: {
+								confirmButton: 'btn border-secondary rounded px-4 py-3 text-primary text-uppercase'
+							},
+						});
 					});
 			}
 			/*]]>*/

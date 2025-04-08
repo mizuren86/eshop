@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 @RequestMapping("/cart")
 public class ShoppingCartController {
-	
+
 	@Autowired
 	private ShoppingCartService shoppingCartService;
 
@@ -28,47 +28,55 @@ public class ShoppingCartController {
 	@GetMapping
 	public String showCart(Model model, HttpSession session,
 			@SessionAttribute(value = "user", required = false) Users user) {
-		
+
 		if (user != null) {
-	        // 從資料庫讀取會員的購物車資料
-	        List<CartItemsDTO> cartItems = shoppingCartService.getCartItems(user.getUserId());
-	        model.addAttribute("cartItems", cartItems);
-	        model.addAttribute("userId", user.getUserId());
-	    } else {
-	        // 未登入狀態，從 session 讀取暫存購物車
-	        List<CartItemsDTO> tempCart = (List<CartItemsDTO>) session.getAttribute("tempCart");
-	        if (tempCart == null) {
-	            tempCart = new ArrayList<>();
-	        }
-	        model.addAttribute("cartItems", tempCart);
-	        model.addAttribute("userId", null);
-	    }
-		
+		    // 從 session 讀取暫存購物車
+		    List<CartItemsDTO> tempCart = (List<CartItemsDTO>) session.getAttribute("tempCart");
+		    if (tempCart != null && !tempCart.isEmpty()) {
+		        // 合併暫存購物車到會員購物車
+		        shoppingCartService.mergeTempCartToUserCart(user.getUserId(), tempCart);
+		        // 合併後清除 session 中的暫存購物車資料，避免重複合併
+		        session.removeAttribute("tempCart");
+		    }
+		    // 從資料庫讀取會員的購物車資料
+		    List<CartItemsDTO> cartItems = shoppingCartService.getCartItems(user.getUserId());
+		    model.addAttribute("cartItems", cartItems);
+		    model.addAttribute("userId", user.getUserId());
+		} else {
+		    // 未登入狀態，從 session 讀取暫存購物車
+		    List<CartItemsDTO> tempCart = (List<CartItemsDTO>) session.getAttribute("tempCart");
+		    if (tempCart == null) {
+		        tempCart = new ArrayList<>();
+		    }
+		    model.addAttribute("cartItems", tempCart);
+		    model.addAttribute("userId", null);
+		}
+
 		// 從 session 讀取用戶先前選擇的運送與付款方式
-	    String shippingMethod = (String) session.getAttribute("shippingMethod");
-	    String paymentMethod = (String) session.getAttribute("paymentMethod");
-	    
-	    if (shippingMethod == null) {
-	        shippingMethod = "711-cod";
-	        session.setAttribute("shippingMethod", shippingMethod);
-	    }
-	    if (paymentMethod == null) {
-	        paymentMethod = "711-cod-only";
-	        session.setAttribute("paymentMethod", paymentMethod);
-	    }
-	    String sessionShippingMethod = (String) session.getAttribute("shippingMethod");
-        String sessionPaymentMethod = (String) session.getAttribute("paymentMethod");
-        model.addAttribute("shippingMethod", sessionShippingMethod);
-        model.addAttribute("paymentMethod", sessionPaymentMethod);
-        
-        // 從 session 讀取優惠券折扣，若不存在則預設為 0
-        Integer couponDiscount = (Integer) session.getAttribute("couponDiscount");
-        if (couponDiscount == null) {
-            couponDiscount = 0;
-            session.setAttribute("couponDiscount", couponDiscount);
-        }
-        model.addAttribute("couponDiscount", couponDiscount);
-        
+		String shippingMethod = (String) session.getAttribute("shippingMethod");
+		String paymentMethod = (String) session.getAttribute("paymentMethod");
+
+		if (shippingMethod == null) {
+			shippingMethod = "711-cod";
+			session.setAttribute("shippingMethod", shippingMethod);
+		}
+		if (paymentMethod == null) {
+			paymentMethod = "711-cod-only";
+			session.setAttribute("paymentMethod", paymentMethod);
+		}
+		String sessionShippingMethod = (String) session.getAttribute("shippingMethod");
+		String sessionPaymentMethod = (String) session.getAttribute("paymentMethod");
+		model.addAttribute("shippingMethod", sessionShippingMethod);
+		model.addAttribute("paymentMethod", sessionPaymentMethod);
+
+		// 從 session 讀取優惠券折扣，若不存在則預設為 0
+		Integer couponDiscount = (Integer) session.getAttribute("couponDiscount");
+		if (couponDiscount == null) {
+			couponDiscount = 0;
+			session.setAttribute("couponDiscount", couponDiscount);
+		}
+		model.addAttribute("couponDiscount", couponDiscount);
+
 		return "/pages/cart";
 	}
 }

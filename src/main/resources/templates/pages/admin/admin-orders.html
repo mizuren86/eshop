@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="utf-8" />
+	<title>CMS - Fruitables</title>
+	<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+	<meta content="" name="keywords" />
+	<meta content="" name="description" />
+
+	<!-- Google Web Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap"
+		rel="stylesheet">
+
+	<!-- Icon Font Stylesheet -->
+	<link rel="stylesheet" th:href="@{'https://use.fontawesome.com/releases/v5.15.4/css/all.css'}" />
+	<link th:href="@{'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css'}" rel="stylesheet">
+
+	<!-- Libraries Stylesheet -->
+	<link th:href="@{/lib/lightbox/css/lightbox.min.css}" rel="stylesheet" />
+	<link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet" />
+
+	<!-- Customized Bootstrap Stylesheet -->
+	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+
+	<!-- Template Stylesheet -->
+	<link th:href="@{/css/style.css}" rel="stylesheet" />
+
+	<!-- SweetAlert2 CSS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+</head>
+
+<body>
+	<!-- Navbar Start -->
+	<div class="container-fluid fixed-top">
+		<div class="container topbar bg-primary d-none d-lg-block">
+			<div class="d-flex justify-content-between">
+				<div class="top-info ps-2">
+					<small class="me-3" id="userLocation" style="display: none;">
+						<i class="fas fa-map-marker-alt me-2 text-secondary"></i> <span id="locationText"
+							class="text-white"></span>
+					</small>
+				</div>
+				<div class="top-link pe-2">
+					<a class="text-white"><small class="text-white mx-2">CMS - Fruitables</small></a>
+				</div>
+			</div>
+		</div>
+		<div class="container px-0">
+			<nav class="navbar navbar-light bg-white navbar-expand-xl">
+				<a th:href="@{/admin-orders}" class="navbar-brand">
+					<h1 class="text-primary display-6">Fruitables</h1>
+				</a>
+				<button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse"
+					data-bs-target="#navbarCollapse">
+					<span class="fa fa-bars text-primary"></span>
+				</button>
+				<div class="collapse navbar-collapse bg-white" id="navbarCollapse">
+					<div class="navbar-nav mx-auto">
+						<a th:href="@{/admin-users}" class="nav-item nav-link">會員管理</a>
+						<a th:href="@{/admin-products}" class="nav-item nav-link">商品管理</a>
+						<a th:href="@{/admin-orders}" class="nav-item nav-link">訂單管理</a>
+						<a th:href="@{/admin-reviews}" class="nav-item nav-link">評論管理</a>
+						<a th:href="@{/admin-reports}" class="nav-item nav-link">報表</a>
+					</div>
+				</div>
+			</nav>
+		</div>
+	</div>
+	<!-- Navbar End -->
+
+	<!-- 頁首 -->
+	<header class="container-fluid page-header py-5">
+		<h1 class="text-center text-white display-6">訂單管理</h1>
+	</header>
+
+	<main class="container py-5">
+		<!-- 訂單管理列表 -->
+		<table class="order-table table">
+			<thead>
+				<tr>
+					<th>訂單編號</th>
+					<th>交易編號</th>
+					<th>顧客姓名</th>
+					<th>訂單金額</th>
+					<th>付款狀態</th>
+					<th>配送狀態</th>
+					<th>訂單日期</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="order : ${ordersPage.content}">
+					<td th:text="${order.orderId}">訂單編號</td>
+					<td th:text="${order.merchantTradeNo}">訂單編號</td>
+					<td th:text="${order.users.username}">顧客姓名</td>
+					<td th:text="${'$' + #numbers.formatDecimal(order.totalAmount, 0, 0)}">$0</td>
+					<td th:text="${order.paymentStatus}">付款狀態</td>
+					<td>
+						<a href="#" th:data-shipping-method="${order.shippingMethod}"
+							th:data-shipping-address="${order.shippingAddress}"
+							th:data-recipient-name="${order.recipientName}"
+							th:data-recipient-phone="${order.recipientPhone}"
+							th:data-order-remark="${order.orderRemark}"
+							onclick="showShippingDetails(this); return false;"
+							th:text="${order.shippingStatus}">配送狀態</a>
+					</td>
+					<td th:text="${#temporals.format(order.orderDate, 'yyyy/MM/dd HH:mm:ss')}">訂單日期</td>
+					<td>
+						<a th:href="@{'/admin/orders/view/' + ${order.orderId}}" class="action-btn">檢視</a>
+						<a th:href="@{'/admin/orders/edit/' + ${order.orderId}}" class="action-btn">編輯</a>
+						<button type="button" class="action-btn"
+							th:onclick="'deleteOrder(' + ${order.orderId} + ')'">刪除</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<!-- 分頁 -->
+		<div class="pagination d-flex justify-content-center mt-5">
+			<!-- 上一頁 -->
+			<a th:if="${ordersPage.number > 0}" th:href="@{'/admin/orders'(page=${ordersPage.number - 1})}"
+				class="rounded">&laquo;</a>
+
+			<!-- 頁碼 -->
+			<a th:each="i : ${#numbers.sequence(0, ordersPage.totalPages - 1)}" th:href="@{'/admin/orders'(page=${i})}"
+				th:text="${i + 1}" th:classappend="${i == ordersPage.number} ? ' active rounded' : ' rounded'">
+			</a>
+
+			<!-- 下一頁 -->
+			<a th:if="${ordersPage.number < ordersPage.totalPages - 1}"
+				th:href="@{'/admin/orders'(page=${ordersPage.number + 1})}" class="rounded">&raquo;</a>
+		</div>
+	</main>
+
+	<!-- Footer Start -->
+	<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
+		<div class="container py-5">
+			<div class="pb-4 mb-4" style="border-bottom: 1px solid rgba(226, 175, 24, 0.5)">
+				<div class="row g-4">
+					<div class="col-lg-3">
+						<a href="#">
+							<h1 class="text-primary mb-0">Fruitables</h1>
+							<p class="text-secondary mb-0">Fresh products</p>
+						</a>
+					</div>
+				</div>
+			</div>
+			<div class="row g-5">
+
+			</div>
+		</div>
+	</div>
+	<!-- Footer End -->
+
+	<!-- Copyright Start -->
+	<div class="container-fluid copyright bg-dark py-4">
+		<div class="container">
+			<div class="row">
+				<span class="text-light text-md-center"> <a href="#"> <i
+							class="fas fa-copyright text-light me-2"></i>Fruitables
+					</a>, All right reserved.
+				</span>
+			</div>
+		</div>
+	</div>
+	<!-- Copyright End -->
+
+	<!-- Back to Top -->
+	<a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top">
+		<i class="fa fa-arrow-up"></i>
+	</a>
+
+	<!-- JavaScript Libraries -->
+	<script th:src="@{'https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js'}"></script>
+	<script th:src="@{'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js'}"></script>
+	<script th:src="@{/lib/easing/easing.min.js}"></script>
+	<script th:src="@{/lib/waypoints/waypoints.min.js}"></script>
+	<script th:src="@{/lib/lightbox/js/lightbox.min.js}"></script>
+	<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+	<script th:src="@{'https://cdn.jsdelivr.net/npm/sweetalert2@11'}"></script>
+	<!-- Template Javascript -->
+	<script th:src="@{/js/main.js}"></script>
+	<script>
+		// 刪除訂單（使用 SweetAlert 做確認）
+		function deleteOrder(orderId) {
+			Swal.fire({
+				icon: 'warning',
+				title: '確認刪除',
+				text: '你確定要刪除此筆訂單嗎？此操作無法恢復。',
+				showCancelButton: true,
+				confirmButtonText: '刪除',
+				cancelButtonText: '取消',
+				customClass: {
+					confirmButton: 'btn btn-danger',
+					cancelButton: 'btn btn-secondary'
+				},
+				buttonsStyling: false
+			}).then((result) => {
+				if (result.isConfirmed) {
+					fetch('/admin/orders/delete/' + orderId, {method: 'DELETE'})
+						.then(response => {
+							if (response.ok) {
+								Swal.fire({
+									icon: 'success',
+									title: '已刪除',
+									text: '訂單已成功刪除。',
+									timer: 1500,
+									showConfirmButton: false
+								}).then(() => {window.location.reload();});
+							} else {
+								Swal.fire({
+									icon: 'error',
+									title: '刪除失敗',
+									text: '無法刪除此筆訂單，請稍後再試。'
+								});
+							}
+						})
+						.catch(error => {
+							console.error('刪除訂單時發生錯誤：', error);
+							Swal.fire({
+								icon: 'error',
+								title: '刪除失敗',
+								text: '無法刪除此筆訂單，請稍後再試。'
+							});
+						});
+				}
+			});
+		}
+
+		// 配送詳情
+		function showShippingDetails(anchorElement) {
+			// 讀取 data- 屬性中的配送詳細資訊
+			var shippingMethod = anchorElement.getAttribute('data-shipping-method') || '無';
+			var shippingAddress = anchorElement.getAttribute('data-shipping-address') || '無';
+			var recipientName = anchorElement.getAttribute('data-recipient-name') || '無';
+			var recipientPhone = anchorElement.getAttribute('data-recipient-phone') || '無';
+			var orderRemark = anchorElement.getAttribute('data-order-remark') || '無';
+
+			// 組合要顯示的 HTML 內容
+			var htmlContent =
+				'<div class="shipping-details" style="text-align: left;">' +
+				'<p><strong>配送方式：</strong>' + shippingMethod + '</p>' +
+				'<p><strong>配送地址：</strong>' + shippingAddress + '</p>' +
+				'<p><strong>收件人姓名：</strong>' + recipientName + '</p>' +
+				'<p><strong>收件人電話：</strong>' + recipientPhone + '</p>' +
+				'<p><strong>訂單備註：</strong>' + orderRemark + '</p>' +
+				'</div>';
+
+			Swal.fire({
+				title: '配送詳情',
+				html: htmlContent,
+				confirmButtonText: '確定',
+				customClass: {
+					confirmButton: 'btn btn-primary'
+				},
+				buttonsStyling: false
+			});
+
+			Swal.fire({
+				icon: 'warning',
+				title: '訂單資料不完整',
+				html: "<p>請填寫以下欄位：</p><p>" + missingFields.join("<br>") + "</p>",
+				confirmButtonText: '確定',
+				customClass: {
+					confirmButton: 'btn border-secondary rounded px-4 py-3 text-primary text-uppercase'
+				},
+				buttonsStyling: false
+			});
+
+		}
+	</script>
+</body>
+
+</html>

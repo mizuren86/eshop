@@ -31,11 +31,11 @@ import jakarta.servlet.http.HttpSession;
 public class CheckoutRestController {
 
 	private static final Logger logger = LogManager.getLogger(CheckoutRestController.class);
-	
+
 	// 測試環境參數
-    private static final String MERCHANT_ID = "3002607";
-    private static final String HASH_KEY = "pwFHCqoQZGmho4w6";
-    private static final String HASH_IV = "EkRm7iFT261dpevs";
+	private static final String MERCHANT_ID = "3002607";
+	private static final String HASH_KEY = "pwFHCqoQZGmho4w6";
+	private static final String HASH_IV = "EkRm7iFT261dpevs";
 
 	private AllInOne allInOne;
 
@@ -64,25 +64,31 @@ public class CheckoutRestController {
 	public void submitOrder(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		try {
 			HttpSession session = request.getSession();
-			
+
 			// Step 0-1: 讀取運送方式參數
 			String shippingMethod = request.getParameter("shippingMethod");
-            if (shippingMethod == null || shippingMethod.trim().isEmpty() || "null".equalsIgnoreCase(shippingMethod.trim())) {
-                throw new RuntimeException("缺少運送方式參數");
-            }
-            session.setAttribute("shippingMethod", shippingMethod);
-            logger.info("收到運送方式參數：{}", shippingMethod);
-			
+			if (shippingMethod == null || shippingMethod.trim().isEmpty()
+					|| "null".equalsIgnoreCase(shippingMethod.trim())) {
+				throw new RuntimeException("缺少運送方式參數");
+			}
+			session.setAttribute("shippingMethod", shippingMethod);
+			logger.info("收到運送方式參數：{}", shippingMethod);
+
 			// Step 0-2: 讀取付款方式參數
-            String paymentMethod = request.getParameter("paymentMethod");
-            if (paymentMethod == null || paymentMethod.trim().isEmpty() || "null".equalsIgnoreCase(paymentMethod.trim())) {
-                paymentMethod = (String) session.getAttribute("paymentMethod");
-                if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
-                    throw new RuntimeException("缺少付款方式參數");
-                }
-            }
-            session.setAttribute("paymentMethod", paymentMethod);
-            logger.info("付款方式參數：{}", paymentMethod);
+			String paymentMethod = request.getParameter("paymentMethod");
+			if (paymentMethod == null || paymentMethod.trim().isEmpty()
+					|| "null".equalsIgnoreCase(paymentMethod.trim())) {
+				paymentMethod = (String) session.getAttribute("paymentMethod");
+				if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+					throw new RuntimeException("缺少付款方式參數");
+				}
+			}
+			session.setAttribute("paymentMethod", paymentMethod);
+			logger.info("付款方式參數：{}", paymentMethod);
+
+			// Step 0-3: 讀取訂單備註，這個欄位只存入資料庫，不會傳給綠界
+			String orderRemark = request.getParameter("orderRemark");
+			logger.info("收到訂單備註：{}", orderRemark);
 
 			// Step 1: 取得或建立訂單（從購物車建立訂單）
 			String orderIdStr = request.getParameter("orderId");
@@ -99,6 +105,9 @@ public class CheckoutRestController {
 					return;
 				}
 			}
+			
+			// 訂單備註存入訂單
+	        order.setOrderRemark(orderRemark);
 
 			// Step 2: 根據運送方式分流處理
 			if ("711-cod".equalsIgnoreCase(shippingMethod)) {
@@ -121,9 +130,9 @@ public class CheckoutRestController {
 				// 非 7-11取貨付款：處理金流付款
 				// 此處直接使用先前存入 Session 中的付款方式
 				if ("711-no-cod".equalsIgnoreCase(shippingMethod) && "711-cod-only".equalsIgnoreCase(paymentMethod)) {
-				    paymentMethod = "credit";
+					paymentMethod = "credit";
 				}
-				
+
 				if ("credit".equalsIgnoreCase(paymentMethod)) {
 					// 信用卡付款流程
 
@@ -153,16 +162,16 @@ public class CheckoutRestController {
 					obj.setTotalAmount(totalAmount);
 					obj.setTradeDesc(tradeDesc);
 					obj.setItemName(itemName);
-					obj.setReturnURL("https://7ab9-124-218-129-55.ngrok-free.app/ecpay/return");
+					obj.setReturnURL("https://8fcd-59-125-142-166.ngrok-free.app/ecpay/return");
 //					obj.setChoosePayment("Credit");
 //					obj.setEncryptType("1");
 					obj.setClientBackURL("http://localhost:8080/orders");
 					obj.setBidingCard("0");
-					
+
 					// 計算檢查碼 CheckMacValue，利用 SDK 的 EcpayFunction
-                    String checkMacValue = EcpayFunction.genCheckMacValue(HASH_KEY, HASH_IV, obj);
-                    logger.info("產生的 CheckMacValue: {}", checkMacValue);
-					
+					String checkMacValue = EcpayFunction.genCheckMacValue(HASH_KEY, HASH_IV, obj);
+					logger.info("產生的 CheckMacValue: {}", checkMacValue);
+
 					// 更新訂單中的廠商交易編號
 					order.setMerchantTradeNo(merchantTradeNo);
 					ordersService.updateOrder(order);

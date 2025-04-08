@@ -25,8 +25,8 @@ public class OrderController {
         if (userId == null) {
             return "redirect:/login?redirect=/orders";
         }
-        // 每頁顯示 8 筆訂單，並依訂單成立時間由新到舊排序
-        Page<OrderDTO> ordersPage = ordersService.getOrdersByUser(userId, page, 8);
+        // 每頁顯示 6 筆訂單，並依訂單成立時間由新到舊排序
+        Page<OrderDTO> ordersPage = ordersService.getOrdersByUser(userId, page, 6);
         model.addAttribute("ordersPage", ordersPage);
         
         // 清除在訂單流程中存入的 session 屬性
