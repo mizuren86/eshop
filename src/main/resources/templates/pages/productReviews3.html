@@ -17,10 +17,13 @@
       .page-btn {
         margin: 0 5px;
         padding: 5px 10px;
+        border: 1px solid rgb(255, 185, 64);
       }
+
       .activebutton {
-        background-color: #007bff;
+        background-color: rgb(111, 199, 51);
         color: white;
+        border: 1px solid rgb(255, 185, 64);
       }
       #reviewsTable {
         table-layout: fixed;
@@ -99,7 +102,7 @@
         gap: 15px;
       }
       .average-rating {
-        font-size: 0.8em;
+        font-size: 1.8em;
         color: #ff9500;
         font-weight: bold;
       }
@@ -142,7 +145,7 @@
       </div>
 
       <!-- 主要內容區 -->
-      <div class="container">
+      <div class="container my-5">
         <div class="page-title">
           <h2 th:text="|會員為『${ProductName}』留下的寶貴意見~|">產品名稱讀取中...</h2>
           <div class="average-rating" id="averageRating"></div>
@@ -404,7 +407,7 @@
           // 創建分頁按鈕輔助函數
           function createPageButton(pageNum, text) {
             const button = document.createElement("button");
-            button.className = `page-btn ${pageNum === currentPage ? "activebutton" : ""}`;
+            button.className = `page-btn ${pageNum === currentPage ? "activebutton rounded" : "rounded"}`;
             button.textContent = text;
             button.onclick = () => {
               if (pageNum !== currentPage) {

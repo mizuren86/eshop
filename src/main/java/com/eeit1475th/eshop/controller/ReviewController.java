@@ -27,9 +27,9 @@ import com.eeit1475th.eshop.member.entity.Users;
 import com.eeit1475th.eshop.product.entity.Products;
 import com.eeit1475th.eshop.product.repository.ProductsRepository;
 import com.eeit1475th.eshop.review.dto.ReviewsDto;
-import com.eeit1475th.eshop.review.dto.ReviewsDto2;
 import com.eeit1475th.eshop.review.dto.ReviewsDto4;
 import com.eeit1475th.eshop.review.dto.ReviewsDto5;
+import com.eeit1475th.eshop.review.dto.ReviewsDto6;
 import com.eeit1475th.eshop.review.entity.Reviews;
 import com.eeit1475th.eshop.review.repository.ReviewsRepository;
 import com.eeit1475th.eshop.review.service.ReviewsService;
@@ -165,7 +165,7 @@ public class ReviewController {
 			// 使用 userId 建立評論
 			reviewsService.createReview(review, user.getUserId());
 			// 重定向到產品評論頁面
-	        return "redirect:/reviews/product/" + productId;
+			return "redirect:/reviews/product/" + productId;
 		} catch (RuntimeException e) {
 			model.addAttribute("error", e.getMessage());
 			return "/pages/creatreviews";
@@ -186,8 +186,8 @@ public class ReviewController {
 
 		// 如果 userId 正確，則顯示該用戶的評價頁面
 		model.addAttribute("userId", userId);
-		Page<ReviewsDto2> reviews = reviewsService.findUserReviews(userId, pageable);
-		model.addAttribute("reviews", reviews);
+//		Page<ReviewsDto2> reviews = reviewsService.findUserReviews(userId, pageable);
+//		model.addAttribute("reviews", reviews);
 		return "/pages/userReviews"; // Thymeleaf 模板路徑
 	}
 
@@ -219,70 +219,97 @@ public class ReviewController {
 
 	@DeleteMapping("/{reviewId}")
 	@ResponseBody
-	public ResponseEntity<?> deleteReview(
-	    @PathVariable Integer reviewId,
-	    @SessionAttribute("user") Users user) {
+	public ResponseEntity<?> deleteReview(@PathVariable Integer reviewId, @SessionAttribute("user") Users user) {
 
-	    Reviews review = reviewsRepository.findById(reviewId)
-	        .orElseThrow(() -> new RuntimeException("評論不存在"));
+		Reviews review = reviewsRepository.findById(reviewId).orElseThrow(() -> new RuntimeException("評論不存在"));
 
-	    // 權限驗證
-	    if (!review.getUsers().getUserId().equals(user.getUserId())) {
-	        return ResponseEntity.status(403).body(Map.of(
-	            "success", false,
-	            "message", "無權限操作"
-	        ));
-	    }
+		// 權限驗證
+		if (!review.getUsers().getUserId().equals(user.getUserId())) {
+			return ResponseEntity.status(403).body(Map.of("success", false, "message", "無權限操作"));
+		}
 
-	    reviewsRepository.delete(review);
-	    return ResponseEntity.ok(Map.of("success", true));
+		reviewsRepository.delete(review);
+		return ResponseEntity.ok(Map.of("success", true));
 	}
-	
+
 	@PostMapping("/update/{reviewId}")
-	public String updateReview(
-	    @PathVariable Integer reviewId,
-	    @RequestParam Integer rating,
-	    @RequestParam(required = false) String comment,
-	    @RequestParam(required = false) MultipartFile photoFile,
-	    @RequestParam(required = false) Boolean deletePhoto,
-	    @SessionAttribute("user") Users user, 
-	    Model model) {
+	public String updateReview(@PathVariable Integer reviewId, @RequestParam Integer rating,
+			@RequestParam(required = false) String comment, @RequestParam(required = false) MultipartFile photoFile,
+			@RequestParam(required = false) Boolean deletePhoto, @SessionAttribute("user") Users user, Model model) {
 
-	    Reviews review = reviewsRepository.findById(reviewId)
-	        .orElseThrow(() -> new RuntimeException("評論不存在"));
+		Reviews review = reviewsRepository.findById(reviewId).orElseThrow(() -> new RuntimeException("評論不存在"));
 
-	    // 權限驗證
-	    if (!review.getUsers().getUserId().equals(user.getUserId())) {
-	        return "/pages/customizedErrorPages/516";
-	    }
+		// 權限驗證
+		if (!review.getUsers().getUserId().equals(user.getUserId())) {
+			return "/pages/customizedErrorPages/516";
+		}
 
-	    // 更新邏輯
-	    review.setRating(rating);
-	    review.setComment(comment);
-	    
-	    // 處理圖片刪除
-	    if (deletePhoto != null && deletePhoto) {
-	        review.setPhoto(null);
-	    }
-	    
-	    // 處理圖片上傳
-	 			if (photoFile != null && !photoFile.isEmpty()) {
-	 				if (photoFile.getSize() > 5 * 1024 * 1024) {
-	 					model.addAttribute("error", "圖片大小不能超過5MB");
-	 					return "redirect:/reviews/edit/" + reviewId;
-	 				}
-	 				try {
-	 					review.setPhoto(photoFile.getBytes());
-	 				} catch (IOException e) {
-	 					logger.error("圖片讀取失敗", e);
-	 					model.addAttribute("error", "圖片上傳失敗，請稍後再試");
-	 					return "redirect:/reviews/edit/" + reviewId;
-	 				}
-	 			}
-	    
-	    reviewsRepository.save(review);
-	    return "redirect:/reviews/user/" + user.getUserId();
+		// 更新邏輯
+		review.setRating(rating);
+		review.setComment(comment);
+
+		// 處理圖片刪除
+		if (deletePhoto != null && deletePhoto) {
+			review.setPhoto(null);
+		}
+
+		// 處理圖片上傳
+		if (photoFile != null && !photoFile.isEmpty()) {
+			if (photoFile.getSize() > 5 * 1024 * 1024) {
+				model.addAttribute("error", "圖片大小不能超過5MB");
+				return "redirect:/reviews/edit/" + reviewId;
+			}
+			try {
+				review.setPhoto(photoFile.getBytes());
+			} catch (IOException e) {
+				logger.error("圖片讀取失敗", e);
+				model.addAttribute("error", "圖片上傳失敗，請稍後再試");
+				return "redirect:/reviews/edit/" + reviewId;
+			}
+		}
+
+		reviewsRepository.save(review);
+		return "redirect:/reviews/user/" + user.getUserId();
 	}
+
+	@GetMapping("/manage")
+	public String manageAllReviews(@SessionAttribute(value = "user", required = false) Users user, Model model) {
+		// 檢查是否登入
+		if (user == null) {
+			return "/pages/customizedErrorPages/515"; // 如果未登入，導向自定義錯誤頁面515
+		}
+
+		// 確認訪問的 userId 是否是當前登入的用戶 ID
+		if (user.getUserId() != 99999999) {
+			return "/pages/customizedErrorPages/516"; // 如果 userId 不為 99999999，則導向自定義錯誤頁面516
+		}
+
+		return "/pages/manageAllReviews";
+	}
+
+	@GetMapping("/api/reviews/manageAll")
+	@ResponseBody
+	public ResponseEntity<Page<ReviewsDto6>> manageAllReviewsApi(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size, @RequestParam(required = false) String comment) {
+
+		Pageable pageable = PageRequest.of(page, size);
+		if (comment != null && comment.length() > 0) {
+			Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfo(comment, pageable);
+			return ResponseEntity.ok(reviewsPage);
+		} else {
+			Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfo(null, pageable);
+			return ResponseEntity.ok(reviewsPage);
+		}
+	}
+
+//	@GetMapping("/api/reviews/manageSpecificReviewsByComment")
+//	@ResponseBody
+//	public ResponseEntity<Page<ReviewsDto6>> manageSpecificReviewsByCommentApi(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+//
+//		Pageable pageable = PageRequest.of(page, size);
+//		Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfo(null, pageable);
+//		return ResponseEntity.ok(reviewsPage);
+//	}
 
 	private static final Logger logger = LoggerFactory.getLogger(ReviewController.class);
 
