@@ -14,8 +14,10 @@ import com.eeit1475th.eshop.member.entity.Users;
 import com.eeit1475th.eshop.member.repository.UsersRepository;
 import com.eeit1475th.eshop.review.dto.ReviewsDto;
 import com.eeit1475th.eshop.review.dto.ReviewsDto2;
+import com.eeit1475th.eshop.review.dto.ReviewsDto3;
 import com.eeit1475th.eshop.review.dto.ReviewsDto4;
 import com.eeit1475th.eshop.review.dto.ReviewsDto5;
+import com.eeit1475th.eshop.review.dto.ReviewsDto6;
 import com.eeit1475th.eshop.review.entity.Reviews;
 import com.eeit1475th.eshop.review.repository.ReviewsRepository;
 
@@ -186,5 +188,33 @@ public class ReviewsService {
 				.orElseThrow(() -> new RuntimeException("評論不存在"));
 		review.setPhoto(null);
 		reviewsRepository.save(review);
+	}
+	@Transactional(readOnly = true)
+	public Page<ReviewsDto6> getReviewsDto6WithUserAndProductInfo(String comment, Pageable pageable) {
+	    // 取得原始 ReviewsDto3 Page
+	    Page<ReviewsDto3> originalPage = reviewsRepository.findAllReviewsWithUserAndProductInfo(comment, pageable);
+	    
+	    // 轉換為 ReviewsDto6 Page
+	    return originalPage.map(reviewDto3 -> {
+	        ReviewsDto6 dto6 = new ReviewsDto6();
+	        dto6.setUserName(reviewDto3.getUserName());
+	        dto6.setProductName(reviewDto3.getProductName());
+	        dto6.setReviewId(reviewDto3.getReviewId());
+	        dto6.setUserId(reviewDto3.getUserId());
+	        dto6.setProductId(reviewDto3.getProductId());
+	        dto6.setRating(reviewDto3.getRating());
+	        dto6.setComment(reviewDto3.getComment());
+	        dto6.setUpdatedAt(reviewDto3.getUpdatedAt());
+	        
+	        // 將 byte[] 轉為 Base64 字串 (僅處理非空數據)
+	        if (reviewDto3.getPhoto() != null && reviewDto3.getPhoto().length > 0) {
+	            String base64Photo = Base64.getEncoder().encodeToString(reviewDto3.getPhoto());
+	            dto6.setPhoto("data:image/jpeg;base64," + base64Photo); // 補上 MIME 類型
+	        } else {
+	            dto6.setPhoto(null);
+	        }
+	        
+	        return dto6;
+	    });
 	}
 }

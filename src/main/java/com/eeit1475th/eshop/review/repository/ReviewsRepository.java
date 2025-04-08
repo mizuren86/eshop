@@ -13,6 +13,7 @@ import com.eeit1475th.eshop.member.entity.Users;
 import com.eeit1475th.eshop.product.entity.Products;
 import com.eeit1475th.eshop.review.dto.ReviewsDto;
 import com.eeit1475th.eshop.review.dto.ReviewsDto2;
+import com.eeit1475th.eshop.review.dto.ReviewsDto3;
 import com.eeit1475th.eshop.review.entity.Reviews;
 
 @Repository
@@ -89,6 +90,19 @@ public interface ReviewsRepository extends JpaRepository<Reviews, Integer> {
     	Page<ReviewsDto2> findReviewsByUserIdWithProductInfoAndProductName(
     	    @Param("userId") Integer userId,
     	    @Param("productName") String productName,  // 新增了 productName 參數
+    	    Pageable pageable
+    	);
+    
+    @Query("SELECT new com.eeit1475th.eshop.review.dto.ReviewsDto3(" +
+    	       "u.username, p.productName, r.reviewId, u.userId, p.productId, " +
+    	       "r.rating, r.comment, r.photo, r.updatedAt) " +
+    	       "FROM Reviews r " +
+    	       "JOIN r.users u " +
+    	       "JOIN r.products p " +
+    	       "WHERE (:comment IS NULL OR r.comment LIKE %:comment%) " +
+    	       "ORDER BY r.updatedAt DESC")
+    	Page<ReviewsDto3> findAllReviewsWithUserAndProductInfo(
+    	    @Param("comment") String comment,
     	    Pageable pageable
     	);
 
