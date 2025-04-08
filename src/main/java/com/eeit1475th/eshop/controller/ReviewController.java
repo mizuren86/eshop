@@ -2,6 +2,7 @@ package com.eeit1475th.eshop.controller;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -290,8 +292,13 @@ public class ReviewController {
 	@GetMapping("/api/reviews/manageAll")
 	@ResponseBody
 	public ResponseEntity<Page<ReviewsDto6>> manageAllReviewsApi(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "5") int size, @RequestParam(required = false) String comment) {
+			@RequestParam(defaultValue = "5") int size, @RequestParam(required = false) String comment, @SessionAttribute(value = "user", required = false) Users user) {
 
+		logger.info("Received request to manageAllReviews with page={}, size={}, comment={}", page, size, comment);
+	    
+	    if (user == null || user.getUserId() != 99999999) {
+	        logger.warn("Unauthorized access attempt by user: {}", user != null ? user.getUserId() : "null");}
+		
 		Pageable pageable = PageRequest.of(page, size);
 		if (comment != null && comment.length() > 0) {
 			Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfo(comment, pageable);
@@ -300,6 +307,18 @@ public class ReviewController {
 			Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfo(null, pageable);
 			return ResponseEntity.ok(reviewsPage);
 		}
+	}
+	
+	// 新增批量刪除API
+	@DeleteMapping("/api/reviews/deleteAll")
+	@ResponseBody
+	public ResponseEntity<String> deleteReviews(@RequestBody List<Integer> reviewIds) {
+	    try {
+	        reviewsService.deleteReviews(reviewIds);
+	        return ResponseEntity.ok("刪除成功");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500).body("刪除失敗: " + e.getMessage());
+	    }
 	}
 
 //	@GetMapping("/api/reviews/manageSpecificReviewsByComment")

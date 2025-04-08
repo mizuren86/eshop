@@ -1,6 +1,7 @@
 package com.eeit1475th.eshop.review.service;
 
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -189,6 +190,7 @@ public class ReviewsService {
 		review.setPhoto(null);
 		reviewsRepository.save(review);
 	}
+	
 	@Transactional(readOnly = true)
 	public Page<ReviewsDto6> getReviewsDto6WithUserAndProductInfo(String comment, Pageable pageable) {
 	    // 取得原始 ReviewsDto3 Page
@@ -216,5 +218,13 @@ public class ReviewsService {
 	        
 	        return dto6;
 	    });
+	}
+	
+	@Transactional
+	public void deleteReviews(List<Integer> reviewIds) {
+	    if (reviewIds == null || reviewIds.isEmpty()) {
+	        throw new IllegalArgumentException("未選擇要刪除的評論");
+	    }
+	    reviewsRepository.deleteAllById(reviewIds);
 	}
 }
