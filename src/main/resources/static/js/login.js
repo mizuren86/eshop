@@ -4,11 +4,11 @@ if (loginForm) {
     loginForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
         console.log('開始登入流程...');
-        console.log('用戶名:', username);
+        console.log('電子郵件:', email);
 
         try {
             console.log('發送登入請求...');
@@ -18,7 +18,7 @@ if (loginForm) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    username: username,
+                    email: email,
                     password: password
                 }),
                 credentials: 'include'

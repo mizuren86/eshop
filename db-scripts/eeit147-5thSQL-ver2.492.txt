@@ -281,11 +281,11 @@ VALUES
 -- 插入假資料到 users 表
 -- [password] 統一為'123'
 INSERT INTO users (username, [password], email, full_name, phone, user_photo, [address]) VALUES
-('alice123', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'alice@example.com', 'Alice Johnson', '0912345678', 'alice.jpg', '台北市信義區123號'),
-('bob456', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'bob@example.com', 'Bob Smith', '0923456789', 'bob.jpg', '台中市南屯區456號'),
-('charlie789', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'charlie@example.com', 'Charlie Brown', '0934567890', 'charlie.jpg', '高雄市三民區789號'),
-('tomlee', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'tomlee@example.com', 'Tom Lee', '0911222333', 'tomlee.jpg', '台北市中正區100號'),
-('janewang', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'janewang@example.com', 'Jane Wang', '0922333444', 'janewang.jpg', '台南市東區200號');
+('alice123', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'alice@example.com', 'Alice Johnson', '0912345678', '\img\users\pexels-photo-415829.webp', '台北市信義區123號'),
+('bob456', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'bob@example.com', 'Bob Smith', '0923456789', '\img\users\pexels-photo-839011.webp', '台中市南屯區456號'),
+('charlie789', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'charlie@example.com', 'Charlie Brown', '0934567890', '\img\users\pexels-photo-1043474.webp', '高雄市三民區789號'),
+('tomlee', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'tomlee@example.com', 'Tom Lee', '0911222333', '\img\users\pexels-photo-2379004.jpeg', '台北市中正區100號'),
+('janewang', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'janewang@example.com', 'Jane Wang', '0922333444', '\img\users\pexels-photo-774909.webp', '台南市東區200號');
 
 
 INSERT INTO [dbo].[reviews] ([reviews_product_id], [reviews_user_id], [rating], [comment], [updated_at]) 

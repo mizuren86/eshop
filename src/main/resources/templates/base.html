@@ -274,8 +274,8 @@
 	<script>
 		// 檢查登入狀態並更新導覽列
 		function updateNavigation() {
-			const user = JSON.parse(sessionStorage.getItem('user') || 'null');
-			const token = sessionStorage.getItem('token');
+			const user = JSON.parse(localStorage.getItem('user') || 'null');
+			const token = localStorage.getItem('token');
 			const guestMenu = document.getElementById('guestMenu');
 			const userMenu = document.getElementById('userMenu');
 
@@ -286,7 +286,7 @@
 
 			// 如果沒有 token，清除所有用戶信息
 			if (!token) {
-				sessionStorage.clear();
+				localStorage.clear();
 				console.log('清除所有用戶信息');
 			}
 
@@ -349,16 +349,16 @@
 				.then(response => response.json())
 				.then(data => {
 					console.log('伺服器端登出成功:', data);
-					// 清除客戶端的 sessionStorage
-					sessionStorage.clear();
-					console.log('已清除 sessionStorage');
+					// 清除客戶端的 localStorage
+					localStorage.clear();
+					console.log('已清除 localStorage');
 					// 導向登入頁面
 					window.location.href = '/index';
 				})
 				.catch(error => {
 					console.error('登出錯誤:', error);
-					// 失敗時也可以清除 sessionStorage 並跳轉
-					sessionStorage.clear();
+					// 失敗時也可以清除 localStorage 並跳轉
+					localStorage.clear();
 					window.location.href = '/index';
 				});
 		}
@@ -413,7 +413,7 @@
 					.then(data => {
 						console.log('自動登出成功：', data);
 						// 清除本地儲存的用戶資料
-						sessionStorage.clear();
+						localStorage.clear();
 						// 跳轉到首頁
 						window.location.href = '/index';
 					})
