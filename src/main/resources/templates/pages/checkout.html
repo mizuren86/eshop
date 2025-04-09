@@ -129,15 +129,15 @@
 	<div layout:fragment="content">
 		<!-- Header -->
 		<div class="container-fluid page-header py-5">
-			<h1 class="text-center text-white display-6">Checkout</h1>
+			<h1 class="text-center text-white display-6">結帳</h1>
 			<ol class="breadcrumb justify-content-center mb-0">
-				<li class="breadcrumb-item"><a th:href="@{/index}">Home</a></li>
-				<li class="breadcrumb-item"><a th:href="@{/cart}">Cart</a></li>
-				<li class="breadcrumb-item active text-white">Checkout</li>
+				<li class="breadcrumb-item"><a th:href="@{/index}">首頁</a></li>
+				<li class="breadcrumb-item"><a th:href="@{/cart}">購物車</a></li>
+				<li class="breadcrumb-item active text-white">結帳</li>
 			</ol>
 		</div>
 
-		<input type="hidden" id="couponCodeHidden" th:value="${couponCode}" />
+		<input type="hidden" id="couponCodeHidden" th:value="${session.couponCode}" />
 
 		<!-- Checkout Page -->
 		<div class="container py-5" id="checkoutPage">
@@ -935,7 +935,8 @@
 				// 全域變數：保存購物車小計
 				let currentSubtotal = 0;
 				// 優惠券折扣（假設從 Session 拿到，若無則為 0）
-				var couponDiscountOverall = /*[[${couponDiscount != null ? couponDiscount : 0}]]*/ 0;
+				//var couponDiscountOverall = /*[[${couponDiscount != null ? couponDiscount : 0}]]*/ 0;
+				var couponDiscountOverall = parseFloat(/*[[${couponDiscount != null ? couponDiscount.toPlainString() : "0"}]]*/ "0");
 				// 假設 shippingMethod 由後端傳入，若無則預設為 "711-cod"
 				var shippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
 

@@ -528,15 +528,57 @@ public class OrdersService {
 
 		return summary;
 	}
-	
+
 	// 刪除訂單
 	public void deleteOrder(Integer orderId) {
-	    ordersRepository.deleteById(orderId);
+		ordersRepository.deleteById(orderId);
 	}
 
 	// 取得所有訂單（管理者專用）
 	public Page<Orders> getAllOrders(PageRequest pageRequest) {
-	    return ordersRepository.findAll(pageRequest);
+		return ordersRepository.findAll(pageRequest);
+	}
+
+	// 搜尋訂單（管理者專用）
+	public Page<Orders> searchOrders(String merchantTradeNo, String orderIdStr, String paymentStatus,
+			String shippingStatus, Pageable pageable) {
+
+		// 如果 merchantTradeNo 為 null，轉為空字串（對於模糊搜尋）
+		if (merchantTradeNo == null) {
+			merchantTradeNo = "";
+		}
+
+		// 轉換付款狀態與配送狀態為 Enum（若失敗或空字串則設定為 null）
+		PaymentStatus paymentStatusEnum = null;
+		if (paymentStatus != null && !paymentStatus.trim().isEmpty()) {
+			try {
+				paymentStatusEnum = PaymentStatus.valueOf(paymentStatus.trim());
+			} catch (IllegalArgumentException e) {
+				logger.warn("無效的付款狀態: {}", paymentStatus);
+			}
+		}
+		ShippingStatus shippingStatusEnum = null;
+		if (shippingStatus != null && !shippingStatus.trim().isEmpty()) {
+			try {
+				shippingStatusEnum = ShippingStatus.valueOf(shippingStatus.trim());
+			} catch (IllegalArgumentException e) {
+				logger.warn("無效的配送狀態: {}", shippingStatus);
+			}
+		}
+
+		// 如果 orderIdStr 存在且能轉換成 Integer，使用包含 orderId 條件的查詢
+		if (orderIdStr != null && !orderIdStr.trim().isEmpty()) {
+			try {
+				Integer orderId = Integer.valueOf(orderIdStr.trim());
+				return ordersRepository.searchOrdersWithOrderId(orderId, merchantTradeNo, paymentStatusEnum,
+						shippingStatusEnum, pageable);
+			} catch (NumberFormatException e) {
+				// 若轉換失敗，則忽略 orderId 條件
+				logger.warn("orderId 格式錯誤: {}", orderIdStr);
+			}
+		}
+		// 若 orderId 條件不存在，則使用不包含 orderId 條件的查詢
+		return ordersRepository.searchOrders(merchantTradeNo, paymentStatusEnum, shippingStatusEnum, pageable);
 	}
 
 }

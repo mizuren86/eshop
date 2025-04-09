@@ -277,27 +277,21 @@ VALUES
 ('VGE0006', '辣椒', '朝天椒', 110, '/img/vegetable-item-6.jpg', 100, 2),
 ('VGE0007', '玉米', '玉米筍', 36, '/img/vegetable-item-7.jpg', 100, 2);
 
-
 -- 插入假資料到 users 表
 -- [password] 統一為'123'
 INSERT INTO users (username, [password], email, full_name, phone, user_photo, [address]) VALUES
-('alice123', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'alice@example.com', 'Alice Johnson', '0912345678', 'alice.jpg', '台北市信義區123號'),
-('bob456', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'bob@example.com', 'Bob Smith', '0923456789', 'bob.jpg', '台中市南屯區456號'),
-('charlie789', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'charlie@example.com', 'Charlie Brown', '0934567890', 'charlie.jpg', '高雄市三民區789號'),
-('tomlee', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'tomlee@example.com', 'Tom Lee', '0911222333', 'tomlee.jpg', '台北市中正區100號'),
-('janewang', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'janewang@example.com', 'Jane Wang', '0922333444', 'janewang.jpg', '台南市東區200號');
-
+('alice123', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'alice@example.com', 'Alice Johnson', '0912345678', '\img\users\pexels-photo-415829.webp', '台北市信義區123號'),
+('bob456', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'bob@example.com', 'Bob Smith', '0923456789', '\img\users\pexels-photo-839011.webp', '台中市南屯區456號'),
+('charlie789', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'charlie@example.com', 'Charlie Brown', '0934567890', '\img\users\pexels-photo-1043474.webp', '高雄市三民區789號'),
+('tomlee', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'tomlee@example.com', 'Tom Lee', '0911222333', '\img\users\pexels-photo-2379004.jpeg', '台北市中正區100號'),
+('janewang', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'janewang@example.com', 'Jane Wang', '0922333444', '\img\users\pexels-photo-774909.webp', '台南市東區200號');
 
 INSERT INTO [dbo].[reviews] ([reviews_product_id], [reviews_user_id], [rating], [comment], [updated_at]) 
 VALUES 
-    (1, 1, 5, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。', DATEADD(MINUTE, -10, GETDATE())),
     (2, 2, 4, N'商品質量還不錯，但物流稍慢了一點。', DATEADD(MINUTE, -10, GETDATE())),
-    (3, 3, 3, N'普通商品，沒有太大驚喜。性價比一般。', DATEADD(MINUTE, -10, GETDATE())),
     (4, 4, 2, N'商品與描述不符，質量不好，不太滿意。', DATEADD(MINUTE, -10, GETDATE())),
     (5, 5, 5, N'超級喜歡這款產品，物超所值，非常實用。', DATEADD(MINUTE, -10, GETDATE())),
-    (1, 2, 4, N'質量很好，使用起來很方便，適合日常使用。', DATEADD(MINUTE, -10, GETDATE())),
     (2, 3, 3, N'商品還可以，沒有很特別，適合基本需求。', DATEADD(MINUTE, -10, GETDATE())),
-    (3, 4, 1, N'商品質量差，完全不符合預期。', DATEADD(MINUTE, -10, GETDATE())),
     (4, 5, 4, N'商品不錯，符合描述，但還是希望能再提升質量。', DATEADD(MINUTE, -10, GETDATE())),
     (5, 1, 5, N'這款產品完全符合我的需求，性價比超高，會再次購買。', DATEADD(MINUTE, -10, GETDATE()));
 
@@ -383,3 +377,57 @@ CREATE NONCLUSTERED INDEX [idx_activity_type] ON [dbo].[user_activity]([activity
 CREATE NONCLUSTERED INDEX [idx_user_id] ON [dbo].[user_activity]([user_id]);
 CREATE NONCLUSTERED INDEX [idx_create_time] ON [dbo].[user_operation_log]([create_time]);
 CREATE NONCLUSTERED INDEX [idx_username] ON [dbo].[user_operation_log]([username]);
+
+
+
+
+
+INSERT INTO [shopping_website].[dbo].[users] ([username], [password], [email], [full_name], [phone], [user_photo], [address])
+VALUES
+('jane', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'jane@example.com', 'Jane Wang', '0922333444', null, '台南市東區200號'),
+('user_x_1', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'user_x_1@example.com', 'X User 1', '0912345678', null, '台北市信義區300號'),
+('johndoe', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'johndoe@example.com', 'John Doe', '0987654321', null, '高雄市苓雅區500號'),
+('mike123', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'mike123@example.com', 'Mike Lee', '0955332211', null, '台中市南區100號'),
+('sarah88', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'sarah88@example.com', 'Sarah Lin', '0933122334', null, '桃園市中壢區400號'),
+('lucychen', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'lucychen@example.com', 'Lucy Chen', '0944223344', null, '新竹市東區50號'),
+('user_x_2', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'user_x_2@example.com', 'X User 2', '0911112233', null, '基隆市信義區700號'),
+('jasonwong', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'jasonwong@example.com', 'Jason Wong', '0955443322', null, '宜蘭市東區800號'),
+('katechu', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'katechu@example.com', 'Kate Chu', '0988776655', null, '屏東市新園區900號'),
+('tomliu', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'tomliu@example.com', 'Tom Liu', '0977112233', null, '新北市中和區600號'),
+('jennytan', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'jennytan@example.com', 'Jenny Tan', '0922444666', null, '彰化市埔心鄉700號'),
+('jerryliu', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'jerryliu@example.com', 'Jerry Liu', '0966334455', null, '台北市中山區110號'),
+('emilyli', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'emilyli@example.com', 'Emily Li', '0988334455', null, '新竹市北區300號'),
+('juliawong', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'juliawong@example.com', 'Julia Wong', '0977445566', null, '台南市北區800號'),
+('user_x_3', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'user_x_3@example.com', 'X User 3', '0933002211', null, '台中市北區600號'),
+('alicechu', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'alicechu@example.com', 'Alice Chu', '0977665544', null, '台北市內湖區100號'),
+('ericli', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'ericli@example.com', 'Eric Li', '0933221155', null, '高雄市楠梓區300號'),
+('hannahzhu', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'hannahzhu@example.com', 'Hannah Zhu', '0977777888', null, '嘉義市東區250號'),
+('user_x_4', '$2a$12$EWhc0y62ujS.a2bCHSikaupEvl/eVYPPKWyir49iFqF2zEzSO.XeG', 'user_x_4@example.com', 'X User 4', '0944332200', null, '花蓮市吉安鄉450號');
+
+
+
+
+
+
+
+INSERT INTO [dbo].[reviews] (
+    reviews_product_id, 
+    reviews_user_id, 
+    rating, 
+    comment, 
+    photo, 
+    updated_at
+)
+VALUES
+(1, 1, 4, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 2, 5, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 3, 4, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 4, 5, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 5, 4, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 7, 4, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 8, 5, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 9, 4, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 10, 5, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 11, 4, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 12, 5, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE())),
+(1, 13, 4, N'非常好用，效果出乎意料。很滿意這次的購物體驗，值得推薦。太讚啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦', NULL, DATEADD(MINUTE, -10, GETDATE()));

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>登入 - Fruitables</title>
+	<title>Login - Fruitables</title>
 	<link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link rel="stylesheet" th:href="@{/css/style.css}">
@@ -125,7 +125,7 @@
 						password: document.getElementById('password').value
 					};
 
-					console.log('發送登入請求到:', finalLoginUrl);
+					console.log('準備發送的登入數據:', loginData);
 
 					// 發送登入請求
 					const response = await fetch(finalLoginUrl, {
@@ -134,7 +134,8 @@
 							'Content-Type': 'application/json',
 							'Accept': 'application/json'
 						},
-						body: JSON.stringify(loginData)
+						body: JSON.stringify(loginData),
+						credentials: 'include'  // 添加這行以包含 cookies
 					});
 
 					console.log('收到響應:', response.status);
@@ -152,14 +153,14 @@
 					console.log('Token:', data.data.token);
 					loadingDiv.innerHTML = `<i class="fas fa-check-circle me-2"></i>歡迎回來，${data.data.user.username}！`;
 
-					// 保存用戶信息到 sessionStorage
+					// 保存用戶信息到 localStorage
 					if (data.data && data.data.user) {
 						const userData = data.data.user;
-						console.log('準備保存用戶信息到 sessionStorage');
+						console.log('準備保存用戶信息到 localStorage');
 
-						sessionStorage.setItem('user', JSON.stringify(userData));
-						sessionStorage.setItem('token', data.data.token);
-						sessionStorage.setItem('welcomeMessage', `歡迎回來，${userData.username}！`);
+						localStorage.setItem('user', JSON.stringify(userData));
+						localStorage.setItem('token', data.data.token);
+						localStorage.setItem('welcomeMessage', `歡迎回來，${userData.username}！`);
 
 						console.log('用戶信息已保存:', {
 							user: userData,

@@ -53,6 +53,12 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  web:
+    resources:
+      cache:
+        period: 0
+      chain:
+        cache: false
 
 # JWT 配置（24小時 = 86400000毫秒）
 jwt:

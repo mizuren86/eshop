@@ -32,10 +32,10 @@
 	<div layout:fragment="content">
 		<!-- Single Page Header Start -->
 		<div class="container-fluid page-header py-5">
-			<h1 class="text-center text-white display-6">Shop</h1>
+			<h1 class="text-center text-white display-6">蔬果</h1>
 			<ol class="breadcrumb justify-content-center mb-0">
-				<li class="breadcrumb-item"><a th:href="@{/index}">Home</a></li>
-				<li class="breadcrumb-item active text-white">Shop</li>
+				<li class="breadcrumb-item"><a th:href="@{/index}">首頁</a></li>
+				<li class="breadcrumb-item active text-white">蔬果</li>
 			</ol>
 		</div>
 		<!-- Single Page Header End -->
@@ -137,8 +137,13 @@
 														<i class="fa fa-minus"></i>
 													</button>
 												</div>
+												
 												<input type="text"
 													class="form-control form-control-sm text-center border-0" value="1">
+													<!--
+												<input type="number" min="1" 
+													class="form-control form-control-sm text-center border-0 product-quantity" value="1">
+													-->			
 												<div class="input-group-btn">
 													<button class="btn btn-sm btn-plus rounded-circle bg-light border">
 														<i class="fa fa-plus"></i>
