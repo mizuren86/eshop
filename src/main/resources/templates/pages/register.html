@@ -52,10 +52,13 @@
             <form id="registerForm">
               <div class="mb-3">
                 <label for="userPhoto" class="form-label">頭像</label>
-                <input type="file" class="form-control" id="userPhoto" name="userPhoto" accept="image/*">
+                <input type="file" class="form-control" id="userPhoto" name="userPhoto" accept="image/*"
+                  onchange="previewImage(this)">
+                <small class="text-muted">支持 jpg、jpeg、png 格式，大小不超過 5MB</small>
                 <div id="photoPreview" class="mt-2 d-none">
-                  <img src="" alt="預覽圖" style="max-width: 200px; max-height: 200px;">
+                  <img src="" alt="預覽圖" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
                 </div>
+                <div id="photoError" class="text-danger d-none"></div>
               </div>
 
               <div class="mb-3">
@@ -157,17 +160,46 @@
       }
 
       // 頭像預覽
-      photoInput.addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (file) {
+      function previewImage(input) {
+        const preview = document.getElementById('photoPreview');
+        const error = document.getElementById('photoError');
+        const img = preview.querySelector('img');
+
+        // 重置錯誤信息
+        error.classList.add('d-none');
+        error.textContent = '';
+
+        if (input.files && input.files[0]) {
+          const file = input.files[0];
+
+          // 驗證文件類型
+          if (!file.type.startsWith('image/')) {
+            error.textContent = '只允許上傳圖片文件';
+            error.classList.remove('d-none');
+            input.value = '';
+            preview.classList.add('d-none');
+            return;
+          }
+
+          // 驗證文件大小
+          if (file.size > 5 * 1024 * 1024) {
+            error.textContent = '圖片大小不能超過5MB';
+            error.classList.remove('d-none');
+            input.value = '';
+            preview.classList.add('d-none');
+            return;
+          }
+
           const reader = new FileReader();
           reader.onload = function (e) {
-            previewImg.src = e.target.result;
-            photoPreview.classList.remove('d-none');
+            img.src = e.target.result;
+            preview.classList.remove('d-none');
           }
           reader.readAsDataURL(file);
+        } else {
+          preview.classList.add('d-none');
         }
-      });
+      }
 
       // 發送驗證碼按鈕點擊事件
       sendVerificationBtn.addEventListener('click', async function () {

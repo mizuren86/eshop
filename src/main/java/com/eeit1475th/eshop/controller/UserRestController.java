@@ -106,15 +106,40 @@ public class UserRestController {
 
 			// 处理头像上传
 			if (userPhoto != null && !userPhoto.isEmpty()) {
-				String fileName = UUID.randomUUID().toString() + "_" + userPhoto.getOriginalFilename();
-				Path uploadDir = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "static", "img",
-						"users");
-				if (!Files.exists(uploadDir)) {
-					Files.createDirectories(uploadDir);
+				// 验证文件类型
+				String contentType = userPhoto.getContentType();
+				if (contentType == null || !contentType.startsWith("image/")) {
+					return ResponseEntity.badRequest().body(new ApiResponse(false, "只允許上傳圖片文件"));
 				}
-				Path filePath = uploadDir.resolve(fileName);
+
+				// 验证文件大小（限制為5MB）
+				if (userPhoto.getSize() > 5 * 1024 * 1024) {
+					return ResponseEntity.badRequest().body(new ApiResponse(false, "圖片大小不能超過5MB"));
+				}
+
+				// 生成唯一文件名
+				String originalFilename = userPhoto.getOriginalFilename();
+				String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+				String fileName = UUID.randomUUID().toString() + extension;
+
+				// 获取上传目录
+				String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/img/users";
+				Path uploadPath = Paths.get(uploadDir);
+
+				// 确保上传目录存在
+				if (!Files.exists(uploadPath)) {
+					Files.createDirectories(uploadPath);
+				}
+
+				// 保存文件
+				Path filePath = uploadPath.resolve(fileName);
 				Files.copy(userPhoto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-				userDTO.setUserPhoto("img/users/" + fileName);
+
+				// 设置用户头像路径
+				userDTO.setUserPhoto("/img/users/" + fileName);
+			} else {
+				// 如果没有上传头像，使用默认头像
+				userDTO.setUserPhoto("/img/avatar.jpg");
 			}
 
 			// 创建用户
@@ -233,15 +258,37 @@ public class UserRestController {
 
 			// 处理用户照片
 			if (userPhoto != null && !userPhoto.isEmpty()) {
-				String fileName = UUID.randomUUID().toString() + "_" + userPhoto.getOriginalFilename();
-				Path uploadDir = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "static", "img",
-						"users");
-				if (!Files.exists(uploadDir)) {
-					Files.createDirectories(uploadDir);
+				// 验证文件类型
+				String contentType = userPhoto.getContentType();
+				if (contentType == null || !contentType.startsWith("image/")) {
+					return ResponseEntity.badRequest().body(new ApiResponse(false, "只允許上傳圖片文件"));
 				}
-				Path filePath = uploadDir.resolve(fileName);
+
+				// 验证文件大小（限制為5MB）
+				if (userPhoto.getSize() > 5 * 1024 * 1024) {
+					return ResponseEntity.badRequest().body(new ApiResponse(false, "圖片大小不能超過5MB"));
+				}
+
+				// 生成唯一文件名
+				String originalFilename = userPhoto.getOriginalFilename();
+				String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+				String fileName = UUID.randomUUID().toString() + extension;
+
+				// 获取上传目录
+				String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/img/users";
+				Path uploadPath = Paths.get(uploadDir);
+
+				// 确保上传目录存在
+				if (!Files.exists(uploadPath)) {
+					Files.createDirectories(uploadPath);
+				}
+
+				// 保存文件
+				Path filePath = uploadPath.resolve(fileName);
 				Files.copy(userPhoto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-				userDTO.setUserPhoto("img/users/" + fileName);
+
+				// 设置用户头像路径
+				userDTO.setUserPhoto("/img/users/" + fileName);
 			}
 
 			// 保存更新后的用户信息
