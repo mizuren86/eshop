@@ -234,13 +234,14 @@ public class UserRestController {
 			// 处理用户照片
 			if (userPhoto != null && !userPhoto.isEmpty()) {
 				String fileName = UUID.randomUUID().toString() + "_" + userPhoto.getOriginalFilename();
-				Path uploadDir = Paths.get("src/main/resources/static/img/users");
+				Path uploadDir = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "static", "img",
+						"users");
 				if (!Files.exists(uploadDir)) {
 					Files.createDirectories(uploadDir);
 				}
 				Path filePath = uploadDir.resolve(fileName);
 				Files.copy(userPhoto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-				userDTO.setUserPhoto("/img/users/" + fileName);
+				userDTO.setUserPhoto("img/users/" + fileName);
 			}
 
 			// 保存更新后的用户信息
