@@ -202,6 +202,8 @@ public class UserRestController {
 	@PutMapping("/profile")
 	public ResponseEntity<?> updateProfile(
 			@RequestHeader("Authorization") String token,
+			@RequestParam(value = "username", required = false) String username,
+			@RequestParam(value = "email", required = false) String email,
 			@RequestParam(value = "fullName", required = false) String fullName,
 			@RequestParam(value = "phone", required = false) String phone,
 			@RequestParam(value = "address", required = false) String address,
@@ -222,8 +224,8 @@ public class UserRestController {
 			// 创建UsersDTO对象
 			UsersDTO userDTO = new UsersDTO();
 			userDTO.setMemberId(userId);
-			userDTO.setUsername(user.getUsername());
-			userDTO.setEmail(user.getEmail());
+			userDTO.setUsername(username != null ? username : user.getUsername());
+			userDTO.setEmail(email != null ? email : user.getEmail());
 			userDTO.setFullName(fullName != null ? fullName : user.getFullName());
 			userDTO.setPhone(phone != null ? phone : user.getPhone());
 			userDTO.setAddress(address != null ? address : user.getAddress());
