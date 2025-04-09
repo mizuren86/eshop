@@ -137,7 +137,7 @@
 			</ol>
 		</div>
 
-		<input type="hidden" id="couponCodeHidden" th:value="${couponCode}" />
+		<input type="hidden" id="couponCodeHidden" th:value="${session.couponCode}" />
 
 		<!-- Checkout Page -->
 		<div class="container py-5" id="checkoutPage">
@@ -935,7 +935,8 @@
 				// 全域變數：保存購物車小計
 				let currentSubtotal = 0;
 				// 優惠券折扣（假設從 Session 拿到，若無則為 0）
-				var couponDiscountOverall = /*[[${couponDiscount != null ? couponDiscount : 0}]]*/ 0;
+				//var couponDiscountOverall = /*[[${couponDiscount != null ? couponDiscount : 0}]]*/ 0;
+				var couponDiscountOverall = parseFloat(/*[[${couponDiscount != null ? couponDiscount.toPlainString() : "0"}]]*/ "0");
 				// 假設 shippingMethod 由後端傳入，若無則預設為 "711-cod"
 				var shippingMethod = /*[[${shippingMethod}]]*/ "711-cod";
 

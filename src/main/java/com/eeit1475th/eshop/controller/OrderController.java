@@ -32,6 +32,9 @@ public class OrderController {
         // 清除在訂單流程中存入的 session 屬性
         session.removeAttribute("shippingMethod");
         session.removeAttribute("paymentMethod");
+        session.removeAttribute("couponDiscount");
+		session.removeAttribute("selectedCity");
+		session.removeAttribute("selectedDistrict");
         
         return "/pages/orders";
     }

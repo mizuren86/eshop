@@ -17,30 +17,43 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.eeit1475th.eshop.cart.dto.OrderUpdateDTO;
 import com.eeit1475th.eshop.cart.entity.Orders;
-import com.eeit1475th.eshop.cart.entity.PaymentStatus;
 import com.eeit1475th.eshop.cart.entity.ShippingStatus;
 import com.eeit1475th.eshop.cart.service.OrdersService;
 
 @Controller
-@RequestMapping("/admin-orders") // 修改這裡：直接映射 /admin-orders
+@RequestMapping("/admin-orders")
 public class AdminOrderController {
 
     @Autowired
     private OrdersService ordersService;
 
-    // 列出所有訂單（依照訂單成立時間由新到舊排序，每頁顯示10筆）
+    // 列出所有訂單（依照訂單成立時間由新到舊排序，每頁顯示15筆）
     @GetMapping("")
     public String listOrders(Model model,
-                             @org.springframework.web.bind.annotation.RequestParam(value = "page", defaultValue = "0") int page) {
-        Page<Orders> ordersPage = ordersService.getAllOrders(
+                             @RequestParam(value = "page", defaultValue = "0") int page,
+                             @RequestParam(value = "merchantTradeNo", required = false) String merchantTradeNo,
+                             @RequestParam(value = "orderId", required = false) String orderId,
+                             @RequestParam(value = "paymentStatus", required = false) String paymentStatus,
+                             @RequestParam(value = "shippingStatus", required = false) String shippingStatus) {
+    	
+    	// 呼叫 service 中的搜尋方法（模糊查詢）
+        Page<Orders> ordersPage = ordersService.searchOrders(
+                merchantTradeNo, orderId, paymentStatus, shippingStatus,
                 PageRequest.of(page, 15, Sort.by("orderDate").descending())
         );
+        
         model.addAttribute("ordersPage", ordersPage);
-        return "/pages/admin/admin-orders"; // 對應到 /templates/admin/admin-orders.html
+        model.addAttribute("merchantTradeNo", merchantTradeNo);
+        model.addAttribute("orderId", orderId);
+        model.addAttribute("paymentStatus", paymentStatus);
+        model.addAttribute("shippingStatus", shippingStatus);
+        
+        return "/pages/admin/admin-orders";
     }
 
     // 刪除訂單 API (使用 DELETE 方法)
@@ -53,11 +66,6 @@ public class AdminOrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("刪除訂單失敗");
         }
     }
-    
-    
-    
-    
-    
     
     @PostMapping("/updateAjax/{orderId}")
     @ResponseBody

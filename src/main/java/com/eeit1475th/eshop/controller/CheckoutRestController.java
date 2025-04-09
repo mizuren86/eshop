@@ -1,6 +1,7 @@
 package com.eeit1475th.eshop.controller;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -105,9 +106,20 @@ public class CheckoutRestController {
 					return;
 				}
 			}
-			
+
 			// 訂單備註存入訂單
-	        order.setOrderRemark(orderRemark);
+			order.setOrderRemark(orderRemark);
+
+//			// 讀取 session 中的優惠券並存入訂單（新增這段程式碼）
+//			String couponDiscountStr = (String) session.getAttribute("couponDiscount");
+//			if (couponDiscountStr != null && !couponDiscountStr.isEmpty()) {
+//			    try {
+//			        BigDecimal couponDiscountValue = new BigDecimal(couponDiscountStr);
+//			        order.setCouponDiscount(couponDiscountValue);
+//			    } catch (NumberFormatException e) {
+//			        logger.error("無法轉換優惠券折扣字串: {}", couponDiscountStr, e);
+//			    }
+//			}
 
 			// Step 2: 根據運送方式分流處理
 			if ("711-cod".equalsIgnoreCase(shippingMethod)) {
@@ -124,6 +136,7 @@ public class CheckoutRestController {
 				ordersService.updateOrder(order);
 
 				logger.info("採用 7-11取貨付款，訂單編號：{}, 交易編號：{}", order.getOrderId(), merchantTradeNo);
+
 				// 直接完成訂單，導向訂單頁面
 				response.sendRedirect("/orders");
 			} else {

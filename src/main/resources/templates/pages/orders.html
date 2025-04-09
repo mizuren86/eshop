@@ -89,13 +89,6 @@
 			border-color: #ffc107;
 		}
 	</style>
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			console.log("DOMContentLoaded triggered, clearing localStorage...");
-			localStorage.clear();
-			console.log("localStorage after clear:", localStorage);
-		});
-	</script>
 </head>
 
 <body>
@@ -191,7 +184,8 @@
 			</div>
 
 			<!-- 分頁 -->
-			<div class="pagination d-flex justify-content-center mt-5">
+			<div class="pagination d-flex justify-content-center mt-5"
+				th:if="${not #lists.isEmpty(ordersPage.content)}">
 				<!-- 上一頁 -->
 				<a th:if="${ordersPage.number > 0}" th:href="@{'/orders'(page=${ordersPage.number - 1})}"
 					class="rounded">&laquo;</a>
@@ -207,5 +201,12 @@
 		</main>
 	</div>
 </body>
+
+<script>
+	// 當頁面載入完成時，清除 localStorage 的 orderRemark
+	document.addEventListener("DOMContentLoaded", function () {
+		localStorage.removeItem("orderRemark");
+	});
+</script>
 
 </html>

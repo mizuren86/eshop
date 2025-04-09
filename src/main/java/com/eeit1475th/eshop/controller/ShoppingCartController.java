@@ -1,5 +1,6 @@
 package com.eeit1475th.eshop.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,12 +71,15 @@ public class ShoppingCartController {
 		model.addAttribute("paymentMethod", sessionPaymentMethod);
 
 		// 從 session 讀取優惠券折扣，若不存在則預設為 0
-		Integer couponDiscount = (Integer) session.getAttribute("couponDiscount");
-		if (couponDiscount == null) {
-			couponDiscount = 0;
-			session.setAttribute("couponDiscount", couponDiscount);
-		}
-		model.addAttribute("couponDiscount", couponDiscount);
+//		BigDecimal couponDiscount = (BigDecimal) session.getAttribute("couponDiscount");
+//		if (couponDiscount == null) {
+//		    couponDiscount = BigDecimal.ZERO;
+//		    session.setAttribute("couponDiscount", couponDiscount);
+//		}
+//		model.addAttribute("couponDiscount", couponDiscount);
+
+		session.setAttribute("couponDiscount", BigDecimal.ZERO);
+		session.removeAttribute("couponCode");
 
 		return "/pages/cart";
 	}
