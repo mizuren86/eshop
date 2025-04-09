@@ -194,8 +194,24 @@
 			document.getElementById('editProfileForm').addEventListener('submit', function (e) {
 				e.preventDefault();
 
+				// 獲取表單數據
 				const formData = new FormData(this);
 				const token = localStorage.getItem('token');
+
+				// 驗證必填欄位
+				const username = formData.get('username');
+				const email = formData.get('email');
+				const phone = formData.get('phone');
+				const address = formData.get('address');
+
+				if (!username || !email || !phone || !address) {
+					Swal.fire({
+						icon: 'error',
+						title: '更新失敗',
+						text: '請填寫所有必填欄位'
+					});
+					return;
+				}
 
 				// 顯示加載消息
 				const submitButton = this.querySelector('button[type="submit"]');
@@ -220,15 +236,15 @@
 						if (data.success) {
 							// 更新 localStorage 中的用戶信息
 							const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-							// 確保圖片路徑正確
-							if (data.data && data.data.userPhoto) {
-								userInfo.userPhoto = data.data.userPhoto.startsWith('/img/') ? data.data.userPhoto : '/img/users/' + data.data.userPhoto;
-							}
 							userInfo.username = data.data.username;
 							userInfo.email = data.data.email;
 							userInfo.fullName = data.data.fullName;
 							userInfo.phone = data.data.phone;
 							userInfo.address = data.data.address;
+							if (data.data.userPhoto) {
+								userInfo.userPhoto = data.data.userPhoto.startsWith('/img/') ?
+									data.data.userPhoto : '/img/users/' + data.data.userPhoto;
+							}
 							localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
 							// 顯示成功消息
@@ -243,12 +259,7 @@
 								window.location.href = '/profile?t=' + new Date().getTime();
 							});
 						} else {
-							// 顯示錯誤消息
-							Swal.fire({
-								icon: 'error',
-								title: '更新失敗',
-								text: data.message || '更新失敗，請稍後再試'
-							});
+							throw new Error(data.message || '更新失敗');
 						}
 					})
 					.catch(error => {
@@ -256,7 +267,7 @@
 						Swal.fire({
 							icon: 'error',
 							title: '更新失敗',
-							text: '發生錯誤，請稍後再試'
+							text: error.message || '發生錯誤，請稍後再試'
 						});
 					})
 					.finally(() => {
@@ -264,6 +275,21 @@
 						submitButton.innerHTML = originalText;
 					});
 			});
+
+			// 從 localStorage 獲取用戶信息
+			const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+			if (userInfo.userPhoto) {
+				// 確保圖片路徑正確
+				let photoPath = userInfo.userPhoto;
+				// 如果路徑已經包含 /img/users/，則直接使用
+				if (photoPath.includes('/img/users/')) {
+					photoPath = photoPath.substring(photoPath.indexOf('/img/users/'));
+				} else if (!photoPath.startsWith('/img/')) {
+					// 如果路徑不是以 /img/ 開頭，則添加前綴
+					photoPath = '/img/users/' + photoPath;
+				}
+				document.getElementById('profilePhotoPreview').src = photoPath + '?t=' + new Date().getTime();
+			}
 		</script>
 
 </body>

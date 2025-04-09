@@ -288,11 +288,17 @@ public class UserRestController {
 				Files.copy(userPhoto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
 				// 设置用户头像路径
-				userDTO.setUserPhoto("/img/users/" + fileName);
+				userDTO.setUserPhoto(fileName);
 			}
 
 			// 保存更新后的用户信息
 			Users updatedUser = usersService.updateUser(userId, userDTO);
+
+			// 确保返回的图片路径格式正确
+			if (updatedUser.getUserPhoto() != null) {
+				updatedUser.setUserPhoto("/img/users/" + updatedUser.getUserPhoto());
+			}
+
 			return ResponseEntity.ok(new ApiResponse(true, "個人資料更新成功", updatedUser));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

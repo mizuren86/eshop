@@ -141,22 +141,20 @@
 	</div>
 
 	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			// 強制重新載入圖片
-			const profilePhoto = document.getElementById('profilePhoto');
-			if (profilePhoto) {
-				// 從 localStorage 獲取最新的用戶信息
-				const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-				if (userInfo.userPhoto) {
-					// 確保圖片路徑正確
-					const photoPath = userInfo.userPhoto.startsWith('/img/') ? userInfo.userPhoto : '/img/users/' + userInfo.userPhoto;
-					profilePhoto.src = photoPath + '?t=' + new Date().getTime();
-				} else {
-					// 使用默認頭像
-					profilePhoto.src = '/img/avatar.jpg?t=' + new Date().getTime();
-				}
+		// 從 localStorage 獲取用戶信息
+		const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+		if (userInfo.userPhoto) {
+			// 確保圖片路徑正確
+			let photoPath = userInfo.userPhoto;
+			// 如果路徑已經包含 /img/users/，則直接使用
+			if (photoPath.includes('/img/users/')) {
+				photoPath = photoPath.substring(photoPath.indexOf('/img/users/'));
+			} else if (!photoPath.startsWith('/img/')) {
+				// 如果路徑不是以 /img/ 開頭，則添加前綴
+				photoPath = '/img/users/' + photoPath;
 			}
-		});
+			document.getElementById('profilePhoto').src = photoPath + '?t=' + new Date().getTime();
+		}
 	</script>
 </body>
 
