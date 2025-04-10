@@ -375,7 +375,14 @@ public class OrdersService {
 			dto.setPrice(oi.getPrice());
 			dto.setQuantity(oi.getQuantity());
 			dto.setSubTotal(oi.getPrice().multiply(new BigDecimal(oi.getQuantity())));
-			dto.setImageUrl(oi.getProducts().getImageUrl());
+//			dto.setImageUrl(oi.getProducts().getImageUrl());
+
+			String imageUrl = oi.getProducts().getImageUrl();
+			if (imageUrl != null && !imageUrl.startsWith("/")) {
+				imageUrl = "/" + imageUrl;
+			}
+			dto.setImageUrl(imageUrl);
+
 			return dto;
 		}).collect(Collectors.toList());
 		orderDTO.setOrderItems(orderItemDTOList);
