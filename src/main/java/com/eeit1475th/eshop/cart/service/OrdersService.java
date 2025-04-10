@@ -2,7 +2,6 @@ package com.eeit1475th.eshop.cart.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eeit1475th.eshop.cart.dto.CartItemsDTO;
 import com.eeit1475th.eshop.cart.dto.OrderDTO;
@@ -65,6 +65,10 @@ public class OrdersService {
 	public void updateOrder(Orders order) {
 		ordersRepository.save(order);
 	}
+	
+	public Orders getOrderById(Integer orderId) {
+		return ordersRepository.findByIdWithItems(orderId).orElse(null);
+	}
 
 	/**
 	 * 根據使用者購物車、運送方式、選擇的城市與地區、以及優惠碼計算訂單摘要。
@@ -91,11 +95,11 @@ public class OrdersService {
 		}
 		// 根據運送方式與前端選擇的城市/區域計算運費
 		BigDecimal shippingFee = calculateShippingFee(shippingMethod, selectedCity, selectedDistrict);
-		// 透過 CouponService 取得優惠券折扣（若找不到則折扣為0）
-		BigDecimal couponDiscount = couponService.getDiscountByCouponCode(couponCode);
-		if (couponDiscount == null) {
-			couponDiscount = BigDecimal.ZERO;
-		}
+		// 帶入訂單小計進行優惠券目標金額檢查
+	    BigDecimal couponDiscount = couponService.getDiscountByCouponCode(couponCode, subtotal);
+	    if (couponDiscount == null) {
+	        couponDiscount = BigDecimal.ZERO;
+	    }
 		// 計算最終合計 = 小計 + 運費 - 優惠券折扣，最低不得低於 0
 		BigDecimal grandTotal = subtotal.add(shippingFee).subtract(couponDiscount);
 		if (grandTotal.compareTo(BigDecimal.ZERO) < 0) {
@@ -175,23 +179,22 @@ public class OrdersService {
 		// 後端計算運費
 		BigDecimal shippingFee = calculateShippingFee(shippingMethod, selectedCity, selectedDistrict);
 
-		// 從 session 中取得優惠券折扣
+		// 從 session 中取得優惠券折扣前，可以先檢查 session 中有沒有存入優惠券資訊（例如 couponCode）
+		String sessionCouponCode = (String) session.getAttribute("couponCode");
 		BigDecimal couponDiscount = BigDecimal.ZERO;
-		Object sessionDiscount = session.getAttribute("couponDiscount");
-
-		if (sessionDiscount != null) {
-			if (sessionDiscount instanceof BigDecimal) {
-				couponDiscount = (BigDecimal) sessionDiscount;
-			} else if (sessionDiscount instanceof Number) {
-				couponDiscount = new BigDecimal(sessionDiscount.toString());
-			}
+		if (sessionCouponCode != null && !sessionCouponCode.trim().isEmpty()) {
+		    // 傳入購物車小計作為驗證條件
+		    couponDiscount = couponService.getDiscountByCouponCode(sessionCouponCode, subtotal);
 		} else {
-			couponDiscount = couponService.getDiscountByCouponCode(couponCode);
-			if (couponDiscount == null) {
-				couponDiscount = BigDecimal.ZERO;
-			}
+		    couponDiscount = couponService.getDiscountByCouponCode(couponCode, subtotal);
+		    if (couponDiscount == null) {
+		        couponDiscount = BigDecimal.ZERO;
+		    }
 		}
 
+		logger.info("傳入的 couponCode: {}", couponCode);
+		logger.info("session couponDiscount (原始): {}", session.getAttribute("couponDiscount"));
+		
 		BigDecimal grandTotal = subtotal.add(shippingFee).subtract(couponDiscount);
 		if (grandTotal.compareTo(BigDecimal.ZERO) < 0) {
 			grandTotal = BigDecimal.ZERO;
@@ -225,6 +228,12 @@ public class OrdersService {
 			}
 		}
 
+		// (選擇性) 這裡可以加入 Log 訊息來檢查計算結果：
+	    logger.info("subTotal: {}", subtotal);
+	    logger.info("shippingFee: {}", shippingFee);
+	    logger.info("couponDiscount: {}", couponDiscount);
+	    logger.info("grandTotal: {}", grandTotal);
+		
 		// 創建訂單
 		Orders order = new Orders();
 		order.setUsers(shoppingCart.getUsers());
@@ -344,11 +353,15 @@ public class OrdersService {
 
 	/**
 	 * 透過訂單編號查詢訂單
-	 */
-	public Orders getOrderById(Integer orderId) {
-		return ordersRepository.findById(orderId).orElse(null);
-	}
+	 * 
+	 * public Orders getOrderById(Integer orderId) { return
+	 * ordersRepository.findById(orderId).orElse(null); }
+	 
 
+	public Orders getOrderById(Integer orderId) {
+		return ordersRepository.findByIdWithItems(orderId).orElse(null);
+	}
+*/
 	/**
 	 * 查詢訂單詳情，將 Orders 與相關訂單項目轉換為 OrderDTO 回傳
 	 * 
@@ -356,7 +369,7 @@ public class OrdersService {
 	 * @return OrderDTO 訂單資料
 	 */
 	public OrderDTO getOrderDetails(Integer orderId) {
-		Orders order = ordersRepository.findByIdWithItems(orderId);
+		Orders order = ordersRepository.findByIdWithItems(orderId).orElse(null);
 		if (order == null) {
 			throw new RuntimeException("訂單未找到");
 		}
@@ -523,12 +536,12 @@ public class OrdersService {
 		BigDecimal shippingFee = calculateShippingFee(shippingMethod, selectedCity, selectedDistrict);
 		summary.setShippingFee(shippingFee);
 
-		// 3. 根據優惠碼取得優惠折扣，使用 CouponService 的邏輯
-		BigDecimal couponDiscount = couponService.getDiscountByCouponCode(couponCode);
-		if (couponDiscount == null) {
-			couponDiscount = BigDecimal.ZERO;
-		}
-		summary.setCouponDiscount(couponDiscount);
+		// 3. 根據優惠碼與訂單小計取得折扣金額（帶入小計作比較）
+	    BigDecimal couponDiscount = couponService.getDiscountByCouponCode(couponCode, subtotal);
+	    if (couponDiscount == null) {
+	        couponDiscount = BigDecimal.ZERO;
+	    }
+	    summary.setCouponDiscount(couponDiscount);
 
 		// 4. 計算最終合計：小計 + 運費 - 優惠折扣（最低不得低於 0）
 		BigDecimal grandTotal = subtotal.add(shippingFee).subtract(couponDiscount);
@@ -591,35 +604,88 @@ public class OrdersService {
 		// 若 orderId 條件不存在，則使用不包含 orderId 條件的查詢
 		return ordersRepository.searchOrders(merchantTradeNo, paymentStatusEnum, shippingStatusEnum, pageable);
 	}
-	
-	public void updateOrderItems(Orders orders, OrderUpdateDTO updateDto) {
-	    if (updateDto.getItems() != null) {
-	        // 將更新資料轉為 map: productId -> newQuantity
-	        Map<Integer, Integer> updateMap = updateDto.getItems().stream()
-	            .collect(Collectors.toMap(OrderItemUpdateDTO::getProductId, OrderItemUpdateDTO::getQuantity));
-	        
-	        // 取得現有訂單商品列表
-	        List<OrderItems> existingItems = orders.getOrderItems();
-	        
-	        // 使用 iterator 逐筆處理
-	        Iterator<OrderItems> iterator = existingItems.iterator();
-	        while (iterator.hasNext()) {
-	            OrderItems orderItem = iterator.next();
-	            Integer pid = orderItem.getProducts().getProductId();
-	            if (updateMap.containsKey(pid)) {
-	                // 更新數量
-	                orderItem.setQuantity(updateMap.get(pid));
-	                // 表示此項已處理，從 map 中移除
-	                updateMap.remove(pid);
-	            } else {
-	                // 若不在更新清單中，則表示該商品應被刪除
-	                iterator.remove();
-	                // 若配置了 CascadeType.REMOVE，則可讓刪除動作自動級聯；若未配置，
-	                // 可考慮調用此處的 repository.delete(orderItem)，或讓 updateOrder() 方法同步更新
-	                // orderItemsRepository.delete(orderItem);
-	            }
-	        }
-	        // 若 updateMap 還有剩餘的，表示更新資料中包含新項目
-	    }
+
+	@Transactional
+	public boolean updateOrderItems(Orders orders, OrderUpdateDTO updateDto) {
+		if (updateDto.getItems() != null) {
+			// 將更新資料轉為 map: productId -> newQuantity
+			Map<Integer, Integer> updateMap = updateDto.getItems().stream()
+					.collect(Collectors.toMap(OrderItemUpdateDTO::getProductId, OrderItemUpdateDTO::getQuantity));
+
+			// 取得現有訂單商品列表
+			List<OrderItems> existingItems = orders.getOrderItems();
+
+			// 建立一個要刪除的清單
+			List<OrderItems> itemsToDelete = new ArrayList<>();
+
+			// 遍歷現有訂單商品，更新數量或標記刪除
+			for (OrderItems orderItem : new ArrayList<>(existingItems)) {
+				Integer pid = orderItem.getProducts().getProductId();
+				if (updateMap.containsKey(pid)) {
+					// 更新商品數量
+					orderItem.setQuantity(updateMap.get(pid));
+					// 已處理該項，從 updateMap 中移除
+					updateMap.remove(pid);
+				} else {
+					// 不在更新清單中，標記該商品為待刪除項目
+					itemsToDelete.add(orderItem);
+				}
+			}
+			// 遍歷完成後，刪除待刪除的商品
+			if (!itemsToDelete.isEmpty()) {
+				orders.getOrderItems().removeAll(itemsToDelete);
+				orderItemsRepository.deleteAll(itemsToDelete);
+			}
+		}
+
+		// 重新計算訂單小計（subtotal）
+		BigDecimal newSubtotal = orders.getOrderItems().stream()
+				.map(oi -> oi.getPrice().multiply(new BigDecimal(oi.getQuantity())))
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		// 計算新的訂單總金額（假設 orders 的 totalAmount 欄位存放的是訂單總合計）
+		BigDecimal newTotal = newSubtotal.add(orders.getShippingFee()).subtract(orders.getCouponDiscount());
+		if (newTotal.compareTo(BigDecimal.ZERO) < 0) {
+			newTotal = BigDecimal.ZERO;
+		}
+		orders.setTotalAmount(newTotal);
+
+		// 若訂單內沒有任何商品，則刪除此筆訂單
+		if (orders.getOrderItems().isEmpty()) {
+			// 你可以直接刪除整筆訂單
+			ordersRepository.delete(orders);
+			// 或視需求進一步做其他處理，例如記錄 Log
+			logger.info("訂單 {} 商品皆被刪除，故自動刪除此訂單。", orders.getOrderId());
+			return true; // 表示訂單已被刪除
+		}
+		return false; // 訂單尚未被刪除
+	}
+
+	@Transactional
+	public boolean deleteOrderItem(Orders order, Integer productId) {
+		// 建立一個待刪除的訂單商品清單
+		List<OrderItems> itemsToDelete = order.getOrderItems().stream()
+				.filter(oi -> oi.getProducts().getProductId().equals(productId)).collect(Collectors.toList());
+
+		if (itemsToDelete.isEmpty()) {
+			return false;
+		}
+
+		// 從訂單集合中移除這些項目
+		order.getOrderItems().removeAll(itemsToDelete);
+
+		// 呼叫 repository 明確刪除這些訂單商品
+		orderItemsRepository.deleteAll(itemsToDelete);
+
+		// 重新計算訂單小計（subtotal），並更新訂單總金額
+		BigDecimal newSubtotal = order.getOrderItems().stream()
+				.map(oi -> oi.getPrice().multiply(new BigDecimal(oi.getQuantity())))
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		BigDecimal newTotal = newSubtotal.add(order.getShippingFee()).subtract(order.getCouponDiscount());
+		if (newTotal.compareTo(BigDecimal.ZERO) < 0) {
+			newTotal = BigDecimal.ZERO;
+		}
+		order.setTotalAmount(newTotal);
+
+		return true;
 	}
 }

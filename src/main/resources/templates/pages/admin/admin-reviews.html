@@ -2,36 +2,169 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="utf-8" />
-	<title>CMS - Fruitables</title>
-	<meta content="width=device-width, initial-scale=1.0" name="viewport" />
-	<meta content="" name="keywords" />
-	<meta content="" name="description" />
+<meta charset="utf-8" />
+<title>CMS - Fruitables</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+<meta content="" name="keywords" />
+<meta content="" name="description" />
 
-	<!-- Google Web Fonts -->
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link
-		href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap"
-		rel="stylesheet">
+<!-- Google Web Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+	href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap"
+	rel="stylesheet">
 
-	<!-- Icon Font Stylesheet -->
-	<link rel="stylesheet" th:href="@{'https://use.fontawesome.com/releases/v5.15.4/css/all.css'}" />
-	<link th:href="@{'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css'}" rel="stylesheet">
+<!-- Icon Font Stylesheet -->
+<link rel="stylesheet"
+	th:href="@{'https://use.fontawesome.com/releases/v5.15.4/css/all.css'}" />
+<link
+	th:href="@{'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css'}"
+	rel="stylesheet">
 
-	<!-- Libraries Stylesheet -->
-	<link th:href="@{/lib/lightbox/css/lightbox.min.css}" rel="stylesheet" />
-	<link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet" />
+<!-- Libraries Stylesheet -->
+<link th:href="@{/lib/lightbox/css/lightbox.min.css}" rel="stylesheet" />
+<link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}"
+	rel="stylesheet" />
 
-	<!-- Customized Bootstrap Stylesheet -->
-	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<!-- Customized Bootstrap Stylesheet -->
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
 
-	<!-- Template Stylesheet -->
-	<link th:href="@{/css/style.css}" rel="stylesheet" />
+<!-- Template Stylesheet -->
+<link th:href="@{/css/style.css}" rel="stylesheet" />
 
-	<!-- SweetAlert2 CSS -->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+.pagination {
+	margin: 10px 0;
+}
+
+.page-btn {
+	margin: 0 5px;
+	padding: 5px 10px;
+	border: 1px solid rgb(255, 185, 64);
+}
+
+.activebutton {
+	background-color: rgb(111, 199, 51);
+	color: white;
+	border: 1px solid rgb(255, 185, 64);
+}
+
+#reviewsTable {
+	table-layout: fixed;
+	width: 100%;
+}
+/* 表格樣式調整 */
+#reviewsTable th:nth-child(1), #reviewsTable td:nth-child(1) {
+	width: 5%;
+}
+
+#reviewsTable th:nth-child(2), #reviewsTable td:nth-child(2) {
+	width: 5%;
+}
+
+#reviewsTable th:nth-child(3), #reviewsTable td:nth-child(3) {
+	width: 10%;
+}
+
+#reviewsTable th:nth-child(4), #reviewsTable td:nth-child(4) {
+	width: 7%;
+}
+
+#reviewsTable th:nth-child(5), #reviewsTable td:nth-child(5) {
+	width: 12%;
+}
+
+#reviewsTable th:nth-child(6), #reviewsTable td:nth-child(6) {
+	width: 38%;
+}
+
+#reviewsTable th:nth-child(7), #reviewsTable td:nth-child(7) {
+	width: 15%;
+}
+
+#reviewsTable th:nth-child(8), #reviewsTable td:nth-child(8) {
+	width: 8%;
+}
+.search-container {
+    display: flex; /* 使元素在同一行 */
+    align-items: center; /* 垂直對齊 */
+}
+
+button {
+    margin-left: 10px; /* 讓按鈕和搜尋框之間有間隔 */
+}
+.search-box {
+	margin: 20px 0;
+	display: flex;
+	gap: 10px;
+	height: 2.3em;
+	flex-grow: 1;
+}
+
+.action-buttons {
+	margin-top: 20px;
+}
+
+.select-all-checkbox {
+	margin-left: 10px;
+}
+
+.comment-content {
+	position: relative;
+	line-height: 1.5em;
+	overflow: hidden;
+	transition: max-height 0.3s ease;
+}
+
+.comment-content.collapsed .fade-out {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 1.5em;
+	background: linear-gradient(to bottom, rgba(255, 255, 255, 0),
+		rgba(255, 255, 255, 1));
+}
+
+.comment-content:not(.collapsed) .fade-out {
+	display: none;
+}
+
+.show-more-btn {
+	color: #065fd4;
+	cursor: pointer;
+	font-weight: bold;
+	margin-top: 5px;
+	display: inline-block;
+}
+
+.show-more-btn:hover {
+	text-decoration: underline;
+}
+
+.review-photo {
+	width: 100%; /* 讓圖片寬度填滿欄位 */
+	height: auto; /* 高度自動按比例調整 */
+	max-height: 200px; /* 限制最大高度（避免過高） */
+	object-fit: contain; /* 保持比例且完整顯示 */
+	display: block; /* 避免下方留白 */
+	margin: 5px 0; /* 適當邊距 */
+}
+
+/* 新增樣式 */
+.page-title {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
+</style>
 </head>
 
 <body>
@@ -41,31 +174,31 @@
 			<div class="d-flex justify-content-between">
 				<div class="top-info ps-2">
 					<small class="me-3" id="userLocation" style="display: none;">
-						<i class="fas fa-map-marker-alt me-2 text-secondary"></i> <span id="locationText"
-							class="text-white"></span>
+						<i class="fas fa-map-marker-alt me-2 text-secondary"></i> <span
+						id="locationText" class="text-white"></span>
 					</small>
 				</div>
 				<div class="top-link pe-2">
-					<a class="text-white"><small class="text-white mx-2">CMS - Fruitables</small></a>
+					<a class="text-white"><small class="text-white mx-2">CMS
+							- Fruitables</small></a>
 				</div>
 			</div>
 		</div>
 		<div class="container px-0">
 			<nav class="navbar navbar-light bg-white navbar-expand-xl">
-				<a th:href="@{/admin-orders}" class="navbar-brand">
+				<a class="navbar-brand">
 					<h1 class="text-primary display-6">Fruitables</h1>
 				</a>
-				<button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse"
-					data-bs-target="#navbarCollapse">
+				<button class="navbar-toggler py-2 px-3" type="button"
+					data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
 					<span class="fa fa-bars text-primary"></span>
 				</button>
 				<div class="collapse navbar-collapse bg-white" id="navbarCollapse">
-					<div class="navbar-nav mx-auto">
-						<a th:href="@{/admin-users}" class="nav-item nav-link">會員管理</a>
-						<a th:href="@{/admin-products}" class="nav-item nav-link">商品管理</a>
-						<a th:href="@{/admin-orders}" class="nav-item nav-link">訂單管理</a>
-						<a th:href="@{/admin-reviews}" class="nav-item nav-link">評論管理</a>
-						<a th:href="@{/admin-reports}" class="nav-item nav-link">報表</a>
+					<div class="navbar-nav mx-left">
+<!--					<a th:href="@{/admin-users}" class="nav-item nav-link">會員管理</a>
+						<a th:href="@{/admin-products}" class="nav-item nav-link">商品管理</a>               -->
+						<a th:href="@{/admin-orders}" class="nav-item nav-link">訂單管理</a> 
+						<a th:href="@{/reviews/manage}" class="nav-item nav-link">評論管理</a>
 					</div>
 				</div>
 			</nav>
@@ -78,75 +211,291 @@
 		<h1 class="text-center text-white display-6">評論管理</h1>
 	</header>
 
-	<!-- 評論頁面內容 Start -->
-	<main class="container py-5">
-		
-		
-		
-		
-		
-		
-		
-	</main>
-	<!-- 評論頁面內容 End -->
-
-	<!-- Footer Start -->
-	<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
-		<div class="container py-5">
-			<div class="pb-4 mb-4" style="border-bottom: 1px solid rgba(226, 175, 24, 0.5)">
-				<div class="row g-4">
-					<div class="col-lg-3">
-						<a href="#">
-							<h1 class="text-primary mb-0">Fruitables</h1>
-							<p class="text-secondary mb-0">Fresh products</p>
-						</a>
-					</div>
-				</div>
-			</div>
-			<div class="row g-5">
-
+	<div class="container my-5">
+		<!-- 搜尋欄 -->
+		<div class="search-container">
+			<div class="search-box">
+        <input type="text" id="searchInput" class="form-control"
+            placeholder="輸入評論內容搜尋關鍵字"
+            onkeypress="if(event.keyCode === 13) searchReviews()">
+    </div>
+			<div>
+				<button class="btn btn-primary" onclick="searchReviews()">搜尋</button>
 			</div>
 		</div>
-	</div>
-	<!-- Footer End -->
-
-	<!-- Copyright Start -->
-	<div class="container-fluid copyright bg-dark py-4">
-		<div class="container">
-			<div class="row">
-				<span class="text-light text-md-center"> <a href="#"> <i
-							class="fas fa-copyright text-light me-2"></i>Fruitables
-					</a>, All right reserved.
-				</span>
-			</div>
+<!-- 		<div class="rating-filter"> -->
+<!--           <button class="rating-filter-btn active" data-rating="0">全部評論</button> -->
+<!--           <button class="rating-filter-btn" data-rating="5"><span class="star">★</span> 5星</button> -->
+<!--           <button class="rating-filter-btn" data-rating="4"><span class="star">★</span> 4星</button> -->
+<!--           <button class="rating-filter-btn" data-rating="3"><span class="star">★</span> 3星</button> -->
+<!--           <button class="rating-filter-btn" data-rating="2"><span class="star">★</span> 2星</button> -->
+<!--           <button class="rating-filter-btn" data-rating="1"><span class="star">★</span> 1星</button> -->
+<!--         </div> -->
+		<div class="pagination" id="pagination"></div>
+		<div>
+			<button class="btn btn-danger action-buttons"
+				onclick="deleteSelected()">刪除</button>
+		</div>
+        
+		<!-- 評論表格 -->
+		<div id="reviewsContainer">
+			<table id="reviewsTable" class="table table">
+				<thead>
+					<tr>
+						<th><input type="checkbox" id="selectAll"
+							class="select-all-checkbox"></th>
+						<th>用戶ID</th>
+						<th>用戶名稱</th>
+						<th>商品名稱</th>
+						<th>評分</th>
+						<th>評論內容</th>
+						<th>圖片</th>
+						<th>更新時間</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+			
 		</div>
 	</div>
-	<!-- Copyright End -->
 
-	<!-- Back to Top -->
-	<a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top">
-		<i class="fa fa-arrow-up"></i>
-	</a>
+	<script th:inline="javascript">
+      /*<![CDATA[*/
+      document.addEventListener("DOMContentLoaded", () => {
+        let currentPage = 0;
+        const pageSize = 5; // 需與後端預設分頁大小一致
+        let searchKeyword = "";
 
-	<!-- JavaScript Libraries -->
-	<script th:src="@{'https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js'}"></script>
-	<script th:src="@{'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js'}"></script>
-	<script th:src="@{/lib/easing/easing.min.js}"></script>
-	<script th:src="@{/lib/waypoints/waypoints.min.js}"></script>
-	<script th:src="@{/lib/lightbox/js/lightbox.min.js}"></script>
-	<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
-	<script th:src="@{'https://cdn.jsdelivr.net/npm/sweetalert2@11'}"></script>
-	<!-- Template Javascript -->
-	<script th:src="@{/js/main.js}"></script>
-	
-	<!-- Javascript 區塊 -->
-	<script>
-		
-		
-		
-		
-	</script>
-	<!-- Javascript 區塊 -->
+        // 初始載入
+        loadReviews(currentPage);
+
+        // 全選功能
+        document.getElementById('selectAll').addEventListener('change', function() {
+          const checkboxes = document.querySelectorAll('.review-checkbox');
+          checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
+
+        // 載入評論
+        function loadReviews(page) {
+          let url = `/reviews/api/reviews/manageAllByComment?page=${page}&size=${pageSize}`;
+          if (searchKeyword) url += `&comment=${encodeURIComponent(searchKeyword)}`;
+
+          axios.get(url)
+            .then(response => {
+              renderTable(response.data);
+              renderPagination(response.data);
+              currentPage = page;
+            })
+            .catch(error => console.error('載入失敗:', error));
+        }
+
+        // 渲染表格
+        function renderTable(data) {
+          const tbody = document.querySelector('#reviewsTable tbody');
+          tbody.innerHTML = '';
+          
+          if (data.content.length === 0) {
+              // 沒有評論時的處理
+              const tr = document.createElement("tr");
+              tr.innerHTML = `<td colspan="6" class="text-center">暫無評論數據</td>`;
+              tbody.appendChild(tr);
+              return;
+            }
+
+          data.content.forEach((review) => {
+        	  const tr = document.createElement("tr");
+              const commentHtml = review.comment
+                ? `<div class="comment-content">
+                    <div class="comment-text">${review.comment}</div>
+                    <div class="fade-out"></div>
+                   </div>`
+                : "";
+                tr.innerHTML = `
+                <td><input type="checkbox" class="review-checkbox" value="${review.reviewId}"></td>
+                <td>${review.userId}</td>
+                <td>${review.userName}</td>
+                <td><a href="/shop-detail?productId=${review.productId}">${review.productName}</a></td>
+                <td>${createRatingStars(review.rating)}</td>
+                <td>${commentHtml}</td>
+                <td>
+                ${
+                    review.photo
+                        ? `<img src="${review.photo}" class="review-photo" loading="lazy"/>`
+                        : "無圖片"
+                }
+            </td>
+                <td>${new Date(review.updatedAt).toLocaleString()}</td>
+                `;
+                tbody.appendChild(tr);
+                
+                console.log(review.photo); // 確認數據類型
+                console.log(review.photo instanceof Uint8Array); // 應為 false（因為 JSON 會轉為普通陣列）
+                
+             // 處理評論內容折疊邏輯
+                if (review.comment) {
+                  const commentCell = tr.querySelector("td:nth-child(6)");
+                  const commentContent = commentCell.querySelector(".comment-content");
+                  const commentText = commentCell.querySelector(".comment-text");
+
+                  commentContent.style.maxHeight = "none"; // 暫時取消限制以測量高度
+                  const lineHeight = parseFloat(getComputedStyle(commentText).lineHeight);
+                  const contentHeight = commentText.offsetHeight;
+                  const maxHeight = lineHeight * 3; // 3行高度
+
+                  if (contentHeight > maxHeight) {
+                    commentContent.classList.add("collapsed");
+                    commentContent.style.maxHeight = maxHeight + "px";
+
+                    const showMoreBtn = document.createElement("div");
+                    showMoreBtn.className = "show-more-btn";
+                    showMoreBtn.textContent = "顯示更多";
+                    commentCell.appendChild(showMoreBtn);
+
+                    showMoreBtn.addEventListener("click", function () {
+                      if (commentContent.classList.contains("expanded")) {
+                        commentContent.classList.remove("expanded");
+                        commentContent.classList.add("collapsed");
+                        commentContent.style.maxHeight = maxHeight + "px";
+                        this.textContent = "顯示更多";
+                      } else {
+                        commentContent.classList.remove("collapsed");
+                        commentContent.classList.add("expanded");
+                        commentContent.style.maxHeight = "none";
+                        this.textContent = "顯示較少";
+                      }
+                    });
+                  } else {
+                    commentContent.classList.remove("collapsed");
+                    commentContent.style.maxHeight = "none";
+                  }
+                }
+                
+          });
+        }
+
+        // 創建星級顯示
+        function createRatingStars(rating) {
+          const fullStars = Math.floor(rating);
+          const hasHalfStar = rating % 1 >= 0.5;
+          let starsHtml = "";
+
+          for (let i = 1; i <= 5; i++) {
+            if (i <= fullStars) {
+              starsHtml += "<span>★</span>";
+            } else if (i === fullStars + 1 && hasHalfStar) {
+              starsHtml += "<span>½</span>";
+            } else {
+              starsHtml += "<span>☆</span>";
+            }
+          }
+
+          return `<div class="rating-stars">${starsHtml} (${rating.toFixed(1)})</div>`;
+        }
+        
+        // 渲染分頁函數（完全重寫）
+        function renderPagination(data) {
+          const pagination = document.querySelector("#pagination");
+          pagination.innerHTML = "";
+          console.log("Pagination data:", data); // 調試用
+
+          // 如果沒有數據或只有一頁，不顯示分頁
+//           if (!data || data.totalPages <= 1) {
+//         	pagination.innerHTML = "<div class='no-pagination'>無分頁</div>";
+//             return;
+//           }
+          
+       // 如果沒有數據或只有一頁，不顯示分頁
+          if (data.totalPages <= 1) {
+            return;
+          }
+
+          // 計算顯示範圍（當前頁前後各1頁）
+          let startPage = Math.max(0, currentPage - 1);
+          let endPage = Math.min(data.totalPages - 1, currentPage + 1);
+
+          // 確保至少顯示3個頁碼
+          if (endPage - startPage < 2) {
+            if (currentPage < data.totalPages / 2) {
+              endPage = Math.min(startPage + 2, data.totalPages - 1);
+            } else {
+              startPage = Math.max(endPage - 2, 0);
+            }
+          }
+
+          // 添加第一頁按鈕（如果不在顯示範圍內）
+          if (startPage > 0) {
+            const firstBtn = createPageButton(0, "« 第一頁");
+            pagination.appendChild(firstBtn);
+          }
+
+          // 添加頁碼按鈕
+          for (let i = startPage; i <= endPage; i++) {
+            const btn = createPageButton(i, i + 1);
+            pagination.appendChild(btn);
+          }
+
+          // 添加最後一頁按鈕（如果不在顯示範圍內）
+          if (endPage < data.totalPages - 1) {
+            const lastBtn = createPageButton(data.totalPages - 1, "最後頁 »");
+            pagination.appendChild(lastBtn);
+          }
+        }
+
+        // 創建分頁按鈕輔助函數
+        function createPageButton(pageNum, text) {
+          const button = document.createElement("button");
+          button.className = `page-btn ${pageNum === currentPage ? "activebutton rounded" : "rounded"}`;
+          button.textContent = text;
+          button.onclick = () => {
+              if (pageNum !== currentPage) {
+                  currentPage = pageNum;
+                  button.classList.add("loadingg");
+                  loadReviews(pageNum).finally(() => {
+                      button.classList.remove("loadingg");
+                  });
+              }
+          };
+          return button;
+        }
+
+        // 搜尋功能
+        window.searchReviews = () => {
+          searchKeyword = document.getElementById('searchInput').value.trim();
+          currentPage = 0; // 重置為第一頁
+          loadReviews(0);
+        };
+        
+        
+
+        // 批量刪除
+        window.deleteSelected = async () => {
+          const selectedIds = Array.from(document.querySelectorAll('.review-checkbox:checked'))
+            .map(checkbox => checkbox.value);
+
+          if (selectedIds.length === 0) {
+            Swal.fire('提示', '請先選擇要刪除的評論', 'warning');
+            return;
+          }
+
+          const result = await Swal.fire({
+            title: '確定刪除？',
+            text: `將永久刪除 ${selectedIds.length} 筆評論`,
+            icon: 'warning',
+            showCancelButton: true
+          });
+
+          if (result.isConfirmed) {
+            axios.delete('/reviews/api/reviews/deleteAll', { data: selectedIds })
+              .then(() => {
+                Swal.fire('成功', '評論已刪除', 'success');
+                loadReviews(currentPage);
+              })
+              .catch(error => Swal.fire('錯誤', error.response.data, 'error'));
+          }
+        };
+      });
+      /*]]>*/
+    </script>
+
 </body>
-
 </html>

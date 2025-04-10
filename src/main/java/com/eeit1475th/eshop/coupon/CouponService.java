@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpSession;
 
 @Service
 public class CouponService {
-
+	
 	@Autowired
 	private CouponRepository couponRepository;
 
@@ -49,7 +49,7 @@ public class CouponService {
 		int discount = coupon.getDiscountAmount();
 		session.setAttribute("couponDiscount", discount);
 		session.setAttribute("couponCode", couponCode);
-
+		
 		response.put("valid", true);
 		response.put("discountAmount", discount);
 		response.put("targetAmount", coupon.getTargetAmount());
@@ -72,17 +72,25 @@ public class CouponService {
      * 根據優惠碼取得折扣金額
      * 
      * @param couponCode 優惠碼（前端傳入）
-     * @return 如果優惠碼存在且未過期，回傳折扣金額，否則回傳 0
+     * @param orderSubtotal 訂單小計（或總金額）
+     * @return 如果優惠碼存在且未過期，並且訂單小計達到優惠券的 targetAmount，回傳折扣金額，否則回傳 0
      */
-    public BigDecimal getDiscountByCouponCode(String couponCode) {
-        if (couponCode == null || couponCode.trim().isEmpty()) {
-            return BigDecimal.ZERO;
-        }
-        Coupon coupon = couponRepository.findByCouponCode(couponCode.trim());
-        if (coupon == null || coupon.getEndDate().isBefore(LocalDateTime.now())) {
-            return BigDecimal.ZERO;
-        }
-        return BigDecimal.valueOf(coupon.getDiscountAmount());
-    }
+	public BigDecimal getDiscountByCouponCode(String couponCode, BigDecimal orderSubtotal) {
+	    // 優惠碼未傳入則直接回傳 0
+	    if (couponCode == null || couponCode.trim().isEmpty()) {
+	        return BigDecimal.ZERO;
+	    }
+	    // 從資料庫中根據 couponCode 查詢優惠券
+	    Coupon coupon = couponRepository.findByCouponCode(couponCode.trim());
+	    if (coupon == null || coupon.getEndDate().isBefore(LocalDateTime.now())) {
+	        return BigDecimal.ZERO;
+	    }
+	    // 如果訂單小計未達到優惠券所設定的最低使用金額，則不適用折扣
+	    if (orderSubtotal.compareTo(BigDecimal.valueOf(coupon.getTargetAmount())) < 0) {
+	        return BigDecimal.ZERO;
+	    }
+	    // 回傳優惠券的折扣金額
+	    return BigDecimal.valueOf(coupon.getDiscountAmount());
+	}
 
 }

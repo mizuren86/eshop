@@ -276,17 +276,8 @@ public class ReviewController {
 
 	@GetMapping("/manage")
 	public String manageAllReviews(@SessionAttribute(value = "user", required = false) Users user, Model model) {
-		// 檢查是否登入
-		if (user == null) {
-			return "/pages/customizedErrorPages/515"; // 如果未登入，導向自定義錯誤頁面515
-		}
 
-		// 確認訪問的 userId 是否是當前登入的用戶 ID
-		if (user.getUserId() != 99999999) {
-			return "/pages/customizedErrorPages/516"; // 如果 userId 不為 99999999，則導向自定義錯誤頁面516
-		}
-
-		return "/pages/manageAllReviews";
+		return "/pages/admin/admin-reviews";
 	}
 
 	@GetMapping("/api/reviews/manageAllByComment")
@@ -295,9 +286,6 @@ public class ReviewController {
 			@RequestParam(defaultValue = "5") int size, @RequestParam(required = false) String comment, @SessionAttribute(value = "user", required = false) Users user) {
 
 		logger.info("Received request to manageAllReviews with page={}, size={}, comment={}", page, size, comment);
-	    
-	    if (user == null || user.getUserId() != 99999999) {
-	        logger.warn("Unauthorized access attempt by user: {}", user != null ? user.getUserId() : "null");}
 		
 		Pageable pageable = PageRequest.of(page, size);
 		if (comment != null && comment.length() > 0) {
@@ -315,9 +303,6 @@ public class ReviewController {
 			@RequestParam(defaultValue = "5") int size, @RequestParam(required = false) Integer rating, @SessionAttribute(value = "user", required = false) Users user) {
 
 		logger.info("Received request to manageAllReviews with page={}, size={}, comment={}", page, size, rating);
-	    
-	    if (user == null || user.getUserId() != 99999999) {
-	        logger.warn("Unauthorized access attempt by user: {}", user != null ? user.getUserId() : "null");}
 		
 		Pageable pageable = PageRequest.of(page, size);
 		if (rating != null && rating > 0) {

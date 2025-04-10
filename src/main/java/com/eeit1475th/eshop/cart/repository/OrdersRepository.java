@@ -20,8 +20,11 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 	boolean existsByUsersUserIdAndOrderItemsProductsProductIdAndShippingStatus(Integer userId, Integer productId,
 			ShippingStatus shippingStatus);
 
-	@Query("SELECT o FROM Orders o LEFT JOIN FETCH o.orderItems WHERE o.orderId = :orderId")
-	Orders findByIdWithItems(@Param("orderId") Integer orderId);
+	@Query("SELECT DISTINCT o FROM Orders o LEFT JOIN FETCH o.orderItems WHERE o.orderId = :orderId")
+    Optional<Orders> findByIdWithItems(@Param("orderId") Integer orderId);
+	
+//	@Query("select o from Orders o left join fetch o.orderItems where o.orderId = :orderId")
+//    Optional<Orders> findByIdWithItems(@Param("orderId") Integer orderId);
 
 	Page<Orders> findByUsers_UserId(Integer userId, Pageable pageable);
 

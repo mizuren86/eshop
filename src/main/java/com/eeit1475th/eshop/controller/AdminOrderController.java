@@ -84,13 +84,21 @@ public class AdminOrderController {
 		}
 
 		// 呼叫 service 方法更新訂單中的訂單商品
-		ordersService.updateOrderItems(orders, updateDto);
+	    // 如果返回 true，表示訂單已被自動刪除
+	    boolean orderDeleted = ordersService.updateOrderItems(orders, updateDto);
+	    if (orderDeleted) {
+	        // 回傳一個表示訂單已刪除的標誌，前端可以依此移除該筆訂單行
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("orderDeleted", true);
+	        return ResponseEntity.ok(response);
+	    }
 
 		ordersService.updateOrder(orders);
 
 		// 回傳更新後的資料：配送狀態與訂單商品簡要資訊
 		Map<String, Object> response = new HashMap<>();
 		response.put("shippingStatus", orders.getShippingStatus());
+		response.put("totalAmount", orders.getTotalAmount());
 		response.put("orderItems", orders.getOrderItems().stream().map(oi -> {
 			Map<String, Object> map = new HashMap<>();
 			map.put("productId", oi.getProducts().getProductId());
@@ -98,6 +106,25 @@ public class AdminOrderController {
 			return map;
 		}).collect(Collectors.toList()));
 
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/deleteOrderItem/{orderId}/{productId}")
+	@ResponseBody
+	public ResponseEntity<?> deleteOrderItem(@PathVariable("orderId") Integer orderId,
+			@PathVariable("productId") Integer productId) {
+		Orders order = ordersService.getOrderById(orderId);
+		if (order == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("訂單未找到");
+		}
+		boolean removed = ordersService.deleteOrderItem(order, productId);
+		if (!removed) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("訂單商品未找到");
+		}
+		ordersService.updateOrder(order);
+		// 回傳更新後的訂單總金額
+		Map<String, Object> response = new HashMap<>();
+		response.put("totalAmount", order.getTotalAmount());
 		return ResponseEntity.ok(response);
 	}
 }

@@ -6,8 +6,6 @@
 	<meta charset="utf-8" />
 	<title>Orders - Fruitables</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" rel="stylesheet">
-
 	<style>
 		/* 基本容器與標題 */
 		.container {
@@ -200,13 +198,15 @@
 			</div>
 		</main>
 	</div>
-</body>
 
-<script>
-	// 當頁面載入完成時，清除 localStorage 的 orderRemark
-	document.addEventListener("DOMContentLoaded", function () {
-		localStorage.removeItem("orderRemark");
-	});
-</script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script>
+		// 當頁面載入完成時，清除 localStorage 的 orderRemark
+		document.addEventListener("DOMContentLoaded", function () {
+			localStorage.removeItem("orderRemark");
+		});
+	</script>
+</body>
 
 </html>
