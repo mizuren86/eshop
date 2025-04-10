@@ -1,0 +1,556 @@
+<div th:fragment="chatWidget">
+    <style>
+        .chat-icon {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+        }
+
+        .chat-container {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            width: 450px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 9999;
+            border: 1px solid #28a745;
+        }
+
+        .chat-header {
+            background: #28a745;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            font-size: 18px;
+            position: relative;
+        }
+
+        .mode-indicator {
+            padding: 8px 10px;
+            background: #f8f9fa;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 1px solid #eee;
+        }
+
+        .human-active {
+            background: #2196F3;
+            color: white;
+        }
+
+        .quick-actions-wrapper {
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            background: #f8f9fa;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            white-space: nowrap;
+            flex-grow: 1;
+            padding-bottom: 5px;
+        }
+
+        .quick-actions::-webkit-scrollbar {
+            display: none;
+        }
+
+        .quick-btn {
+            padding: 8px 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .quick-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .human-btn {
+            background: #2196F3;
+        }
+
+        .human-btn:hover {
+            background: #0d8bf2;
+        }
+
+        .scroll-btn {
+            background: #ddd;
+            border: none;
+            padding: 8px 12px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .scroll-btn:hover {
+            background: #bbb;
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 10px;
+            margin: 5px 0;
+            max-width: 85%;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .user-message {
+            background: rgb(192, 192, 192);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            background: #e6f7e1;
+            color: black;
+            align-self: flex-start;
+        }
+
+        .human-message {
+            background: #e3f2fd;
+            color: black;
+            align-self: flex-start;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background: #f8f9fa;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .chat-input button {
+            padding: 10px 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            min-width: 30px !important;
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            background-color: #28a745;
+        }
+
+        .bot-avatar {
+            background-color: #218838;
+        }
+
+        .human-avatar {
+            background-color: #2196F3;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .btn-close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 10px;
+            right: 50px;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .connected {
+            background-color: #28a745;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .disconnected {
+            background-color: #dc3545;
+        }
+        
+        .connecting {
+            background-color: #ffc107;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
+
+    <!-- 引入 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- 客服圖標 -->
+    <div class="chat-icon" onclick="toggleChatWindow()">💬</div>
+
+    <!-- 聊天窗口 -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <strong>客服對話</strong>
+            <div class="connection-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">智能客服</span>
+            </div>
+            <button class="btn-close" onclick="toggleChatWindow()">×</button>
+        </div>
+
+        <div class="mode-indicator" id="modeIndicator">
+            當前模式: 智能客服
+        </div>
+
+        <!-- 快速操作區域 -->
+        <div class="quick-actions-wrapper">
+            <button class="scroll-btn left" onclick="scrollQuickActions(-150)">&#10094;</button>
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="handleQuickAction('orders')">
+                    <i class="fas fa-box"></i> 我的訂單
+                </button>
+                <button class="quick-btn" onclick="handleQuickAction('faq')">
+                    <i class="fas fa-question-circle"></i> 熱門問題
+                </button>
+                <button class="quick-btn" onclick="handleQuickAction('promotions')">
+                    <i class="fas fa-gift"></i> 最新活動
+                </button>
+                <button class="quick-btn" id="toggleModeBtn" onclick="toggleHumanMode()">
+                    <i class="fas fa-headset"></i> 人工客服
+                </button>
+            </div>
+            <button class="scroll-btn right" onclick="scrollQuickActions(150)">&#10095;</button>
+        </div>
+
+        <!-- 聊天內容 -->
+        <div class="chat-box" id="chatBox">
+            <!-- 初始歡迎訊息 -->
+            <div class="message bot-message">
+                <div class="avatar bot-avatar"><i class="fas fa-robot"></i></div>
+                <div>
+                    <div>您好！我是智能客服助手，請問有什麼可以幫您？</div>
+                    <div class="timestamp" id="welcomeTimestamp"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 輸入表單 -->
+        <form id="chatForm" class="chat-input">
+            <input type="text" id="message" placeholder="輸入訊息..." required>
+            <button type="submit">傳送</button>
+        </form>
+    </div>
+
+    <script>
+        // 全局變量
+        let isHumanMode = false;
+        let humanWebSocket = null;
+        let chatHistory = [];
+        const toggleModeBtn = document.getElementById('toggleModeBtn');
+        const modeIndicator = document.getElementById('modeIndicator');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        
+        // 初始化歡迎訊息的時間戳
+        document.getElementById('welcomeTimestamp').textContent = new Date().toLocaleTimeString();
+        
+        // 切換聊天視窗
+        function toggleChatWindow() {
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.style.display = (chatContainer.style.display === 'none' || chatContainer.style.display === '') 
+                ? 'block' 
+                : 'none';
+        }
+        
+        // 滾動快速操作按鈕
+        function scrollQuickActions(amount) {
+            const quickActions = document.querySelector(".quick-actions");
+            quickActions.scrollBy({ left: amount, behavior: "smooth" });
+        }
+        
+        // 快速按鈕處理
+        function handleQuickAction(type) {
+            if (type === 'customer-service') {
+                toggleHumanMode();
+                return;
+            }
+            
+            const messages = {
+                orders: '您的最新訂單狀態如下：\n訂單編號：#123456\n狀態：已出貨 🚚\n預計送達時間：2023-12-15',
+                faq: '常見問題：\n1. 如何退貨？\n2. 會員點數如何使用？\n3. 如何修改訂單資訊？\n4. 付款方式有哪些？',
+                promotions: '最新活動：\n🔥 週年慶全館8折！\n🎁 消費滿1000元送100元購物金！\n💝 新會員首購享9折優惠！'
+            };
+            
+            if(messages[type]) {
+                displayMessage(messages[type], 'bot');
+            }
+        }
+        
+        // 切換人工客服模式
+        function toggleHumanMode() {
+            fetch('/chat/toggle-mode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                isHumanMode = !isHumanMode;
+                updateModeUI();
+                
+                if (isHumanMode) {
+                    initWebSocket();
+                } else {
+                    if (humanWebSocket) {
+                        humanWebSocket.close();
+                        humanWebSocket = null;
+                    }
+                }
+            })
+            .catch(error => console.error('切換模式失敗:', error));
+        }
+        
+        // 初始化WebSocket連接
+        function initWebSocket() {
+            updateConnectionStatus('connecting', '連接中...');
+            
+            // 替換為您的WebSocket端點
+			humanWebSocket = new WebSocket('ws://localhost:8080/ws'); // 非加密連線
+            
+            humanWebSocket.onopen = function(e) {
+                console.log('WebSocket連接已建立');
+                updateConnectionStatus('connected', '人工客服已連接');
+            };
+            
+            humanWebSocket.onmessage = function(event) {
+                displayMessage(event.data, 'human');
+            };
+            
+            humanWebSocket.onclose = function(event) {
+                console.log('WebSocket連接已關閉');
+                if (isHumanMode) {
+                    updateConnectionStatus('disconnected', '連接已斷開');
+                    displayMessage('與人工客服的連接已斷開，已自動切回智能客服', 'bot');
+                    toggleHumanMode();
+                }
+            };
+            
+            humanWebSocket.onerror = function(error) {
+                console.error('WebSocket錯誤:', error);
+                updateConnectionStatus('disconnected', '連接錯誤');
+                if (isHumanMode) {
+                    displayMessage('連接人工客服時發生錯誤，已自動切回智能客服', 'bot');
+                    toggleHumanMode();
+                }
+            };
+        }
+        
+        // 更新連接狀態顯示
+        function updateConnectionStatus(status, text) {
+            statusDot.className = 'status-dot ' + status;
+            statusText.textContent = text;
+        }
+        
+        // 更新模式UI
+        function updateModeUI() {
+            if (isHumanMode) {
+                modeIndicator.textContent = '當前模式: 人工客服';
+                modeIndicator.classList.add('human-active');
+                toggleModeBtn.innerHTML = '<i class="fas fa-robot"></i> 智能客服';
+                toggleModeBtn.classList.remove('human-btn');
+            } else {
+                modeIndicator.textContent = '當前模式: 智能客服';
+                modeIndicator.classList.remove('human-active');
+                toggleModeBtn.innerHTML = '<i class="fas fa-headset"></i> 人工客服';
+                toggleModeBtn.classList.add('human-btn');
+                updateConnectionStatus('', '智能客服');
+            }
+        }
+        
+        // 表單提交處理
+        document.getElementById("chatForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const userMessage = document.getElementById("message").value.trim();
+            
+            if(userMessage) {
+                displayMessage(userMessage, "user");
+                document.getElementById("message").value = "";
+                
+                if (isHumanMode) {
+                    if (humanWebSocket && humanWebSocket.readyState === WebSocket.OPEN) {
+                        humanWebSocket.send(userMessage);
+                    } else {
+                        displayMessage('人工客服連接已斷開，已自動切回智能客服', 'bot');
+                        toggleHumanMode();
+                    }
+                } else {
+                    sendToAI(userMessage);
+                }
+            }
+        });
+        
+        // 發送到AI (RASA API)
+        function sendToAI(message) {
+            fetch('/chat/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayMessage(data.botResponse, "bot");
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayMessage('抱歉，暫時無法處理您的請求，請稍後再試。', 'bot');
+            });
+        }
+        
+        // 顯示訊息
+        function displayMessage(message, sender) {
+            const chatBox = document.getElementById("chatBox");
+            const messageDiv = document.createElement("div");
+            
+            // 根據發送者決定樣式
+            let messageClass = '';
+            let avatarClass = '';
+            let icon = '';
+            
+            switch(sender) {
+                case 'user':
+                    messageClass = 'user-message';
+                    avatarClass = 'user-avatar';
+                    icon = 'fa-user';
+                    break;
+                case 'bot':
+                    messageClass = 'bot-message';
+                    avatarClass = 'bot-avatar';
+                    icon = 'fa-robot';
+                    break;
+                case 'human':
+                    messageClass = 'human-message';
+                    avatarClass = 'human-avatar';
+                    icon = 'fa-headset';
+                    break;
+            }
+            
+            messageDiv.className = `message ${messageClass}`;
+            
+            // 建立頭像
+            const avatar = document.createElement("div");
+            avatar.className = `avatar ${avatarClass}`;
+            avatar.innerHTML = `<i class="fas ${icon}"></i>`;
+            
+            // 訊息內容
+            const content = document.createElement("div");
+            const text = document.createElement("div");
+            
+            // 處理換行顯示
+            message.split('\n').forEach((line, index) => {
+                if (index > 0) {
+                    text.appendChild(document.createElement('br'));
+                }
+                text.appendChild(document.createTextNode(line));
+            });
+            
+            // 時間戳記
+            const timestamp = document.createElement("div");
+            timestamp.className = "timestamp";
+            timestamp.textContent = new Date().toLocaleTimeString();
+            
+            // 組合元素
+            content.appendChild(text);
+            content.appendChild(timestamp);
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            chatBox.appendChild(messageDiv);
+            
+            // 自動滾動
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</div>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/base}">
+
+<head>
+	<meta charset="utf-8" />
+	<title>Q&A - Fruitables</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<style>
+		.policy-section {
+			font-family: 'Open Sans', sans-serif;
+			color: #333;
+			line-height: 1.8;
+			margin-bottom: 2rem;
+		}
+
+		.policy-section h2 {
+			font-size: 2.5rem;
+			font-weight: 700;
+			margin-bottom: 1.5rem;
+			color: #222;
+		}
+
+		.policy-section h3 {
+			font-size: 1.75rem;
+			font-weight: 600;
+			margin-top: 2rem;
+			margin-bottom: 1rem;
+			color: #222;
+		}
+
+		.policy-section p {
+			font-size: 1rem;
+			margin-bottom: 1rem;
+		}
+
+		.policy-section ul {
+			margin-bottom: 1rem;
+			padding-left: 1.5rem;
+		}
+
+		.policy-section li {
+			margin-bottom: 0.5rem;
+		}
+
+		.policy-card {
+			background: #fff;
+			border: 1px solid #e0e0e0;
+			border-radius: 0.5rem;
+			padding: 2rem;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+	</style>
+</head>
+
+<body>
+	<div layout:fragment="content">
+		<!-- 頁首 -->
+		<header class="container-fluid page-header py-5">
+			<h1 class="text-center text-white display-6">Q&A</h1>
+			<nav aria-label="breadcrumb" class="breadcrumb justify-content-center">
+				<a th:href="@{/index}" class="breadcrumb-item">首頁</a>
+				<span class="breadcrumb-item active text-white">Q&A</span>
+			</nav>
+		</header>
+
+		<!-- 常見問答與幫助內容開始 -->
+		<div class="container-fluid contact py-5">
+			<div class="container py-5">
+				<div class="p-5 bg-light rounded">
+					<div class="row g-4">
+						<div class="col-12">
+							<h1 class="text-primary text-center">常見問答</h1>
+							</br>
+
+							<!-- Q1 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q1、商品為現貨嗎?</strong></div>
+								<div class="qa-answer">
+									<p>
+										A：賣場內絕大部分是現貨，預購則會在選項或內文標示。但仍有少部分調貨需等 5～7 個工作天，不會另外備註需等調貨，
+										若對於到貨時間有特殊需求，務必在下訂單前與我們聯繫。
+									</p>
+								</div>
+							</div>
+
+							<!-- Q2 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q2、網站上顯示售完，還能補貨嗎?</strong></div>
+								<div class="qa-answer">
+									<p>
+										A：商品售完為止，除預購品外不會再補貨，但若有其他消費者取消訂單，系統會自動回補庫存。
+									</p>
+								</div>
+							</div>
+
+							<!-- Q3 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q3、可以合併訂單或加購嗎?</strong></div>
+								<div class="qa-answer">
+									<p>
+										A：出貨前都可以調整訂單購物內容，請於訂單內留言給我們即可。但若訂單狀態為已完成，表示訂單已完成出貨，無法合併訂單。
+									</p>
+								</div>
+							</div>
+
+							<!-- Q4 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q4、可以取消訂單嗎?</strong></div>
+								<div class="qa-answer">
+									<p>
+										A：可以，請留言給我們需取消的訂單編號或訂購人姓名手機，以供查詢並取消。
+									</p>
+								</div>
+							</div>
+
+							<!-- Q5 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q5、關於出貨時間與超商取貨？</strong></div>
+								<div class="qa-answer">
+									<p>
+										A：一般訂單為下單完成後隔 1～3 個工作天寄出，不包含預購或調貨訂單。ex：週一下訂單，將於週二～四內寄出，週四下訂單，
+										將於週五或下週一～二內寄出，以此類推，遇國定例假日順延。
+									</p>
+									<p>
+										若非特殊門市，寄出後隔 1 天到指定門市。ex：週一出貨 / 週三到達門市，週五出貨 / 週日到達門市，以此類推。
+									</p>
+								</div>
+							</div>
+
+							<!-- Q6 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q6、已選擇的 7-11 門市可以更改嗎?</strong></div>
+								<div class="qa-answer">
+									<p>
+										A：在訂單出貨前，您都可以透過以下兩種方式與小幫手聯繫更改取貨門市，但若已經出貨之訂單恕無法變更取貨門市。
+									</p>
+									<p>
+										聯絡方式1-信箱內的系統通知信中可點選訂單連結進入訂單明細，畫面右下角店家和顧客訂單通訊內可直接留言。<br />
+										聯絡方式2-電腦版任一畫面的右上角點選聯絡我們，手機版的左上角有三條橫線的按鈕，點開後往下拉，倒數第二行有聯絡我們的連結。<br />
+									</p>
+									<p>
+										※ 寄出包裹後，若遇到門市關轉，小幫手會透過電話或 email 與您聯繫，若聯繫不上您，會自行協助選擇離原門市較近之 7-11
+										配送/若已被退回則需另外重新下單。
+									</p>
+								</div>
+							</div>
+
+							<!-- Q7 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q7、超商純取貨時需要本人取貨嗎? 若是超商取貨付款呢?</strong></div>
+								<div class="qa-answer">
+									<p>
+										A：純取貨建議本人取貨，取貨時務必攜帶並出示與包裹姓名相同的身份證明文件(如身份證、健保卡、駕照)，而超商取貨付款一般不太會看證件，取貨時也比較不會強制要本人，但須明確知道取貨人名與金額。
+									</p>
+								</div>
+							</div>
+
+							<!-- Q8 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q8、超商取貨時，包裹到店後如何通知?</strong></div>
+								<div class="qa-answer">
+									<p>
+										A：除寄出當日系統會發送MAIL通知外，到店後系統也會發送取貨通知簡訊(但若您使用電信公司拒收商務廣告簡訊之服務或長時間未開機，可能導致無法接收通知簡訊)。
+									</p>
+									<p>
+										包裹送達超商門市後，會於當天寄送簡訊通知取貨，若您未收到簡訊通知，有以下幾種可能:
+									<ol>
+										<li>訂購時，手機號碼輸入錯誤。</li>
+										<li>手機門號本身預設拒收廣告簡訊功能，或有安裝阻擋廣告簡訊的APP。</li>
+										<li>發送簡訊時，您所在的地點收訊不穩定。</li>
+										<li>手機簡訊儲存容量已滿。</li>
+									</ol>
+									</p>
+									<p>
+										關於訂單配送狀態，除了簡訊通知外，建議您可以登入訂購信箱內查詢是否已配送出，查詢方式可參考Q15。
+									</p>
+								</div>
+							</div>
+
+							<!-- Q9 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q9、如果超商取貨包裹未領取怎麼辦?</strong></div>
+								<div class="qa-answer">
+									<p>
+										A：若您未於貨到後 7日內取貨，包裹將被退回，需請您補匯運費 60後，我們將再次配送。
+									</p>
+									<p style="color: royalblue; font-weight: bold;">
+										※ 若半年內累積達
+										2次超取未領取，也未通知工作人員補運費重新寄出者，將設定帳號為黑名單，若有所選的超商因應疫情影響緊急閉店未能順利取貨而被限制，請提供訂單編號與我們聯繫，確認後將取消限制。
+									</p>
+								</div>
+							</div>
+
+							<!-- Q10 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q10、超商代碼（透過綠界）怎麼操作?</strong></div>
+								<div class="qa-answer">
+									<p>
+										A：詳細說明請參考綠界網站說明
+									</p>
+									<p>
+										※ 請留意超商代碼不等於超商條碼，兩者不同，我們使用的是"超商代碼"。
+									</p>
+								</div>
+							</div>
+
+							<!-- Q11 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q11、請問有實體店面嗎?</strong></div>
+								<div class="qa-answer">
+									<p>A：很抱歉我們現在還沒有實體店面。</p>
+								</div>
+							</div>
+
+							<!-- Q12 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q12、如何查詢訂單?</strong></div>
+								<div class="qa-answer">
+									<p>A：請登入 Fruitables 官網會員(登入帳號為您填寫的 email )，在「訂單」頁面查詢完整訂單記錄。</p>
+									<p>
+										若訂單狀態為 "處理中" 或 "已確認" 表示尚未出貨</br>
+										若訂單狀態為 "已完成" 則表示已經出貨</br>
+										超取訂單請留意手機簡訊或至您選擇的7-11門市詢問。
+									</p>
+									<p>【電腦版查詢方式】</p>
+									<ol class="qa-answer">
+										<li>官網右上角點選登入會員。</li>
+										<li>點選「我的帳戶」。</li>
+										<li>點選「訂單」。</li>
+									</ol>
+									<p>【手機版查詢方式】</p>
+									<ol class="qa-answer">
+										<li>官網右上角點選會員登入。</li>
+										<li>登入後點選右上角的會員圖示。</li>
+										<li>點選「訂單」。</li>
+									</ol>
+								</div>
+							</div>
+
+							<!-- Q13 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>Q13、忘記密碼或密碼無法更新怎麼辦?</strong></div>
+								<div class="qa-answer">
+									<p>A：請點選「忘記密碼」並填入您註冊時使用的 EMAIL ，以更新密碼。若更新失敗，請確認：</p>
+									<ol class="qa-answer">
+										<li>輸入的密碼少於 8 個字元；</li>
+										<li>密碼重設連結已過期；</li>
+										<li>密碼重設連結已失效。</li>
+									</ol>
+									<p>
+										若如無法更新密碼，請留下會員信箱，我們將於上班時間與系統商聯繫，確認後回覆您，謝謝。
+									</p>
+								</div>
+							</div>
+
+							<hr>
+
+							<!-- 詐騙警語 -->
+							<div class="qa-item">
+								<div class="qa-question"><strong>網路詐騙警語</strong></div>
+								<div class="qa-answer">
+									<ul>
+										<li>不要依指示到ATM前操作</li>
+										<li>工作人員不會主動打電話聯絡誤設多期扣款</li>
+										<li>請勿透過LINE或其他通訊軟體約定交易方式，聯繫小幫手請使用官網留言或FB粉絲團</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 常見問答與幫助內容結束 -->
+
+
+		<!-- JavaScript 區塊 -->
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+
+			/*]]>*/
+		</script>
+	</div>
+</body>
+
+</html>

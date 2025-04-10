@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/base}">
+
+<head>
+	<meta charset="utf-8" />
+	<title>Terms of Use - Fruitables</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<style>
+		.policy-section {
+			font-family: 'Open Sans', sans-serif;
+			color: #333;
+			line-height: 1.8;
+			margin-bottom: 2rem;
+		}
+
+		.policy-section h2 {
+			font-size: 2.5rem;
+			font-weight: 700;
+			margin-bottom: 1.5rem;
+			color: #222;
+		}
+
+		.policy-section h3 {
+			font-size: 1.75rem;
+			font-weight: 600;
+			margin-top: 2rem;
+			margin-bottom: 1rem;
+			color: #222;
+		}
+
+		.policy-section p {
+			font-size: 1rem;
+			margin-bottom: 1rem;
+		}
+
+		.policy-section ul {
+			margin-bottom: 1rem;
+			padding-left: 1.5rem;
+		}
+
+		.policy-section li {
+			margin-bottom: 0.5rem;
+		}
+
+		.policy-card {
+			background: #fff;
+			border: 1px solid #e0e0e0;
+			border-radius: 0.5rem;
+			padding: 2rem;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+	</style>
+</head>
+
+<body>
+	<div layout:fragment="content">
+		<!-- 頁首 -->
+		<header class="container-fluid page-header py-5">
+			<h1 class="text-center text-white display-6">條款與細則</h1>
+			<nav aria-label="breadcrumb" class="breadcrumb justify-content-center">
+				<a th:href="@{/index}" class="breadcrumb-item">首頁</a>
+				<span class="breadcrumb-item active text-white">條款與細則</span>
+			</nav>
+		</header>
+
+		<!-- 條款與細則內容開始 -->
+		<div class="container-fluid contact py-5">
+			<div class="container py-5">
+				<div class="p-5 bg-light rounded">
+					<div class="row g-4">
+						<div class="col-12">
+							<h1 class="text-primary text-center">條款與細則</h1>
+							</br>
+							<p>
+								歡迎來到 Fruitables 官方線上購物網站，為維護彼此權益，請詳閱本商店之約定條款。
+							</p>
+							<p>
+								當您於結帳購物車時點選我同意服務條款和退換貨政策，即表示您已知悉並同意此約定條款之全部內容，包含以 EMAIL 作為意思表示之方法，
+								本店將依照個人資料保護法令相關規定保護您的個人資料，並遵守商店隱私權保護政策。
+							</p>
+
+							<h3>- 訂單相關 -</h3>
+							<ul>
+								<li>一般訂單將於 1~2 個工作天寄出。</li>
+								<li>預購商品預計出貨日期供參考，實際仍以商品到貨為主。</li>
+								<li>
+									本店保留訂單接受與否之權利，若有特殊或意外狀況導致無法接受訂單時，將使用訂單聯繫 EMAIL 、訊息留言或電話之任一方式聯繫，
+									若訂單已付款，可選擇更換品項或辦理全額退款，造成不便敬請見諒。
+								</li>
+							</ul>
+
+							<h3>- 訂單查詢 -</h3>
+							<p>
+								登入 Fruitables 官網會員後，點選訂單即可查閱完整記錄<br />
+								訂單狀態為「處理中」或「已確認」表示尚未出貨，「已完成」表示已出貨<br />
+							<P>
+								※ 超商取貨訂單請留意手機簡訊或至選擇 7-11 門市詢問。
+							</P>
+							<P>
+								※ 若未加入會員，請透過訂購時所填寫的聯繫 EMAIL 連結查詢
+							</P>
+							</p>
+
+							<h3>- 配送相關 -</h3>
+							<p>
+								出貨時間為平日週一至週五，例假日休息。<br />
+								以下預估配達時間僅供參考，實際情況以委託物流方配送為主，恕無法承諾 100% 配送時間。
+							</p>
+							<ul>
+								<li>
+									新竹貨運：<br />
+									寄出後約隔 1~2 工作天到，例假日休息。
+								</li>
+								<li>
+									7-11 到店純取貨：<br />
+									寄出日 +2 會配達指定門市，寄出時系統會發 EMAIL 通知訂單已完成；配達時物流系統會發手機簡訊通知，需於配達門市起算
+									7 日內取貨，取貨時需檢視收貨人證件(如：身份證、健保卡、駕照)<br />
+									逾期未取被退回，需負擔再次寄送運費 60。
+								</li>
+								<li>
+									7-11 取貨付款：<br />
+									寄出日 +2 會配達指定門市，寄出時系統會發 EMAIL 通知訂單已完成；配達時物流系統會發手機簡訊通知，需於配達門市起算
+									7 日內取貨<br />
+									逾期未取被退回，需負擔再次寄送運費 60 ，一年內累積滿 2 次未取貨紀錄，恕將無法使用超商取貨付款之服務。
+								</li>
+								<li>
+									外島郵寄：<br />
+									中華郵政寄出後約隔 3~7 工作天左右到。
+								</li>
+							</ul>
+							<p>
+							<P>
+								※ 若收件資料不完整或錯誤、意外天災、系統設備維護等情況，出貨時間將順延，請見諒。
+							</P>
+							<P>
+								※ 包裹送達超商門市後，物流系統會發寄簡訊通知，若未收到簡訊，有以下幾種可能：
+							</P>
+							<ol style="margin-left: 2rem;">
+								<li>訂購時，手機號碼輸入錯誤</li>
+								<li>手機門號預設拒收廣告簡訊，或安裝了阻擋廣告簡訊的APP</li>
+								<li>發送簡訊時，您所在的地點收訊不穩定</li>
+								<li>手機簡訊儲存容量已滿</li>
+							</ol>
+							<span style="color: red;">
+								※ 出貨完成時，官網會發 EMAIL 通知訂單狀態為已完成；超商包裹配達時，物流系統會發送手機簡訊通知取貨
+								若未於期限內完成取貨，需補運費後再重新配送，恕不接受以未收到簡訊通知要求不補運費。
+							</span>
+							</p>
+
+							<h3>- 商店隱私權保護政策 -</h3>
+							<ul>
+								<strong>資料收集及使用方式</strong><br />
+								<li>本商店得將遞送商品或服務所必要之資訊提供予物流廠商作配送或聯絡之用。</li>
+							</ul>
+							<ul>
+								<strong>資料揭露</strong><br />
+								<li>本商店除依法配合司法機關、其他有權機關或檢警單位之調查，或於您有違反法令或契約而有主張權利之必要情形外，
+									非依相關法律規範不會向任何人揭露或出售你的個人資料。</li>
+							</ul>
+							<ul>
+								<strong>隱私權保護政策修訂</strong><br />
+								<li>本商店保留隨時修訂本隱私權保護政策的權利，若有影響您權益之重大變更時，本商店會於網頁適當位置公告。</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 條款與細則內容結束 -->
+
+
+		<!-- JavaScript 區塊 -->
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+
+			/*]]>*/
+		</script>
+	</div>
+</body>
+
+</html>

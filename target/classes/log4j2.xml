@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="ConsoleAppender" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%5p}{FATAL=red blink, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue, TRACE=magenta} %style{%pid}{magenta} --- [%t] %style{%-40.40logger{39}}{cyan} : %m%n%throwable" 
+               disableAnsi="false" noConsoleNoAnsi="false"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="ConsoleAppender"/>
+    </Root>
+    <Logger name="ecpay" level="debug" additivity="false">
+      <AppenderRef ref="ConsoleAppender"/>
+    </Logger>
+  </Loggers>
+</Configuration>

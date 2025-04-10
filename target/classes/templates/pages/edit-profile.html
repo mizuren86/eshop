@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/base}">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Edit Profile - Fruitables</title>
+	<!--	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"> -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<style>
+		.error-message {
+			color: red;
+			display: none;
+			margin-top: 10px;
+		}
+
+		.success-message {
+			color: green;
+			display: none;
+			margin-top: 10px;
+		}
+
+		.loading {
+			display: none;
+			margin-top: 10px;
+		}
+
+
+		.btn-primary {
+			padding: 10px 25px;
+			border-radius: 25px;
+			font-weight: 600;
+			transition: all 0.3s ease;
+		}
+
+		.btn-primary:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		}
+
+		/* 調整整體頭像區塊 */
+		.profile-photo-container {
+			position: relative;
+			width: 150px;
+			/* 控制容器寬度 */
+			height: 150px;
+			/* 控制容器高度 */
+			margin: 0 auto;
+			/* 置中 */
+			border-radius: 50%;
+			/* 讓容器成圓形 */
+			overflow: hidden;
+			/* 隱藏多餘部分 */
+			border: 3px solid #fff;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+
+		/* 調整圖片樣式，充滿容器且不失真 */
+		.profile-photo {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+
+
+		/* .container {
+	      max-width: 1140px;
+	      margin: 0 auto;
+	      padding: 0 15px;
+	    } */
+	</style>
+</head>
+
+<body>
+	<div layout:fragment="content">
+		<div class="container">
+
+			<header class="container-fluid page-header py-5">
+				<h1 class="text-center text-white display-6">編輯個人資料</h1>
+				<nav aria-label="breadcrumb" class="breadcrumb justify-content-center">
+				</nav>
+			</header>
+
+
+			<main class="container py-5">
+				<form id="editProfileForm" enctype="multipart/form-data">
+					<div class="profile-section">
+						<div class="text-center mb-4">
+							<div class="profile-photo-container">
+								<img th:src="@{${user.userPhoto != null ? (user.userPhoto.startsWith('/img/') ? user.userPhoto : '/img/users/' + user.userPhoto) : '/img/avatar.jpg'}}"
+									alt="Profile Photo" class="profile-photo" id="profilePhotoPreview">
+							</div>
+							<div class="mt-3">
+								<input type="file" class="form-control" id="userPhoto" name="userPhoto" accept="image/*"
+									style="display: none;" onchange="previewImage(this)">
+								<button type="button" class="btn btn-outline-primary"
+									onclick="document.getElementById('userPhoto').click()">
+									<i class="fas fa-camera"></i> 更換頭像
+								</button>
+								<small class="text-muted d-block mt-2">支持 jpg、jpeg、png 格式，大小不超過 5MB</small>
+								<div id="photoError" class="text-danger d-none mt-2"></div>
+							</div>
+						</div>
+
+						<div class="mb-3">
+							<label for="username" class="form-label">用戶名</label>
+							<input type="text" class="form-control" id="username" name="username"
+								th:value="${user.username}">
+							<small class="text-muted">請輸入新的用戶名</small>
+						</div>
+
+						<div class="mb-3">
+							<label for="email" class="form-label">電子郵件</label>
+							<input type="email" class="form-control" id="email" name="email" th:value="${user.email}">
+						</div>
+
+						<div class="mb-3">
+							<label for="fullName" class="form-label">姓名</label>
+							<input type="text" class="form-control" id="fullName" name="fullName"
+								th:value="${user.fullName}">
+						</div>
+
+						<div class="mb-3">
+							<label for="phone" class="form-label">電話</label>
+							<input type="tel" class="form-control" id="phone" name="phone" th:value="${user.phone}">
+						</div>
+
+						<div class="mb-3">
+							<label for="address" class="form-label">地址</label>
+							<input type="text" class="form-control" id="address" name="address"
+								th:value="${user.address}">
+						</div>
+					</div>
+
+					<div class="d-grid gap-2">
+						<button type="submit" class="btn btn-primary">
+							<i class="fas fa-save"></i> 保存更改
+						</button>
+						<a href="/profile" class="btn btn-outline-secondary">
+							<i class="fas fa-arrow-left"></i> 返回個人資料
+						</a>
+					</div>
+				</form>
+
+				<div class="loading">
+					<div class="spinner-border loading-spinner text-primary" role="status">
+						<span class="visually-hidden">Loading...</span>
+					</div>
+				</div>
+			</main>
+		</div>
+		<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+		<script>
+			function previewImage(input) {
+				const preview = document.getElementById('profilePhotoPreview');
+				const error = document.getElementById('photoError');
+
+				// 重置錯誤信息
+				error.classList.add('d-none');
+				error.textContent = '';
+
+				if (input.files && input.files[0]) {
+					const file = input.files[0];
+
+					// 驗證文件類型
+					if (!file.type.startsWith('image/')) {
+						error.textContent = '只允許上傳圖片文件';
+						error.classList.remove('d-none');
+						input.value = '';
+						return;
+					}
+
+					// 驗證文件大小
+					if (file.size > 5 * 1024 * 1024) {
+						error.textContent = '圖片大小不能超過5MB';
+						error.classList.remove('d-none');
+						input.value = '';
+						return;
+					}
+
+					const reader = new FileReader();
+					reader.onload = function (e) {
+						preview.src = e.target.result;
+					}
+					reader.readAsDataURL(file);
+				}
+			}
+
+			document.getElementById('editProfileForm').addEventListener('submit', function (e) {
+				e.preventDefault();
+
+				// 獲取表單數據
+				const formData = new FormData(this);
+				const token = localStorage.getItem('token');
+
+				// 驗證必填欄位
+				const username = formData.get('username');
+				const email = formData.get('email');
+				const phone = formData.get('phone');
+				const address = formData.get('address');
+
+				if (!username || !email || !phone || !address) {
+					Swal.fire({
+						icon: 'error',
+						title: '更新失敗',
+						text: '請填寫所有必填欄位'
+					});
+					return;
+				}
+
+				// 顯示加載消息
+				const submitButton = this.querySelector('button[type="submit"]');
+				const originalText = submitButton.innerHTML;
+				submitButton.disabled = true;
+				submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 更新中...';
+
+				fetch('/api/users/profile', {
+					method: 'PUT',
+					headers: {
+						'Authorization': token
+					},
+					body: formData
+				})
+					.then(response => {
+						if (!response.ok) {
+							throw new Error(`HTTP error! status: ${response.status}`);
+						}
+						return response.json();
+					})
+					.then(data => {
+						if (data.success) {
+							// 更新 localStorage 中的用戶信息
+							const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+							userInfo.username = data.data.username;
+							userInfo.email = data.data.email;
+							userInfo.fullName = data.data.fullName;
+							userInfo.phone = data.data.phone;
+							userInfo.address = data.data.address;
+							if (data.data.userPhoto) {
+								userInfo.userPhoto = data.data.userPhoto.startsWith('/img/') ?
+									data.data.userPhoto : '/img/users/' + data.data.userPhoto;
+							}
+							localStorage.setItem('userInfo', JSON.stringify(userInfo));
+
+							// 顯示成功消息
+							Swal.fire({
+								icon: 'success',
+								title: '更新成功',
+								text: '個人資料已成功更新',
+								showConfirmButton: false,
+								timer: 1500
+							}).then(() => {
+								// 更新成功，重定向到個人資料頁面
+								window.location.href = '/profile?t=' + new Date().getTime();
+							});
+						} else {
+							throw new Error(data.message || '更新失敗');
+						}
+					})
+					.catch(error => {
+						console.error('Error:', error);
+						Swal.fire({
+							icon: 'error',
+							title: '更新失敗',
+							text: error.message || '發生錯誤，請稍後再試'
+						});
+					})
+					.finally(() => {
+						submitButton.disabled = false;
+						submitButton.innerHTML = originalText;
+					});
+			});
+
+			// 從 localStorage 獲取用戶信息
+			const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+			if (userInfo.userPhoto) {
+				// 確保圖片路徑正確
+				let photoPath = userInfo.userPhoto;
+				// 如果路徑已經包含 /img/users/，則直接使用
+				if (photoPath.includes('/img/users/')) {
+					photoPath = photoPath.substring(photoPath.indexOf('/img/users/'));
+				} else if (!photoPath.startsWith('/img/')) {
+					// 如果路徑不是以 /img/ 開頭，則添加前綴
+					photoPath = '/img/users/' + photoPath;
+				}
+				document.getElementById('profilePhotoPreview').src = photoPath + '?t=' + new Date().getTime();
+			}
+		</script>
+
+</body>
+
+</html>
