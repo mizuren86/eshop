@@ -39,7 +39,7 @@ public class EcpayController {
         mapObj.setLogisticsSubType("UNIMART");              // 必填，選項之一，例如 FAMI
         mapObj.setIsCollection("N");                     // 必填，通常設為 "N"
         // 將 shippingMethod 和 paymentMethod 加入 ServerReplyURL 的查詢字串中
-        String callbackUrl = "https://8fcd-59-125-142-166.ngrok-free.app/ecpay/callback"
+        String callbackUrl = "https://dabf-59-125-142-166.ngrok-free.app/ecpay/callback"
                 + "?shippingMethod=" + shippingMethod
                 + "&paymentMethod=" + paymentMethod;
         mapObj.setServerReplyURL(callbackUrl);

@@ -179,7 +179,15 @@
 					<tr th:each="order : ${ordersPage.content}"
 						th:attr="data-order-id=${order.orderId}, data-shipping-status=${order.shippingStatus}">
 						<td class="text-center align-middle" th:text="${order.orderId}">訂單編號</td>
-						<td class="text-center align-middle" th:text="${order.merchantTradeNo}">訂單編號</td>
+
+						<td class="text-center align-middle" th:text="${order.merchantTradeNo}">交易編號</td>
+
+						<td class="text-center align-middle">
+							<a href="#" th:onclick="'showOrderDetails(' + ${order.orderId} + '); return false;'"
+								th:text="${order.merchantTradeNo}">交易編號</a>
+						</td>
+
+
 						<td class="text-center align-middle" th:text="${order.users.username}">顧客姓名</td>
 						<td class="text-center align-middle"
 							th:text="${'$' + #numbers.formatDecimal(order.totalAmount, 0, 0)}">$0</td>
@@ -484,6 +492,53 @@
 				});
 			}
 		});
+		
+		// 訂單詳情
+		function showOrderDetails(orderId) {
+		      fetch('/admin-orders/orderDetails/' + orderId)
+		          .then(response => {
+		              if (!response.ok) {
+		                  throw new Error('無法取得訂單明細');
+		              }
+		              return response.json();
+		          })
+		          .then(data => {
+		              // data 預期是一個訂單明細的陣列，例如：[{productImage: '/img/products/xxx.jpg', productName: '商品名稱', quantity: 2}, ...]
+		              if (!data || data.length === 0) {
+		                  Swal.fire({
+		                      icon: 'info',
+		                      title: '訂單明細',
+		                      text: '此訂單無明細資料'
+		                  });
+		                  return;
+		              }
+		              let html = '<table class="table table-bordered"><thead><tr>';
+		              html += '<th>商品圖片</th><th>商品名稱</th><th>購買數量</th>';
+		              html += '</tr></thead><tbody>';
+		              data.forEach(item => {
+		                  html += '<tr>';
+		                  html += '<td><img src="' + item.productImage + '" alt="商品圖片" style="width:50px; height:50px;"></td>';
+		                  html += '<td>' + item.productName + '</td>';
+		                  html += '<td>' + item.quantity + '</td>';
+		                  html += '</tr>';
+		              });
+		              html += '</tbody></table>';
+		              Swal.fire({
+		                  title: '訂單明細',
+		                  html: html,
+		                  width: '600px',
+		                  confirmButtonText: '關閉'
+		              });
+		          })
+		          .catch(error => {
+		              console.error('取得訂單明細錯誤：', error);
+		              Swal.fire({
+		                  icon: 'error',
+		                  title: '錯誤',
+		                  text: error.message
+		              });
+		          });
+		  }
 	</script>
 </body>
 
