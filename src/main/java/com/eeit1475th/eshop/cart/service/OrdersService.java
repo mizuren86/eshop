@@ -2,7 +2,9 @@ package com.eeit1475th.eshop.cart.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,7 +19,9 @@ import org.springframework.stereotype.Service;
 import com.eeit1475th.eshop.cart.dto.CartItemsDTO;
 import com.eeit1475th.eshop.cart.dto.OrderDTO;
 import com.eeit1475th.eshop.cart.dto.OrderItemDTO;
+import com.eeit1475th.eshop.cart.dto.OrderItemUpdateDTO;
 import com.eeit1475th.eshop.cart.dto.OrderSummary;
+import com.eeit1475th.eshop.cart.dto.OrderUpdateDTO;
 import com.eeit1475th.eshop.cart.entity.CartItems;
 import com.eeit1475th.eshop.cart.entity.OrderItems;
 import com.eeit1475th.eshop.cart.entity.Orders;
@@ -587,5 +591,35 @@ public class OrdersService {
 		// 若 orderId 條件不存在，則使用不包含 orderId 條件的查詢
 		return ordersRepository.searchOrders(merchantTradeNo, paymentStatusEnum, shippingStatusEnum, pageable);
 	}
-
+	
+	public void updateOrderItems(Orders orders, OrderUpdateDTO updateDto) {
+	    if (updateDto.getItems() != null) {
+	        // 將更新資料轉為 map: productId -> newQuantity
+	        Map<Integer, Integer> updateMap = updateDto.getItems().stream()
+	            .collect(Collectors.toMap(OrderItemUpdateDTO::getProductId, OrderItemUpdateDTO::getQuantity));
+	        
+	        // 取得現有訂單商品列表
+	        List<OrderItems> existingItems = orders.getOrderItems();
+	        
+	        // 使用 iterator 逐筆處理
+	        Iterator<OrderItems> iterator = existingItems.iterator();
+	        while (iterator.hasNext()) {
+	            OrderItems orderItem = iterator.next();
+	            Integer pid = orderItem.getProducts().getProductId();
+	            if (updateMap.containsKey(pid)) {
+	                // 更新數量
+	                orderItem.setQuantity(updateMap.get(pid));
+	                // 表示此項已處理，從 map 中移除
+	                updateMap.remove(pid);
+	            } else {
+	                // 若不在更新清單中，則表示該商品應被刪除
+	                iterator.remove();
+	                // 若配置了 CascadeType.REMOVE，則可讓刪除動作自動級聯；若未配置，
+	                // 可考慮調用此處的 repository.delete(orderItem)，或讓 updateOrder() 方法同步更新
+	                // orderItemsRepository.delete(orderItem);
+	            }
+	        }
+	        // 若 updateMap 還有剩餘的，表示更新資料中包含新項目
+	    }
+	}
 }
