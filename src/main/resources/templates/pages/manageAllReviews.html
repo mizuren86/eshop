@@ -66,23 +66,23 @@
 }
 
 #reviewsTable th:nth-child(2), #reviewsTable td:nth-child(2) {
-	width: 10%;
-}
-
-#reviewsTable th:nth-child(3), #reviewsTable td:nth-child(3) {
-	width: 15%;
-}
-
-#reviewsTable th:nth-child(4), #reviewsTable td:nth-child(4) {
 	width: 5%;
 }
 
+#reviewsTable th:nth-child(3), #reviewsTable td:nth-child(3) {
+	width: 10%;
+}
+
+#reviewsTable th:nth-child(4), #reviewsTable td:nth-child(4) {
+	width: 7%;
+}
+
 #reviewsTable th:nth-child(5), #reviewsTable td:nth-child(5) {
-	width: 25%;
+	width: 12%;
 }
 
 #reviewsTable th:nth-child(6), #reviewsTable td:nth-child(6) {
-	width: 15%;
+	width: 38%;
 }
 
 #reviewsTable th:nth-child(7), #reviewsTable td:nth-child(7) {
@@ -90,13 +90,22 @@
 }
 
 #reviewsTable th:nth-child(8), #reviewsTable td:nth-child(8) {
-	width: 5%;
+	width: 8%;
+}
+.search-container {
+    display: flex; /* 使元素在同一行 */
+    align-items: center; /* 垂直對齊 */
 }
 
+button {
+    margin-left: 10px; /* 讓按鈕和搜尋框之間有間隔 */
+}
 .search-box {
 	margin: 20px 0;
 	display: flex;
 	gap: 10px;
+	height: 2.5em;
+	flex-grow: 1;
 }
 
 .action-buttons {
@@ -205,14 +214,30 @@
 
 	<div class="container my-5">
 		<!-- 搜尋欄 -->
-		<div class="search-box">
-			<input type="text" id="searchInput" class="form-control"
-				placeholder="輸入評論關鍵字">
-			<button class="btn btn-primary" onclick="searchReviews()">搜尋</button>
-			<button class="btn btn-danger action-buttons"
-				onclick="deleteSelected()">刪除已選</button>
+		<div class="search-container">
+			<div class="search-box">
+        <input type="text" id="searchInput" class="form-control"
+            placeholder="輸入評論內容搜尋關鍵字"
+            onkeypress="if(event.keyCode === 13) searchReviews()">
+    </div>
+			<div>
+				<button class="btn btn-primary" onclick="searchReviews()">搜尋</button>
+			</div>
 		</div>
-
+<!-- 		<div class="rating-filter"> -->
+<!--           <button class="rating-filter-btn active" data-rating="0">全部評論</button> -->
+<!--           <button class="rating-filter-btn" data-rating="5"><span class="star">★</span> 5星</button> -->
+<!--           <button class="rating-filter-btn" data-rating="4"><span class="star">★</span> 4星</button> -->
+<!--           <button class="rating-filter-btn" data-rating="3"><span class="star">★</span> 3星</button> -->
+<!--           <button class="rating-filter-btn" data-rating="2"><span class="star">★</span> 2星</button> -->
+<!--           <button class="rating-filter-btn" data-rating="1"><span class="star">★</span> 1星</button> -->
+<!--         </div> -->
+		<div class="pagination" id="pagination"></div>
+		<div>
+			<button class="btn btn-danger action-buttons"
+				onclick="deleteSelected()">刪除</button>
+		</div>
+        
 		<!-- 評論表格 -->
 		<div id="reviewsContainer">
 			<table id="reviewsTable" class="table table">
@@ -231,7 +256,7 @@
 				</thead>
 				<tbody></tbody>
 			</table>
-			<div class="pagination" id="pagination"></div>
+			
 		</div>
 	</div>
 
@@ -253,7 +278,7 @@
 
         // 載入評論
         function loadReviews(page) {
-          let url = `/reviews/api/reviews/manageAll?page=${page}&size=${pageSize}`;
+          let url = `/reviews/api/reviews/manageAllByComment?page=${page}&size=${pageSize}`;
           if (searchKeyword) url += `&comment=${encodeURIComponent(searchKeyword)}`;
 
           axios.get(url)
@@ -307,6 +332,45 @@
                 console.log(review.photo); // 確認數據類型
                 console.log(review.photo instanceof Uint8Array); // 應為 false（因為 JSON 會轉為普通陣列）
                 
+             // 處理評論內容折疊邏輯
+                if (review.comment) {
+                  const commentCell = tr.querySelector("td:nth-child(6)");
+                  const commentContent = commentCell.querySelector(".comment-content");
+                  const commentText = commentCell.querySelector(".comment-text");
+
+                  commentContent.style.maxHeight = "none"; // 暫時取消限制以測量高度
+                  const lineHeight = parseFloat(getComputedStyle(commentText).lineHeight);
+                  const contentHeight = commentText.offsetHeight;
+                  const maxHeight = lineHeight * 3; // 3行高度
+
+                  if (contentHeight > maxHeight) {
+                    commentContent.classList.add("collapsed");
+                    commentContent.style.maxHeight = maxHeight + "px";
+
+                    const showMoreBtn = document.createElement("div");
+                    showMoreBtn.className = "show-more-btn";
+                    showMoreBtn.textContent = "顯示更多";
+                    commentCell.appendChild(showMoreBtn);
+
+                    showMoreBtn.addEventListener("click", function () {
+                      if (commentContent.classList.contains("expanded")) {
+                        commentContent.classList.remove("expanded");
+                        commentContent.classList.add("collapsed");
+                        commentContent.style.maxHeight = maxHeight + "px";
+                        this.textContent = "顯示更多";
+                      } else {
+                        commentContent.classList.remove("collapsed");
+                        commentContent.classList.add("expanded");
+                        commentContent.style.maxHeight = "none";
+                        this.textContent = "顯示較少";
+                      }
+                    });
+                  } else {
+                    commentContent.classList.remove("collapsed");
+                    commentContent.style.maxHeight = "none";
+                  }
+                }
+                
           });
         }
 
@@ -333,8 +397,15 @@
         function renderPagination(data) {
           const pagination = document.querySelector("#pagination");
           pagination.innerHTML = "";
+          console.log("Pagination data:", data); // 調試用
 
           // 如果沒有數據或只有一頁，不顯示分頁
+//           if (!data || data.totalPages <= 1) {
+//         	pagination.innerHTML = "<div class='no-pagination'>無分頁</div>";
+//             return;
+//           }
+          
+       // 如果沒有數據或只有一頁，不顯示分頁
           if (data.totalPages <= 1) {
             return;
           }
@@ -390,9 +461,12 @@
 
         // 搜尋功能
         window.searchReviews = () => {
-          searchKeyword = document.getElementById('searchInput').value;
+          searchKeyword = document.getElementById('searchInput').value.trim();
+          currentPage = 0; // 重置為第一頁
           loadReviews(0);
         };
+        
+        
 
         // 批量刪除
         window.deleteSelected = async () => {

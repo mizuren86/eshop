@@ -36,7 +36,10 @@
 				<div class="mb-3">
 					<label class="form-label">評論內容</label>
 					<textarea name="comment" class="form-control"
-						th:text="${review.comment}"></textarea>
+						th:text="${review.comment}" maxlength="1000" id="commentInput"></textarea>
+						<div class="text-end">
+                <span id="charCounter">0/1000</span>
+            </div>
 				</div>
 
 				<div class="mb-3">

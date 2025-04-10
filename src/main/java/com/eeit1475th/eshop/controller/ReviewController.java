@@ -289,9 +289,9 @@ public class ReviewController {
 		return "/pages/manageAllReviews";
 	}
 
-	@GetMapping("/api/reviews/manageAll")
+	@GetMapping("/api/reviews/manageAllByComment")
 	@ResponseBody
-	public ResponseEntity<Page<ReviewsDto6>> manageAllReviewsApi(@RequestParam(defaultValue = "0") int page,
+	public ResponseEntity<Page<ReviewsDto6>> manageAllReviewsByCommentApi(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "5") int size, @RequestParam(required = false) String comment, @SessionAttribute(value = "user", required = false) Users user) {
 
 		logger.info("Received request to manageAllReviews with page={}, size={}, comment={}", page, size, comment);
@@ -301,10 +301,30 @@ public class ReviewController {
 		
 		Pageable pageable = PageRequest.of(page, size);
 		if (comment != null && comment.length() > 0) {
-			Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfo(comment, pageable);
+			Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfoWithCommentLike(comment, pageable);
 			return ResponseEntity.ok(reviewsPage);
 		} else {
-			Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfo(null, pageable);
+			Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfo(pageable);
+			return ResponseEntity.ok(reviewsPage);
+		}
+	}
+	
+	@GetMapping("/api/reviews/manageAllByRating")
+	@ResponseBody
+	public ResponseEntity<Page<ReviewsDto6>> manageAllReviewsByRatingApi(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size, @RequestParam(required = false) Integer rating, @SessionAttribute(value = "user", required = false) Users user) {
+
+		logger.info("Received request to manageAllReviews with page={}, size={}, comment={}", page, size, rating);
+	    
+	    if (user == null || user.getUserId() != 99999999) {
+	        logger.warn("Unauthorized access attempt by user: {}", user != null ? user.getUserId() : "null");}
+		
+		Pageable pageable = PageRequest.of(page, size);
+		if (rating != null && rating > 0) {
+			Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfoByRating(rating, pageable);
+			return ResponseEntity.ok(reviewsPage);
+		} else {
+			Page<ReviewsDto6> reviewsPage = reviewsService.getReviewsDto6WithUserAndProductInfo(pageable);
 			return ResponseEntity.ok(reviewsPage);
 		}
 	}

@@ -192,9 +192,71 @@ public class ReviewsService {
 	}
 	
 	@Transactional(readOnly = true)
-	public Page<ReviewsDto6> getReviewsDto6WithUserAndProductInfo(String comment, Pageable pageable) {
+	public Page<ReviewsDto6> getReviewsDto6WithUserAndProductInfoWithCommentLike(String comment, Pageable pageable) {
 	    // 取得原始 ReviewsDto3 Page
-	    Page<ReviewsDto3> originalPage = reviewsRepository.findAllReviewsWithUserAndProductInfo(comment, pageable);
+	    Page<ReviewsDto3> originalPage = reviewsRepository.findAllReviewsWithUserAndProductInfoWithCommentLike(comment, pageable);
+	    
+	 // 調試：印出原始分頁資訊
+	 //   System.out.println("Original Page - TotalElements: " + originalPage.getTotalElements());
+	 //   System.out.println("Original Page - TotalPages: " + originalPage.getTotalPages());
+	    
+	    // 轉換為 ReviewsDto6 Page
+	    return originalPage.map(reviewDto3 -> {
+	        ReviewsDto6 dto6 = new ReviewsDto6();
+	        dto6.setUserName(reviewDto3.getUserName());
+	        dto6.setProductName(reviewDto3.getProductName());
+	        dto6.setReviewId(reviewDto3.getReviewId());
+	        dto6.setUserId(reviewDto3.getUserId());
+	        dto6.setProductId(reviewDto3.getProductId());
+	        dto6.setRating(reviewDto3.getRating());
+	        dto6.setComment(reviewDto3.getComment());
+	        dto6.setUpdatedAt(reviewDto3.getUpdatedAt());
+	        
+	        // 將 byte[] 轉為 Base64 字串 (僅處理非空數據)
+	        if (reviewDto3.getPhoto() != null && reviewDto3.getPhoto().length > 0) {
+	            String base64Photo = Base64.getEncoder().encodeToString(reviewDto3.getPhoto());
+	            dto6.setPhoto("data:image/jpeg;base64," + base64Photo); // 補上 MIME 類型
+	        } else {
+	            dto6.setPhoto(null);
+	        }
+	        
+	        return dto6;
+	    });
+	}
+	
+	@Transactional(readOnly = true)
+	public Page<ReviewsDto6> getReviewsDto6WithUserAndProductInfo(Pageable pageable) {
+	    // 取得原始 ReviewsDto3 Page
+	    Page<ReviewsDto3> originalPage = reviewsRepository.findAllReviewsWithUserAndProductInfo(pageable);
+	    
+	    // 轉換為 ReviewsDto6 Page
+	    return originalPage.map(reviewDto3 -> {
+	        ReviewsDto6 dto6 = new ReviewsDto6();
+	        dto6.setUserName(reviewDto3.getUserName());
+	        dto6.setProductName(reviewDto3.getProductName());
+	        dto6.setReviewId(reviewDto3.getReviewId());
+	        dto6.setUserId(reviewDto3.getUserId());
+	        dto6.setProductId(reviewDto3.getProductId());
+	        dto6.setRating(reviewDto3.getRating());
+	        dto6.setComment(reviewDto3.getComment());
+	        dto6.setUpdatedAt(reviewDto3.getUpdatedAt());
+	        
+	        // 將 byte[] 轉為 Base64 字串 (僅處理非空數據)
+	        if (reviewDto3.getPhoto() != null && reviewDto3.getPhoto().length > 0) {
+	            String base64Photo = Base64.getEncoder().encodeToString(reviewDto3.getPhoto());
+	            dto6.setPhoto("data:image/jpeg;base64," + base64Photo); // 補上 MIME 類型
+	        } else {
+	            dto6.setPhoto(null);
+	        }
+	        
+	        return dto6;
+	    });
+	}
+	
+	@Transactional(readOnly = true)
+	public Page<ReviewsDto6> getReviewsDto6WithUserAndProductInfoByRating(Integer rating, Pageable pageable) {
+	    // 取得原始 ReviewsDto3 Page
+	    Page<ReviewsDto3> originalPage = reviewsRepository.findAllReviewsWithUserAndProductInfoByRating(rating, pageable);
 	    
 	    // 轉換為 ReviewsDto6 Page
 	    return originalPage.map(reviewDto3 -> {
