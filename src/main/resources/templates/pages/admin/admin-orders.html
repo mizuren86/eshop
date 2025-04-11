@@ -86,7 +86,7 @@
 				</button>
 				<div class="collapse navbar-collapse bg-white" id="navbarCollapse">
 					<div class="navbar-nav mx-left">
-<!--					<a th:href="@{/admin-users}" class="nav-item nav-link">會員管理</a>
+						<!--					<a th:href="@{/admin-users}" class="nav-item nav-link">會員管理</a>
 						<a th:href="@{/admin-products}" class="nav-item nav-link">商品管理</a>               -->
 						<a th:href="@{/admin-orders}" class="nav-item nav-link">訂單管理</a>
 						<a th:href="@{/reviews/manage}" class="nav-item nav-link">評論管理</a>
@@ -199,15 +199,7 @@
 							th:text="${#temporals.format(order.orderDate, 'yyyy/MM/dd HH:mm:ss')}">訂單日期</td>
 						<td class="text-center align-middle">
 							<!-- 可點擊的編輯按鈕 -->
-							<button type="button" class="btn btn-custom-white action-btn"
-								th:if="${order != null and order.paymentStatus.name() == '待處理' and order.shippingStatus.name() == '處理中'}"
-								onclick="editOrder(this);">
-								編輯
-							</button>
-							<!-- 禁用的灰色編輯按鈕 -->
-							<button type="button" class="btn btn-secondary action-btn"
-								th:if="${order == null or not (order.paymentStatus.name() == '待處理' and order.shippingStatus.name() == '處理中')}"
-								disabled style="background-color: #F0F0F0; border-color: #D0D0D0;">
+							<button type="button" class="btn btn-custom-white action-btn" onclick="editOrder(this);">
 								編輯
 							</button>
 						</td>
@@ -301,6 +293,12 @@
 			const orderId = row.getAttribute('data-order-id');
 			const currentShippingStatus = row.getAttribute('data-shipping-status');
 
+			// 取得付款狀態（假設付款狀態在第五個欄位；也可以考慮在 <tr> 中新增一個 data-payment-status 屬性）
+			const paymentStatusCell = row.querySelector("td:nth-child(5)");
+			const paymentStatus = paymentStatusCell ? paymentStatusCell.textContent.trim() : "";
+			// 只有付款狀態為 "待處理" 時，允許編輯訂單商品
+			const editable = (paymentStatus === '待處理' && currentShippingStatus === '處理中');
+
 			// 取得該訂單的訂單項目資料
 			fetch('/admin-orders/orderDetails/' + orderId)
 				.then(response => {
@@ -314,6 +312,7 @@
 					tableHTML += '<thead><tr>';
 					tableHTML += '<th>商品圖片</th><th>商品名稱</th><th>數量</th><th>刪除商品</th>';
 					tableHTML += '</tr></thead><tbody>';
+
 					items.forEach(item => {
 						let imageUrl = item.imageUrl;
 						if (imageUrl && !imageUrl.startsWith('/')) {
@@ -322,9 +321,20 @@
 						tableHTML += '<tr data-product-id="' + item.productId + '">';
 						tableHTML += '<td><img src="' + imageUrl + '" alt="商品圖片" style="width:50px; height:50px;"></td>';
 						tableHTML += '<td>' + item.productName + '</td>';
-						tableHTML += '<td><input type="number" class="form-control product-qty" value="' + item.quantity + '" min="1" style="width:80px;"></td>';
+
+						//tableHTML += '<td><input type="number" class="form-control product-qty" value="' + item.quantity + '" min="1" style="width:80px;"></td>';
+						// 當訂單不可編輯時，數量輸入框禁用且背景改為灰色
+						tableHTML += '<td><input type="number" class="form-control product-qty" value="' + item.quantity + '" min="1" style="width:80px; ' + (editable ? '' : 'background-color: #D0D0D0;') + '" ' + (editable ? '' : 'disabled') + '></td>';
+
 						// 改成僅從 DOM 中移除（不直接呼叫刪除 API）
-						tableHTML += `<td><button type="button" class="btn btn-danger btn-sm" onclick="removeOrderItemRow(this)"><i class="fa fa-trash"></i></button></td>`;
+						// tableHTML += `<td><button type="button" class="btn btn-danger btn-sm" onclick="removeOrderItemRow(this)"><i class="fa fa-trash"></i></button></td>`;
+						// 當訂單不可編輯時，刪除按鈕改為禁用灰色按鈕
+						if (editable) {
+							tableHTML += `<td><button type="button" class="btn btn-danger btn-sm" onclick="removeOrderItemRow(this)"><i class="fa fa-trash"></i></button></td>`;
+						} else {
+							tableHTML += `<td><button type="button" class="btn btn-secondary btn-sm" disabled style="background-color: #D0D0D0;"><i class="fa fa-trash"></i></button></td>`;
+						}
+
 						tableHTML += '</tr>';
 					});
 					tableHTML += '</tbody></table>';
@@ -358,10 +368,12 @@
 							if (!shippingStatus) {
 								Swal.showValidationMessage('請選擇配送狀態');
 							}
+							// 只讀取可編輯狀態的訂單商品資料
 							const rows = document.querySelectorAll('#orderItemsTable tbody tr');
 							let itemsData = [];
 							rows.forEach(row => {
 								const productId = row.getAttribute('data-product-id');
+								// 僅在可編輯狀態下讀取數量輸入值
 								const qtyInput = row.querySelector('.product-qty');
 								let quantity = parseInt(qtyInput.value, 10);
 								if (isNaN(quantity) || quantity < 1) {

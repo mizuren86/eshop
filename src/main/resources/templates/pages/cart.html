@@ -83,7 +83,7 @@
 		</header>
 
 		<input type="hidden" id="couponCodeHidden" name="couponCode" th:value="${session.couponCode}" />
-		
+
 		<!-- 購物車內容 -->
 		<main class="container py-5">
 			<!-- 購物車清單 -->
@@ -668,6 +668,9 @@
 					paymentSelect.selectedIndex = 0;
 				}
 				onPaymentChange();
+
+				// 先更新 shippingMethod 全域變數，再做後續處理
+				shippingMethod = selectedMethodKey;
 
 				// 判斷送貨方式，更新運費或提示訊息
 				const shippingFeeRow = document.getElementById("shippingFeeRow");
