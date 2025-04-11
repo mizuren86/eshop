@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/base}">
+
+<head>
+	<meta charset="utf-8">
+	<title>Profile - Fruitables</title>
+	<style>
+		.error-message {
+			color: red;
+			display: none;
+			margin-top: 10px;
+		}
+
+		.success-message {
+			color: green;
+			display: none;
+			margin-top: 10px;
+		}
+
+		.loading {
+			display: none;
+			margin-top: 10px;
+		}
+
+
+
+		.btn-primary {
+			padding: 10px 25px;
+			border-radius: 25px;
+			font-weight: 600;
+			transition: all 0.3s ease;
+		}
+
+		.btn-primary:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		}
+
+		/* 調整整體頭像區塊 */
+		.profile-photo-container {
+			position: relative;
+			width: 150px;
+			/* 控制容器寬度 */
+			height: 150px;
+			/* 控制容器高度 */
+			margin: 0 auto;
+			/* 置中 */
+			border-radius: 50%;
+			/* 讓容器成圓形 */
+			overflow: hidden;
+			/* 隱藏多餘部分 */
+			border: 3px solid #fff;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+
+		/* 調整圖片樣式，充滿容器且不失真 */
+		.profile-photo {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		/* .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 15px;
+    } */
+	</style>
+</head>
+
+<body>
+	<div layout:fragment="content">
+
+
+		<div class="container">
+
+			<header class="container-fluid page-header py-5">
+				<h1 class="text-center text-white display-6">個人資料</h1>
+				<nav aria-label="breadcrumb" class="breadcrumb justify-content-center">
+				</nav>
+			</header>
+			<main class="container py-5">
+				<div class="profile-header">
+					<div class="container">
+						<div class="text-center">
+							<div class="profile-photo-container">
+								<img th:src="@{${user.userPhoto != null ? (user.userPhoto.startsWith('/img/') ? user.userPhoto : '/img/users/' + user.userPhoto) : '/img/avatar.jpg'}}"
+									alt="Profile Photo" class="profile-photo" id="profilePhoto">
+							</div>
+							<div class="mt-3">
+								<h3 class="profile-name" th:text="${user.username}">未設置</h3>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="profile-content">
+					<div class="card">
+						<div class="card-body">
+							<div class="row">
+								<div class="col-md-6">
+									<div class="mb-3">
+										<label class="form-label">用戶名</label>
+										<input type="text" class="form-control" th:value="${user.username}" readonly>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">電子郵件</label>
+										<input type="email" class="form-control" th:value="${user.email}" readonly>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">姓名</label>
+										<input type="text" class="form-control" th:value="${user.fullName}" readonly>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="mb-3">
+										<label class="form-label">電話</label>
+										<input type="tel" class="form-control" th:value="${user.phone}" readonly>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">地址</label>
+										<input type="text" class="form-control" th:value="${user.address}" readonly>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="text-center mt-4">
+						<a href="/change-password" class="btn btn-primary me-2">
+							<i class="fas fa-key me-2"></i>修改密碼
+						</a>
+						<a href="/edit-profile" class="btn btn-primary">
+							<i class="fas fa-user-edit me-2"></i>編輯個人資料
+						</a>
+					</div>
+				</div>
+			</main>
+		</div>
+	</div>
+
+	<script>
+		// 從 localStorage 獲取用戶信息
+		const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+		if (userInfo.userPhoto) {
+			// 確保圖片路徑正確
+			let photoPath = userInfo.userPhoto;
+			// 如果路徑已經包含 /img/users/，則直接使用
+			if (photoPath.includes('/img/users/')) {
+				photoPath = photoPath.substring(photoPath.indexOf('/img/users/'));
+			} else if (!photoPath.startsWith('/img/')) {
+				// 如果路徑不是以 /img/ 開頭，則添加前綴
+				photoPath = '/img/users/' + photoPath;
+			}
+			document.getElementById('profilePhoto').src = photoPath + '?t=' + new Date().getTime();
+		}
+	</script>
+</body>
+
+</html>
